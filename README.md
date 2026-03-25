@@ -1,36 +1,167 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ✝ Open Sermon
 
-## Getting Started
+**Open-source sermon preparation tool for pastors and cell group leaders.**  
+Ferramenta open source para preparação de sermões — pastores, pregadores e líderes de célula.
 
-First, run the development server:
+> Organize, structure, and build a reusable sermon library — with a block-based editor designed for how preachers actually think.
+
+---
+
+## ✨ Features
+
+- 📖 **Block-based editor** — Notion-style blocks with semantic types: Bible verse, illustration, application, point, intro, conclusion
+- 🔍 **Bible verse search** — Type a reference, pull the text automatically via API.Bible
+- 📚 **Reusable block library** — Save illustrations, points, and verses. Reuse across sermons
+- 🗂️ **Series organization** — Group sermons into thematic series
+- 📤 **Export** — PDF and Markdown export for printing or distribution
+- 🌐 **i18n** — Available in English and Portuguese (PT-BR)
+- 🐳 **Self-hostable** — Run it on your own server with Docker
+
+---
+
+## 🚀 Quick Start (Self-hosted)
+
+### Prerequisites
+- Node.js 20+
+- Docker & Docker Compose
+- A [Supabase](https://supabase.com) project (or self-hosted Supabase)
+- An [API.Bible](https://scripture.api.bible) key (free)
+
+### 1. Clone the repository
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/your-username/open-sermon.git
+cd open-sermon
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Configure environment variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cp .env.example .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Fill in your `.env.local`:
 
-## Learn More
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+API_BIBLE_KEY=your_api_bible_key
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 3. Run with Docker
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+docker compose up
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+App will be available at `http://localhost:3000`
 
-## Deploy on Vercel
+### 4. Run locally (dev)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm install
+npm run dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 🧱 Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | Next.js 16 (App Router + Turbopack) |
+| Backend / Auth / DB | Supabase (PostgreSQL + Auth + Storage) |
+| Editor | TipTap with custom blocks |
+| Styling | Tailwind CSS + shadcn/ui |
+| Bible API | API.Bible |
+| i18n | next-intl |
+| Export | React PDF |
+
+---
+
+## 📁 Project Structure
+
+```
+open-sermon/
+├── app/                        # Next.js App Router
+│   ├── [locale]/               # i18n routing
+│   │   ├── (auth)/             # Login, register
+│   │   ├── (app)/              # Protected app routes
+│   │   │   ├── dashboard/      # Home / sermon list
+│   │   │   ├── sermon/
+│   │   │   │   ├── new/        # Create sermon
+│   │   │   │   └── [id]/       # Edit sermon
+│   │   │   ├── series/         # Series management
+│   │   │   └── library/        # Reusable blocks library
+│   │   └── layout.tsx
+│   └── api/                    # API routes
+│       └── bible/              # Bible verse proxy (API.Bible)
+├── components/
+│   ├── editor/                 # TipTap editor + custom blocks
+│   │   ├── sermon-editor.tsx
+│   │   ├── blocks/
+│   │   │   ├── verse-block.tsx
+│   │   │   ├── illustration-block.tsx
+│   │   │   ├── application-block.tsx
+│   │   │   ├── point-block.tsx
+│   │   │   ├── intro-block.tsx
+│   │   │   └── conclusion-block.tsx
+│   │   └── block-menu.tsx       # "/" command menu
+│   ├── ui/                     # shadcn/ui components
+│   └── shared/                 # Shared components
+├── lib/
+│   ├── supabase/               # Supabase client + server
+│   ├── bible-api/              # API.Bible integration
+│   └── export/                 # PDF / Markdown export
+├── messages/                   # i18n translation files
+│   ├── en.json
+│   └── pt-BR.json
+├── supabase/
+│   └── migrations/             # Database migrations
+├── .env.example
+├── docker-compose.yml
+└── README.md
+```
+
+---
+
+## 🗺️ Roadmap
+
+- [x] Project setup & architecture
+- [ ] **Phase 1 — MVP**: Block editor, sermon CRUD, series, export, public demo
+- [ ] **Phase 2 — Collaboration**: Multi-user teams, sermon sharing, comments
+- [ ] **Phase 3 — AI Assistant**: Outline suggestions, semantic search in your library
+- [ ] **Phase 4 — Ecosystem**: Community templates, public API, audio support (Bible.is)
+
+---
+
+## ☁️ Cloud Version
+
+Don't want to self-host? A managed cloud version is available at **[opensermon.app](https://opensermon.app)** _(coming soon)_.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a PR.
+
+```bash
+# Fork the repo, then:
+git checkout -b feat/your-feature
+git commit -m "feat: your feature description"
+git push origin feat/your-feature
+# Open a Pull Request
+```
+
+---
+
+## 📄 License
+
+Licensed under **AGPL-3.0**. See [LICENSE](./LICENSE) for details.
+
+In short: free to use and self-host. If you modify and distribute, you must open-source your changes. Commercial use is permitted — contact us for a commercial license if needed.
+
+---
+
+<p align="center">Built with ✝ for the Church</p>
