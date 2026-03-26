@@ -34,7 +34,9 @@
     "checkEmail": "Conta criada! Verifique seu e-mail para confirmar.",
     "registerSuccess": "Verifique seu e-mail",
     "registerSuccessSubtitle": "Enviamos um link de confirmação. Clique nele para ativar sua conta.",
-    "goToLogin": "Ir para o login"
+    "goToLogin": "Ir para o login",
+    "continueWithGoogle": "Continuar com Google",
+    "orContinueWith": "ou continue com"
   },
   "dashboard": {
     "title": "Meus Sermões",

@@ -74,6 +74,29 @@ export async function signInWithMagicLink(
   return { error: undefined };
 }
 
+export async function signInWithGoogle(locale: string = "pt-BR") {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_VERCEL_URL 
+        ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` 
+        : "http://localhost:3000"}/${locale}/auth/callback`,
+    },
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  if (data.url) {
+    redirect(data.url);
+  }
+
+  return { error: "Could not initiate Google sign in" };
+}
+
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();

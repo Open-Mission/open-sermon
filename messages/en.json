@@ -34,7 +34,9 @@
     "checkEmail": "Account created! Please check your email to confirm.",
     "registerSuccess": "Check your email",
     "registerSuccessSubtitle": "We sent you a confirmation link. Click it to activate your account.",
-    "goToLogin": "Go to sign in"
+    "goToLogin": "Go to sign in",
+    "continueWithGoogle": "Continue with Google",
+    "orContinueWith": "or continue with"
   },
   "dashboard": {
     "title": "My Sermons",
