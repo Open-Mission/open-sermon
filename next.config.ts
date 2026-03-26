@@ -6,5 +6,6 @@ const nextConfig: NextConfig = {
     root: "/Users/claudio/Projects/development/open-mission/open-sermon",
   },
 };
+
 const withNextIntl = createNextIntlPlugin();
 export default withNextIntl(nextConfig);
