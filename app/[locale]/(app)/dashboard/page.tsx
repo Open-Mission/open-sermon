@@ -7,6 +7,7 @@ import { Clock, FileText, MoreHorizontal, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Note01Icon } from "@hugeicons/core-free-icons";
+import { UserMenu } from "@/components/shared/user-menu";
 
 export default async function DashboardPage() {
   const t = await getTranslations("dashboard");
@@ -34,6 +35,7 @@ export default async function DashboardPage() {
         <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
           <span className="text-4xl">☀️</span> Olá, {userName}
         </h1>
+        <UserMenu user={user} showDetails={false} />
       </div>
 
       {recentSermons.length > 0 && (

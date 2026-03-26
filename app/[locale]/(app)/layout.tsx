@@ -1,12 +1,9 @@
 import * as React from "react";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import {
-  SidebarProvider,
-  SidebarInset,
-} from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppSidebar } from "@/components/shared/app-sidebar";
+import { NavShell } from "@/components/shared/nav-shell";
 
 export default async function AppLayout({
   children,
@@ -24,12 +21,9 @@ export default async function AppLayout({
 
   return (
     <TooltipProvider delayDuration={0}>
-      <SidebarProvider>
-        <AppSidebar />
-        <SidebarInset>
-          <main className="flex-1 overflow-auto">{children}</main>
-        </SidebarInset>
-      </SidebarProvider>
+      <NavShell sidebar={<AppSidebar />}>
+        {children}
+      </NavShell>
     </TooltipProvider>
   );
 }
