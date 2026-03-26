@@ -3,17 +3,36 @@
 import { NodeViewWrapper, NodeViewContent } from '@tiptap/react'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
+import { useBlockSelection } from '../block-selection-context'
+import { Checkbox } from '@/components/ui/checkbox'
 
-export function ApplicationBlockView({ getPos }: { getPos: () => number | undefined }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function ApplicationBlockView({ node, getPos }: { node: any, getPos: () => number | undefined }) {
   const t = useTranslations('editor')
+  const { isBlockSelected, toggleBlock } = useBlockSelection()
+  const blockId = node.attrs.id
+  const isSelected = blockId ? isBlockSelected(blockId) : false
 
   return (
     <NodeViewWrapper
       className={cn(
-        'border-l-4 border-emerald-500 pl-4 py-3 my-2 rounded-r-md bg-muted/30',
-        getPos() === undefined ? 'opacity-50' : ''
+        'group relative border-l-4 border-emerald-500 pl-4 py-3 my-2 rounded-r-md bg-emerald-500/10',
+        getPos() === undefined ? 'opacity-50' : '',
+        isSelected ? 'bg-emerald-500/20 shadow-sm' : ''
       )}
     >
+      {blockId && (
+        <div 
+          className="absolute -left-6 top-3.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity aria-selected:opacity-100 z-10" 
+          aria-selected={isSelected}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Checkbox 
+            checked={isSelected}
+            onCheckedChange={() => toggleBlock(blockId)}
+          />
+        </div>
+      )}
       <div className="flex items-start space-x-3">
         <div className="shrink-0 h-4 w-4 text-emerald-500">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
@@ -24,7 +43,7 @@ export function ApplicationBlockView({ getPos }: { getPos: () => number | undefi
           <div className="text-sm font-medium text-foreground">
             {t('blocks.application')}
           </div>
-          <NodeViewContent className="text-sm text-muted-foreground" />
+          <NodeViewContent className="text-base text-foreground" />
         </div>
         <div className="shrink-0 space-x-2">
           <button

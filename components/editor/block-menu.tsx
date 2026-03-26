@@ -197,7 +197,9 @@ export function BlockMenu({ editor }: BlockMenuProps) {
               autoFocus
             />
           </div>
-          {MenuList}
+          <div className="px-3 pb-4">
+            {MenuList}
+          </div>
         </DrawerContent>
       </Drawer>
     )

@@ -1,8 +1,12 @@
 "use client";
 
 import { useEditor, EditorContent } from "@tiptap/react";
+import { BubbleMenu } from "@tiptap/react/menus";
 import { useState, useEffect, useCallback } from "react";
 import { StarterKit } from "@tiptap/starter-kit";
+import { NodeSelection } from "@tiptap/pm/state";
+import Underline from "@tiptap/extension-underline";
+import UniqueId from "@tiptap/extension-unique-id";
 import { Placeholder } from "@tiptap/extension-placeholder";
 import { IllustrationBlock } from "./blocks/illustration-block";
 import { ApplicationBlock } from "./blocks/application-block";
@@ -16,8 +20,27 @@ import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { useSidebar } from "@/components/ui/sidebar";
 import { DragHandle } from "@tiptap/extension-drag-handle-react";
-import { GripVertical, Trash2 } from "lucide-react";
+import { GripVertical, Trash2, Bold, Italic, Underline as UnderlineIcon, Copy, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { BlockSelectionProvider, useBlockSelection } from "./block-selection-context";
+import { SelectableTextBlockView } from "./blocks/selectable-text-block-view";
+import Paragraph from "@tiptap/extension-paragraph";
+import Heading from "@tiptap/extension-heading";
+import { ReactNodeViewRenderer } from "@tiptap/react";
 
+const SelectableParagraph = Paragraph.extend({
+  addNodeView() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return ReactNodeViewRenderer(SelectableTextBlockView as any);
+  },
+});
+
+const SelectableHeading = Heading.extend({
+  addNodeView() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return ReactNodeViewRenderer(SelectableTextBlockView as any);
+  },
+});
 type JSONContent = {
   type: string;
   content?: Array<JSONContent>;
@@ -51,7 +74,12 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       saveToSupabase(content);
     },
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        paragraph: false,
+        heading: false,
+      }),
+      SelectableParagraph,
+      SelectableHeading,
       Placeholder.configure({
         placeholder: t("placeholder", {
           default: "Digite '/' para inserir um bloco...",
@@ -63,6 +91,11 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       IntroBlock,
       ConclusionBlock,
       VerseBlock,
+      Underline,
+      UniqueId.configure({
+        types: ['paragraph', 'heading', 'verseBlock', 'illustrationBlock', 'applicationBlock', 'pointBlock', 'introBlock', 'conclusionBlock'],
+        generateID: () => crypto.randomUUID(),
+      }),
     ],
     editorProps: {
       attributes: {
@@ -114,40 +147,139 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
     [sermonId, isSaving, supabase],
   );
 
+  const handleBulkDelete = (ids: string[]) => {
+    if (!editor) return;
+    
+    // Reverse order deletion to avoid RangeError (shifting positions)
+    const nodesToDelete: { pos: number; size: number }[] = [];
+    editor.state.doc.descendants((node, pos) => {
+      if (node.attrs.id && ids.includes(node.attrs.id)) {
+        nodesToDelete.push({ pos, size: node.nodeSize });
+      }
+    });
+
+    nodesToDelete.reverse().forEach(({ pos, size }) => {
+      editor.view.dispatch(editor.state.tr.delete(pos, pos + size));
+    });
+  };
+
+  const handleBulkCopy = (ids: string[]) => {
+    if (!editor) return;
+    
+    const htmlContents: string[] = [];
+    editor.state.doc.descendants((node, pos) => {
+      if (node.attrs.id && ids.includes(node.attrs.id)) {
+        const dom = editor.view.nodeDOM(pos) as HTMLElement;
+        if (dom) {
+          htmlContents.push(dom.innerText || dom.textContent || "");
+        }
+      }
+    });
+
+    if (htmlContents.length > 0) {
+      navigator.clipboard.writeText(htmlContents.join("\\n\\n")).then(() => {
+        // simple feedback
+      });
+    }
+  };
+
   return (
-    <div className="relative min-h-[300px]">
-      {editor && (
+    <BlockSelectionProvider onDelete={handleBulkDelete} onCopy={handleBulkCopy}>
+      <div className="relative min-h-[300px]">
+        <style dangerouslySetInnerHTML={{__html: `
+          .my-drag-handle {
+            width: 100%;
+            pointer-events: none;
+          }
+          .my-drag-handle-inner {
+            pointer-events: auto;
+            position: absolute;
+            right: -24px;
+            top: 0;
+          }
+          @media (max-width: 640px) {
+            .my-drag-handle-inner {
+              right: 0px;
+            }
+          }
+        `}} />
+        <BlockSelectionToolbar />
+        {/* {editor && (
         <DragHandle 
           editor={editor}
-          className="flex items-center gap-0.5 px-1 py-0.5 bg-background border border-border shadow-sm rounded-md transition-opacity duration-200"
+          className="my-drag-handle"
         >
-          <div className="flex items-center h-6">
+          <div className="my-drag-handle-inner flex items-center h-6">
             <button
               type="button"
-              className="p-1 hover:bg-muted rounded cursor-grab active:cursor-grabbing text-muted-foreground transition-colors"
+              className="p-1 hover:bg-muted rounded cursor-grab active:cursor-grabbing text-muted-foreground transition-colors bg-background border border-border shadow-sm"
               title="Arraste para mover"
             >
               <GripVertical className="h-4 w-4" />
             </button>
-            <button
-              type="button"
-              className="p-1 hover:bg-destructive hover:text-destructive-foreground rounded text-muted-foreground transition-colors"
-              title="Excluir bloco"
-              onClick={() => {
-                const { state } = editor;
-                const { $from } = state.selection;
-                // Get the range of the current block node
-                const range = { 
-                  from: $from.before($from.depth || 1), 
-                  to: $from.after($from.depth || 1) 
-                };
-                editor.chain().focus().deleteRange(range).run();
-              }}
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
           </div>
         </DragHandle>
+      )} */}
+      {editor && (
+        <BubbleMenu 
+          editor={editor} 
+          pluginKey="formatMenu"
+          shouldShow={({ state }) => {
+            // Only show format menu for text selections, not node selections
+            return !(state.selection instanceof NodeSelection) && !state.selection.empty;
+          }}
+          className="flex items-center overflow-hidden rounded-md border border-border bg-background shadow-xl"
+        >
+          <button
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            className={cn(
+              "p-2 text-sm hover:bg-muted transition-colors",
+              editor.isActive('bold') ? 'bg-muted text-foreground' : 'text-muted-foreground'
+            )}
+          >
+            <Bold className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            className={cn(
+              "p-2 text-sm hover:bg-muted transition-colors",
+              editor.isActive('italic') ? 'bg-muted text-foreground' : 'text-muted-foreground'
+            )}
+          >
+            <Italic className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            className={cn(
+              "p-2 text-sm hover:bg-muted transition-colors",
+              editor.isActive('underline') ? 'bg-muted text-foreground' : 'text-muted-foreground'
+            )}
+          >
+            <UnderlineIcon className="h-4 w-4" />
+          </button>
+        </BubbleMenu>
+      )}
+      {editor && (
+        <BubbleMenu 
+          editor={editor} 
+          pluginKey="deleteBlockMenu"
+          options={{ placement: 'right' }}
+          shouldShow={() => {
+            return false;
+          }}
+          className="hidden md:flex items-center overflow-hidden rounded-md border border-border bg-background shadow-xl"
+        >
+          <button
+            type="button"
+            onClick={() => {
+              editor.chain().focus().deleteSelection().run();
+            }}
+            className="p-2 text-sm hover:bg-destructive hover:text-destructive-foreground text-muted-foreground transition-colors"
+            title="Excluir bloco"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </BubbleMenu>
       )}
       <EditorContent editor={editor} className="min-h-[300px]" />
       <BlockMenu editor={editor} />
@@ -176,6 +308,46 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
           Salvando...
         </div>
       )}
+    </div>
+    </BlockSelectionProvider>
+  );
+}
+
+function BlockSelectionToolbar() {
+  const { selectedBlocks, clearSelection, bulkDelete, bulkCopy } = useBlockSelection();
+  
+  if (selectedBlocks.length === 0) {
+    return <div className="hidden" aria-hidden="true" />;
+  }
+
+  return (
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-max bg-background border border-border rounded-full shadow-lg px-4 py-2 flex items-center gap-4 animate-in fade-in slide-in-from-bottom-4">
+      <span className="text-sm font-medium">
+        {selectedBlocks.length} bloco{selectedBlocks.length !== 1 ? 's' : ''} selecionado{selectedBlocks.length !== 1 ? 's' : ''}
+      </span>
+      <div className="h-4 w-px bg-border" />
+      <button 
+        onClick={bulkCopy}
+        className="flex items-center gap-1.5 text-sm hover:text-primary transition-colors focus:outline-none"
+        title="Copiar blocos"
+      >
+        <Copy className="h-4 w-4" /> Copiar
+      </button>
+      <button 
+        onClick={bulkDelete}
+        className="flex items-center gap-1.5 text-sm hover:text-destructive transition-colors focus:outline-none"
+        title="Excluir blocos"
+      >
+        <Trash2 className="h-4 w-4" /> Excluir
+      </button>
+      <div className="h-4 w-px bg-border" />
+      <button 
+        onClick={clearSelection}
+        className="p-1 hover:bg-muted rounded-full transition-colors focus:outline-none"
+        title="Limpar seleção"
+      >
+        <X className="h-4 w-4" />
+      </button>
     </div>
   );
 }
