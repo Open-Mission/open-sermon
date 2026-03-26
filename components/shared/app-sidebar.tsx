@@ -1,4 +1,5 @@
 import * as React from "react";
+import Image from "next/image";
 import {
   Sidebar,
   SidebarContent,
@@ -50,11 +51,11 @@ export async function AppSidebar() {
   return (
     <Sidebar variant="sidebar" collapsible="offcanvas">
       <SidebarHeader className="h-14 flex flex-row items-center justify-between px-4 border-b">
-        <Link href="/dashboard" className="flex items-center gap-2 group-data-[collapsible=icon]:hidden hover:opacity-80 transition-opacity">
-          <div className="size-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold leading-none">
-            OS
+        <Link href="/dashboard" className="flex items-center gap-2 group-data-[collapsible=icon]:mx-auto hover:opacity-80 transition-opacity">
+          <div className="size-8 rounded-lg overflow-hidden flex items-center justify-center border shadow-sm relative">
+            <Image src="/logo.png" alt="Open Sermon" fill className="object-cover" />
           </div>
-          <span className="font-bold text-lg leading-none tracking-tight">
+          <span className="font-bold text-lg leading-none tracking-tight group-data-[collapsible=icon]:hidden">
             {commonT("appName")}
           </span>
         </Link>

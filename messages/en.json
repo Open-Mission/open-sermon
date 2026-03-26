@@ -137,5 +137,21 @@
     "filterIllustration": "Illustrations",
     "filterApplication": "Applications",
     "filterPoint": "Points"
+  },
+  "landing": {
+    "heroTitle": "Prepare Inspiring Sermons with Ease",
+    "heroSubtitle": "The sermon editor designed specifically for pastors. Organize your thoughts, integrate Bible passages instantly, and preach with confidence.",
+    "getStarted": "Get Started for Free",
+    "viewFeatures": "View Features",
+    "featuresTitle": "Everything you need to preach",
+    "featureEditorTitle": "Notion-Style Editor",
+    "featureEditorDesc": "Fluid writing with custom blocks for introductions, illustrations, applications, and conclusions.",
+    "featureBibleTitle": "Bible Integration",
+    "featureBibleDesc": "Search and insert verses directly into your draft without switching tabs or apps.",
+    "featureLibraryTitle": "Block Library",
+    "featureLibraryDesc": "Save illustrations and key points to reuse in future sermons or series.",
+    "ctaTitle": "Ready to transform your preparation?",
+    "ctaSubtitle": "Join hundreds of pastors who are already saving hours on weekly preparation.",
+    "footerText": "© 2026 Open Sermon. Open source for the expansion of the Kingdom."
   }
 }

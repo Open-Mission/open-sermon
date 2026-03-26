@@ -137,5 +137,21 @@
     "filterIllustration": "Ilustrações",
     "filterApplication": "Aplicações",
     "filterPoint": "Pontos"
+  },
+  "landing": {
+    "heroTitle": "Prepare Sermões Inspiradores com Facilidade",
+    "heroSubtitle": "O editor de sermões projetado especificamente para pastores. Organize suas ideias, integre passagens bíblicas instantaneamente e pregue com confiança.",
+    "getStarted": "Começar Agora Gratuitamente",
+    "viewFeatures": "Ver Funcionalidades",
+    "featuresTitle": "Tudo o que você precisa para pregar",
+    "featureEditorTitle": "Editor Estilo Notion",
+    "featureEditorDesc": "Escrita fluida com blocos customizados para introduções, ilustrações, aplicações e conclusões.",
+    "featureBibleTitle": "Integração Bíblica",
+    "featureBibleDesc": "Busque e insira versículos diretamente no seu rascunho sem trocar de aba ou aplicativo.",
+    "featureLibraryTitle": "Biblioteca de Blocos",
+    "featureLibraryDesc": "Salve ilustrações e pontos marcantes para reutilizar em futuros sermões ou séries.",
+    "ctaTitle": "Pronto para transformar sua preparação?",
+    "ctaSubtitle": "Junte-se a centenas de pastores que já estão economizando horas na preparação semanal.",
+    "footerText": "© 2026 Open Sermon. Código aberto para a expansão do Reino."
   }
 }
