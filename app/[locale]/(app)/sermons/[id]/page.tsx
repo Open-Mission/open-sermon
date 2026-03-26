@@ -9,6 +9,7 @@ import {
   MoreHorizontalIcon,
   StarIcon,
 } from "@hugeicons/core-free-icons";
+import { SaveIndicator } from "@/components/editor/save-indicator";
 
 export default async function SermonPage({
   params,
@@ -41,17 +42,20 @@ export default async function SermonPage({
           </nav>
         </div>
         
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button variant="ghost" size="sm" className="h-8 gap-1 text-muted-foreground">
-            <HugeiconsIcon icon={StarIcon} size={16} />
-          </Button>
-          <Button variant="ghost" size="sm" className="h-8 gap-1 text-muted-foreground">
-            <HugeiconsIcon icon={Share01Icon} size={16} />
-            <span className="hidden sm:inline">Share</span>
-          </Button>
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground">
-            <HugeiconsIcon icon={MoreHorizontalIcon} size={16} />
-          </Button>
+        <div className="flex items-center gap-1">
+          <SaveIndicator />
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button variant="ghost" size="sm" className="h-8 gap-1 text-muted-foreground">
+              <HugeiconsIcon icon={StarIcon} size={16} />
+            </Button>
+            <Button variant="ghost" size="sm" className="h-8 gap-1 text-muted-foreground">
+              <HugeiconsIcon icon={Share01Icon} size={16} />
+              <span className="hidden sm:inline">Share</span>
+            </Button>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground">
+              <HugeiconsIcon icon={MoreHorizontalIcon} size={16} />
+            </Button>
+          </div>
         </div>
       </header>
 

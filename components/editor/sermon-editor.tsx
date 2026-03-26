@@ -102,10 +102,10 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
         class: "focus:outline-none max-w-none prose dark:prose-invert min-h-[500px] cursor-text", // Notion-like: no focus ring, full width, min-height
       },
       handleKeyDown: (view, event) => {
-        // Toggle sidebar with Ctrl+B or Meta+B
-        if ((event.ctrlKey || event.metaKey) && event.code === 'KeyB') {
+        // Toggle sidebar with Ctrl+\ or Meta+\
+        if ((event.ctrlKey || event.metaKey) && event.code === 'Backslash') {
           toggleSidebar();
-          return true; // Preven propagation and default bold action
+          return true; // Prevent propagation and default bold action
         }
         return false;
       },
@@ -127,6 +127,11 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       }
     }
   }, [editor, initialContent]);
+
+  // Dispatch saving event for global SaveIndicator
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('sermon-save-status', { detail: { isSaving } }));
+  }, [isSaving]);
 
   const saveToSupabase = useCallback(
     async (content: JSONContent) => {
@@ -302,11 +307,6 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
             setSelectedBlock(null);
           }}
         />
-      )}
-      {isSaving && (
-        <div className="absolute bottom-2 right-2 px-3 py-1 bg-primary/90 text-primary-foreground text-xs rounded">
-          Salvando...
-        </div>
       )}
     </div>
     </BlockSelectionProvider>

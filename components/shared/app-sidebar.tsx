@@ -48,7 +48,7 @@ export async function AppSidebar() {
   } = await supabase.auth.getUser();
 
   return (
-    <Sidebar variant="sidebar" collapsible="icon">
+    <Sidebar variant="sidebar" collapsible="offcanvas">
       <SidebarHeader className="h-14 flex flex-row items-center justify-between px-4 border-b">
         <Link href="/dashboard" className="flex items-center gap-2 group-data-[collapsible=icon]:hidden hover:opacity-80 transition-opacity">
           <div className="size-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold leading-none">
