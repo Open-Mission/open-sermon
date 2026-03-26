@@ -6,7 +6,7 @@
 
 Open-source sermon preparation tool for pastors. Built with Next.js 16 (App Router + Turbopack), Supabase, TipTap editor, Tailwind CSS + shadcn/ui, and API.Bible integration.
 
-**Status:** Auth + Dashboard implemented. Sermon editor, series, and library are next.
+**Status:** Core features (Auth, Dashboard, Editor) implemented. PWA and Caching (React Query + Redis) added. Export features (PDF/Markdown) and Library refinements are next.
 
 ## Tech Stack
 
@@ -16,9 +16,18 @@ Open-source sermon preparation tool for pastors. Built with Next.js 16 (App Rout
 | Database | Supabase (Postgres) |
 | Auth | Supabase Auth (email/password + magic link) |
 | Styling | Tailwind CSS 4 + shadcn/ui |
-| i18n | next-intl (locales: `pt`, `en`, default: `pt`) |
-| Editor | TipTap (planned) |
+| Caching | React Query + Upstash Redis |
+| PWA | Web App Manifest + Service Worker |
+| i18n | next-intl (locales: `pt-BR`, `en`, default: `pt-BR`) |
+| Editor | TipTap 2.x (custom blocks) |
 | Bible API | scripture.api.bible |
+
+## Documentation Index
+
+For detailed implementation details, see:
+- [PWA Implementation](file:///Users/claudio/Projects/development/open-mission/open-sermon/docs/pwa.md)
+- [Performance & Caching](file:///Users/claudio/Projects/development/open-mission/open-sermon/docs/caching.md)
+- [Editor Technical Features](file:///Users/claudio/Projects/development/open-mission/open-sermon/docs/editor-features.md)
 
 ## Project Structure
 

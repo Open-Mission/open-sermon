@@ -10,12 +10,16 @@ Ferramenta open source para preparação de sermões — pastores, pregadores e 
 ## ✨ Features
 
 - 📖 **Block-based editor** — Notion-style blocks with semantic types: Bible verse, illustration, application, point, intro, conclusion
-- 🔍 **Bible verse search** — Type a reference, pull the text automatically via API.Bible
-- 📚 **Reusable block library** — Save illustrations, points, and verses. Reuse across sermons
+- 🪄 **Slash Commands (/)** — Rapid content creation with a keyboard-first block menu
+- 📱 **Mobile & PWA Support** — Fully responsive design and installable as a mobile app
+- 📴 **Offline Access** — View and edit your sermons even without an internet connection
+- 🔍 **Bible verse search** — Pull text automatically from API.Bible (cached via Redis)
+- 📚 **Reusable block library** — Save illustrations, points, and verses for use across sermons
 - 🗂️ **Series organization** — Group sermons into thematic series
+- ⚡ **Optimized Performance** — Client-side caching (React Query) and server-side caching (Redis)
 - 📤 **Export** — PDF and Markdown export for printing or distribution
-- 🌐 **i18n** — Available in English and Portuguese (PT-BR)
-- 🐳 **Self-hostable** — Run it on your own server with Docker
+- 🌐 **i18n** — Fully localized in English and Portuguese (PT-BR)
+- 🐳 **Self-hostable** — Docker-ready architecture
 
 ---
 
@@ -71,12 +75,13 @@ npm run dev
 | Layer | Technology |
 |-------|-----------|
 | Frontend | Next.js 16 (App Router + Turbopack) |
-| Backend / Auth / DB | Supabase (PostgreSQL + Auth + Storage) |
-| Editor | TipTap with custom blocks |
-| Styling | Tailwind CSS + shadcn/ui |
+| Backend / Auth / DB | Supabase (Postgres + Auth) |
+| Caching | React Query + Upstash Redis |
+| PWA | Standard Web Manifest + Custom Service Worker |
+| Editor | TipTap 2.x with custom blocks |
+| Styling | Tailwind CSS 4 + shadcn/ui |
 | Bible API | API.Bible |
 | i18n | next-intl |
-| Export | React PDF |
 
 ---
 
@@ -126,13 +131,11 @@ open-sermon/
 
 ---
 
-## 🗺️ Roadmap
-
 - [x] Project setup & architecture
-- [ ] **Phase 1 — MVP**: Block editor, sermon CRUD, series, export, public demo
-- [ ] **Phase 2 — Collaboration**: Multi-user teams, sermon sharing, comments
-- [ ] **Phase 3 — AI Assistant**: Outline suggestions, semantic search in your library
-- [ ] **Phase 4 — Ecosystem**: Community templates, public API, audio support (Bible.is)
+- [x] **Phase 1 — MVP**: Block editor, Auth, Dashboard, PWA, Caching
+- [ ] **Phase 2 — Performance & UX**: PDF Export, search across library, drag and drop refinement
+- [ ] **Phase 3 — Collaboration**: Multi-user teams, sermon sharing, comments
+- [ ] **Phase 4 — AI Assistant**: Outline suggestions, semantic search in your library
 
 ---
 
