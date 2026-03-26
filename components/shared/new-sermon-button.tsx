@@ -14,8 +14,9 @@ export function NewSermonButton() {
   return (
     <>
       <SidebarMenuButton
-        className="w-full justify-start gap-2 bg-sidebar-accent/50 hover:bg-sidebar-accent"
+        className="w-full justify-start gap-2 bg-sidebar-accent/50 hover:bg-sidebar-accent border border-sidebar-accent"
         tooltip={t("newSermon")}
+        variant={"default"}
         onClick={() => setIsDialogOpen(true)}
       >
         <HugeiconsIcon icon={Add01Icon} size={18} />

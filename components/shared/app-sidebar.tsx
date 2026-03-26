@@ -1,4 +1,3 @@
-import * as React from "react";
 import Image from "next/image";
 import {
   Sidebar,
@@ -17,10 +16,9 @@ import {
   Book01Icon,
   Home01Icon,
   UserCircleIcon,
-  Note01Icon,
 } from "@hugeicons/core-free-icons";
 import { getSermons } from "@/lib/sermon-data";
-import { getTranslations, getLocale } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SermonItem } from "./sermon-item";
@@ -38,7 +36,7 @@ export async function AppSidebar() {
   } = await supabase.auth.getUser();
 
   return (
-    <Sidebar variant="sidebar" collapsible="icon">
+    <Sidebar variant="sidebar" collapsible="offcanvas">
       <SidebarHeader className="h-14 flex flex-row items-center justify-between px-4">
         <Link href="/dashboard" className="flex items-center gap-2 group-data-[collapsible=icon]:mx-auto hover:opacity-80 transition-opacity">
           <div className="size-8 rounded-lg overflow-hidden flex items-center justify-center border shadow-sm relative">

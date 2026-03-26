@@ -44,7 +44,7 @@ export default async function SermonPage({
         
         <div className="flex items-center gap-1">
           <SaveIndicator />
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex items-center gap-1 opacity-100 group-hover:opacity-100 transition-opacity">
             <Button variant="ghost" size="sm" className="h-8 gap-1 text-muted-foreground">
               <HugeiconsIcon icon={StarIcon} size={16} />
             </Button>

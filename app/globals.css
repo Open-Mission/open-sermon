@@ -52,6 +52,12 @@
 }
 
 :root {
+    --highlight-yellow: oklch(0.95 0.15 90);
+    --highlight-green: oklch(0.92 0.18 145);
+    --highlight-blue: oklch(0.92 0.15 240);
+    --highlight-pink: oklch(0.92 0.15 340);
+    --highlight-orange: oklch(0.92 0.18 50);
+    --highlight-purple: oklch(0.92 0.12 300);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.141 0.005 285.823);
     --popover: oklch(1 0 0);
@@ -133,10 +139,21 @@
 }
 .ProseMirror {
     @apply outline-none min-h-[300px];
+    touch-action: manipulation;
 }
 
 .ProseMirror:focus {
     @apply outline-none ring-0;
+}
+
+@media (max-width: 640px) {
+    .ProseMirror {
+        font-size: 16px;
+    }
+}
+
+.ProseMirror mark {
+    color: oklch(0.21 0.006 285.885) !important;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {

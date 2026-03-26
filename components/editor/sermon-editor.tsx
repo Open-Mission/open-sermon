@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from "react";
 import { StarterKit } from "@tiptap/starter-kit";
 import { NodeSelection } from "@tiptap/pm/state";
 import Underline from "@tiptap/extension-underline";
+import { Highlight } from "@tiptap/extension-highlight";
 import UniqueId from "@tiptap/extension-unique-id";
 import { Placeholder } from "@tiptap/extension-placeholder";
 import { IllustrationBlock } from "./blocks/illustration-block";
@@ -15,12 +16,13 @@ import { IntroBlock } from "./blocks/intro-block";
 import { ConclusionBlock } from "./blocks/conclusion-block";
 import { VerseBlock } from "./blocks/verse-block";
 import { VerseSearchModal } from "./modals/verse-search-modal";
+import { HighlightColorPicker } from "./highlight-color-picker";
 import { BlockMenu } from "./block-menu";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { useSidebar } from "@/components/ui/sidebar";
 import { DragHandle } from "@tiptap/extension-drag-handle-react";
-import { GripVertical, Trash2, Bold, Italic, Underline as UnderlineIcon, Copy, X } from "lucide-react";
+import { GripVertical, Trash2, Bold, Italic, Underline as UnderlineIcon, Copy, X, Highlighter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BlockSelectionProvider, useBlockSelection } from "./block-selection-context";
 import { SelectableTextBlockView } from "./blocks/selectable-text-block-view";
@@ -92,6 +94,7 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       ConclusionBlock,
       VerseBlock,
       Underline,
+      Highlight.configure({ multicolor: true }),
       UniqueId.configure({
         types: ['paragraph', 'heading', 'verseBlock', 'illustrationBlock', 'applicationBlock', 'pointBlock', 'introBlock', 'conclusionBlock'],
         generateID: () => crypto.randomUUID(),
@@ -262,6 +265,17 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
           >
             <UnderlineIcon className="h-4 w-4" />
           </button>
+          <HighlightColorPicker editor={editor}>
+            <button
+              type="button"
+              className={cn(
+                "p-2 text-sm hover:bg-muted transition-colors",
+                editor.isActive('highlight') ? 'bg-muted text-foreground' : 'text-muted-foreground'
+              )}
+            >
+              <Highlighter className="h-4 w-4" />
+            </button>
+          </HighlightColorPicker>
         </BubbleMenu>
       )}
       {editor && (

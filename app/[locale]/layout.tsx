@@ -69,6 +69,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: "#1A1B2E",
+  maximumScale: 1,
+  userScalable: false,
 };
 
 type Props = {
