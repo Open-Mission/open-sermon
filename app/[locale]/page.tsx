@@ -12,9 +12,12 @@ import { DesignBackground } from "@/components/shared/design-background";
 import { Navbar } from "@/components/shared/navbar";
 import { Footer } from "@/components/shared/footer";
 import { Badge } from "@/components/ui/badge";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function Page() {
   const t = await getTranslations("landing");
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
   return (
     <div className="relative min-h-screen flex flex-col bg-background selection:bg-primary/20">
@@ -35,12 +38,21 @@ export default async function Page() {
               {t("heroSubtitle")}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-5 duration-1000 fill-mode-both" style={{ animationDelay: "400ms" }}>
-              <Link href="/register">
-                <Button size="lg" className="h-14 px-8 text-base font-bold rounded-2xl shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all hover:scale-[1.02] active:scale-[0.98]">
-                  {t("getStarted")}
-                  <HugeiconsIcon icon={ArrowRight01Icon} className="ml-2 size-5" />
-                </Button>
-              </Link>
+              {user ? (
+                <Link href="/app">
+                  <Button size="lg" className="h-14 px-8 text-base font-bold rounded-2xl shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                    {t("accessApp")}
+                    <HugeiconsIcon icon={ArrowRight01Icon} className="ml-2 size-5" />
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/register">
+                  <Button size="lg" className="h-14 px-8 text-base font-bold rounded-2xl shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                    {t("getStarted")}
+                    <HugeiconsIcon icon={ArrowRight01Icon} className="ml-2 size-5" />
+                  </Button>
+                </Link>
+              )}
               <Link href="#features">
                 <Button variant="outline" size="lg" className="h-14 px-8 text-base font-bold rounded-2xl backdrop-blur-sm border-border/40 hover:bg-muted/40 transition-all hover:scale-[1.02]">
                   {t("viewFeatures")}
@@ -109,9 +121,9 @@ export default async function Page() {
                 <p className="text-muted-foreground text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
                   {t("ctaSubtitle")}
                 </p>
-                <Link href="/register">
+                <Link href={user ? "/app" : "/register"}>
                   <Button size="lg" className="h-16 px-10 text-lg font-bold rounded-2xl shadow-xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all">
-                    {t("getStarted")}
+                    {user ? t("accessApp") : t("getStarted")}
                     <HugeiconsIcon icon={ArrowRight01Icon} className="ml-2 size-6" />
                   </Button>
                 </Link>

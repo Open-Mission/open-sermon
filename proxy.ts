@@ -5,7 +5,7 @@ import { createServerClient } from "@supabase/ssr";
 
 const intlMiddleware = createMiddleware(routing);
 
-const protectedRoutes = ["/dashboard", "/sermons", "/series", "/library"];
+const protectedRoutes = ["/app", "/sermons", "/series", "/library"];
 
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

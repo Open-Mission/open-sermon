@@ -26,7 +26,7 @@ export async function signIn(
     return { error: error.message };
   }
 
-  redirect(`/${locale}/dashboard`);
+  redirect(`/${locale}/app`);
 }
 
 export async function signUp(

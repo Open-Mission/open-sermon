@@ -12,7 +12,7 @@ export default async function LoginPage({
   const { data: { user } } = await supabase.auth.getUser();
 
   if (user) {
-    redirect(`/${locale}/dashboard`);
+    redirect(`/${locale}/app`);
   }
 
   return <LoginForm />;
