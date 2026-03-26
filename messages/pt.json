@@ -86,16 +86,40 @@
       "point": "Ponto Principal",
       "intro": "Introdução / Gancho",
       "conclusion": "Conclusão / Chamado",
-      "text": "Texto Livre"
+      "text": "Texto Livre",
+      "h1": "Título 1",
+      "h2": "Título 2",
+      "h3": "Título 3",
+      "bold": "Negrito",
+      "italic": "Itálico",
+      "underline": "Sublinhado"
     },
     "verse": {
-      "reference": "Referência (ex: João 3:16)",
+      "reference": "Referência",
       "search": "Buscar versículo",
       "version": "Versão",
-      "insertVerse": "Inserir versículo"
+      "insertVerse": "Inserir versículo",
+      "searching": "Buscando...",
+      "errors": {
+        "emptyReference": "Por favor, insira uma referência",
+        "verseNotFound": "Versículo não encontrado",
+        "fetchFailed": "Falha ao buscar versículo",
+        "verseRequired": "É necessário buscar um versículo primeiro"
+      },
+      "searchModal": {
+        "title": "Buscar Versículo Bíblico",
+        "description": "Insira a referência do versículo (ex: João 3:16)",
+        "referencePlaceholder": "João 3:16",
+        "selectVersion": "Selecione uma versão",
+        "insert": "Inserir"
+      },
+      "editing": "Editando versículo...",
+      "saveToLibrary": "Salvar na biblioteca"
     },
     "saveBlock": "Salvar na biblioteca",
-    "blockSaved": "Bloco salvo na biblioteca!"
+    "blockSaved": "Bloco salvo na biblioteca!",
+    "search": "Buscar blocos...",
+    "noResults": "Nenhum resultado encontrado"
   },
   "series": {
     "title": "Séries",

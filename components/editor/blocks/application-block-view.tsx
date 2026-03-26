@@ -1,7 +1,12 @@
+'use client';
+
 import { NodeViewWrapper, NodeViewContent } from '@tiptap/react'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
-export function ApplicationBlockView({ node, getPos, updateAttributes }: any) {
+export function ApplicationBlockView({ getPos }: { getPos: () => number | undefined }) {
+  const t = useTranslations('editor')
+
   return (
     <NodeViewWrapper
       className={cn(
@@ -10,18 +15,18 @@ export function ApplicationBlockView({ node, getPos, updateAttributes }: any) {
       )}
     >
       <div className="flex items-start space-x-3">
-        <div className="flex-shrink-0 h-4 w-4 text-emerald-500">
+        <div className="shrink-0 h-4 w-4 text-emerald-500">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9.099 9.099a3 3 0 104.242 4.242M9.099 9.099V3.5a2.5 2.5 0 015 0v5.598m-5 5.598a3 3 0 114.242-4.242" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
         <div className="flex-1 space-y-2">
           <div className="text-sm font-medium text-foreground">
-            Aplicação
+            {t('blocks.application')}
           </div>
           <NodeViewContent className="text-sm text-muted-foreground" />
         </div>
-        <div className="flex-shrink-0 space-x-2">
+        <div className="shrink-0 space-x-2">
           <button
             onClick={() => {
               // Save to library functionality would go here
@@ -29,7 +34,7 @@ export function ApplicationBlockView({ node, getPos, updateAttributes }: any) {
             }}
             className="text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
-            Salvar na biblioteca
+            {t('saveBlock')}
           </button>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { SermonEditor } from "@/components/editor/sermon-editor";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function SermonPage({
   params,
@@ -10,14 +10,15 @@ export default async function SermonPage({
   const { id } = await params;
 
   // Fetch sermon data on server side
-  const supabase = createClient(); // This is now the browser client
-  const { data: sermon } = await supabase
+  const supabase = await createClient();
+  const { data: sermon, error } = await supabase
     .from("sermons")
     .select("*")
     .eq("id", id)
     .single();
 
-  if (!sermon) {
+  if (error || !sermon) {
+    console.error("SermonPage error:", error, "ID:", id);
     notFound();
   }
 

@@ -1,32 +1,36 @@
 'use client';
 
-import { NodeViewWrapper, NodeViewContent } from '@tiptap/react'
+import { NodeViewWrapper } from '@tiptap/react'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { useTranslations } from 'next-intl'
 
-export function VerseBlockView({ node, getPos, updateAttributes }: any) {
+interface VerseAttrs {
+  reference?: string;
+  text?: string;
+  version?: string;
+}
+
+interface VerseNode {
+  attrs: VerseAttrs;
+}
+
+export function VerseBlockView({ node, getPos, updateAttributes }: { 
+  node: VerseNode, 
+  getPos: () => number | undefined, 
+  updateAttributes: (attrs: Partial<VerseAttrs>) => void 
+}) {
+  const t = useTranslations('editor.verse')
+  const tCommon = useTranslations('common')
   const { reference, text, version } = node.attrs
   const [isEditing, setIsEditing] = useState(false)
 
   const handleClick = () => {
-    // In a real implementation, this would open the verse search modal
-    // For now, we'll just toggle editing state
     setIsEditing(!isEditing)
   }
 
-  const handleSave = (newReference: string, newText: string, newVersion: string) => {
-    updateAttributes({
-      reference: newReference,
-      text: newText,
-      version: newVersion,
-    })
-    setIsEditing(false)
-  }
-
   if (isEditing) {
-    // In a real implementation, we would render a form here to edit the verse
-    // For now, we'll just show the verse content with an indication it's editable
     return (
       <NodeViewWrapper
         className={cn(
@@ -36,14 +40,14 @@ export function VerseBlockView({ node, getPos, updateAttributes }: any) {
         onClick={handleClick}
       >
         <div className="flex items-start space-x-3">
-          <div className="flex-shrink-0 h-4 w-4 text-violet-500">
+          <div className="shrink-0 h-4 w-4 text-violet-500">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.5 8H5.5A2.5 2.5 0 003 10.5v9a2.5 2.5 0 002.5 2.5h9a2.5 2.5 0 002.5-2.5v-6m-6 4h.01M15.5 8a5.5 5.5 0 0111 0M15.5 8a5.5 5.5 0 00-11 0" />
             </svg>
           </div>
           <div className="flex-1 space-y-2">
             <div className="text-sm font-medium text-foreground">
-              Editando versículo...
+              {t('editing')}
             </div>
             <div className="text-sm text-muted-foreground">
               {reference}
@@ -55,15 +59,12 @@ export function VerseBlockView({ node, getPos, updateAttributes }: any) {
               {version}
             </div>
           </div>
-          <div className="flex-shrink-0 space-x-2">
-            <Button variant="outline" size="xs" onClick={() => setIsEditing(false)}>
-              Cancelar
+          <div className="shrink-0 space-x-2">
+            <Button variant="outline" size="xs" onClick={(e) => { e.stopPropagation(); setIsEditing(false); }}>
+              {tCommon('cancel')}
             </Button>
-            <Button variant="default" size="xs" onClick={() => {
-              // In a real implementation, we would save the edited verse
-              setIsEditing(false)
-            }}>
-              Salvar
+            <Button variant="default" size="xs" onClick={(e) => { e.stopPropagation(); setIsEditing(false); }}>
+              {tCommon('save')}
             </Button>
           </div>
         </div>
@@ -82,23 +83,23 @@ export function VerseBlockView({ node, getPos, updateAttributes }: any) {
        <div className="flex items-start space-x-3">
          {!reference ? (
            <>
-             <div className="flex-shrink-0 h-4 w-4 text-violet-500">
+             <div className="shrink-0 h-4 w-4 text-violet-500">
                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.5 8H5.5A2.5 2.5 0 003 10.5v9a2.5 2.5 0 002.5 2.5h9a2.5 2.5 0 002.5-2.5v-6m-6 4h.01M15.5 8a5.5 5.5 0 0111 0M15.5 8a5.5 5.5 0 00-11 0" />
                </svg>
              </div>
              <div className="flex-1 space-y-2">
                <div className="text-sm font-medium text-foreground">
-                 Versículo Bíblico
+                 {t('blocks.verse')}
                </div>
                <div className="text-sm text-muted-foreground italic">
-                 Clique para inserir um versículo
+                 {t('search')}
                </div>
              </div>
            </>
          ) : (
            <>
-             <div className="flex-shrink-0 h-4 w-4 text-violet-500">
+             <div className="shrink-0 h-4 w-4 text-violet-500">
                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-4 w-4">
                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.5 8H5.5A2.5 2.5 0 003 10.5v9a2.5 2.5 0 002.5 2.5h9a2.5 2.5 0 002.5-2.5v-6m-6 4h.01M15.5 8a5.5 5.5 0 0111 0M15.5 8a5.5 5.5 0 00-11 0" />
                </svg>
@@ -116,16 +117,17 @@ export function VerseBlockView({ node, getPos, updateAttributes }: any) {
              </div>
            </>
          )}
-         <div className="flex-shrink-0 space-x-2">
+         <div className="shrink-0 space-x-2">
            <Button
              variant="outline"
              size="xs"
-             onClick={() => {
+             onClick={(e) => {
+               e.stopPropagation();
                // Save to library functionality would go here
                console.log('Save verse to library')
              }}
            >
-             Salvar na biblioteca
+             {t('saveToLibrary')}
            </Button>
          </div>
        </div>
