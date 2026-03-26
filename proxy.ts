@@ -11,33 +11,50 @@ export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const pathnameWithoutLocale = pathname.replace(/^\/(pt|en)/, "");
 
-  // Pass through auth callback
-  if (pathnameWithoutLocale.startsWith("/auth/")) {
-    return NextResponse.next();
+  let response = NextResponse.next({ request });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          );
+          response = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (
+    !user &&
+    !pathnameWithoutLocale.startsWith("/login") &&
+    !pathnameWithoutLocale.startsWith("/auth/")
+  ) {
+    const locale = pathname.split("/")[1] || routing.defaultLocale;
+    return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
   }
 
-  // Handle protected routes
+  if (pathnameWithoutLocale.startsWith("/auth/")) {
+    return response;
+  }
+
   const isProtected = protectedRoutes.some((route) =>
     pathnameWithoutLocale.startsWith(route),
   );
 
-  if (isProtected) {
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-      {
-        cookies: {
-          getAll: () => request.cookies.getAll(),
-        },
-      },
-    );
-
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      const locale = pathname.split("/")[1] || routing.defaultLocale;
-      return NextResponse.redirect(new URL(`/${locale}/login`, request.url));
-    }
+  if (isProtected && user) {
+    return response;
   }
 
   return intlMiddleware(request);

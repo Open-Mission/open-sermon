@@ -18,13 +18,15 @@ export default async function Page() {
   const t = await getTranslations("landing");
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-
+  if (user) {
+    redirect(`/${locale}/app`);
+  }
   return (
     <div className="relative min-h-screen flex flex-col bg-background selection:bg-primary/20">
       <DesignBackground />
       <Navbar />
 
-      <main className="flex-grow pt-16">
+      <main className="grow pt-16">
         {/* Hero Section */}
         <section className="relative overflow-hidden pt-36 pb-24 md:pt-48 md:pb-48 text-center">
           <div className="container mx-auto px-4 relative z-10 text-center flex flex-col items-center">
