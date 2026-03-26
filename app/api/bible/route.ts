@@ -4,7 +4,8 @@ import { getCached, bibleVerseCacheKey } from "@/lib/redis";
 const VERSION_IDS: Record<string, string> = {
   NVI: "your-nvi-id",
   ARA: "your-ara-id",
-  ARC: "your-arc-id",
+  ACF: "your-acf-id",
+  NTLH: "your-ntlh-id",
   KJV: "de4e12af7f28f599-02",
   NIV: "your-niv-id",
 };

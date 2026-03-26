@@ -38,6 +38,29 @@ export async function getSermons(limit?: number) {
   );
 }
 
+export async function getFavoriteSermons() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return [];
+
+  const { data: sermons, error } = await supabase
+    .from("sermons")
+    .select("*")
+    .is("deleted_at", null)
+    .eq("is_favorite", true)
+    .order("updated_at", { ascending: false });
+
+  if (error) {
+    console.error("getFavoriteSermons - Error:", error);
+    return [];
+  }
+
+  return (sermons || []) as Sermon[];
+}
+
 export async function getSermon(id: string) {
   const supabase = await createClient();
   const cacheKey = sermonCacheKey(id);

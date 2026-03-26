@@ -4,17 +4,15 @@ import { createClient } from "@/lib/supabase/server";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  Share01Icon,
-  MoreHorizontalIcon,
-  StarIcon,
-} from "@hugeicons/core-free-icons";
+import { Share01Icon } from "@hugeicons/core-free-icons";
 import { SaveIndicator } from "@/components/editor/save-indicator";
+import { FavoriteButton } from "@/components/shared/favorite-button";
+import { SermonActionsDropdown } from "@/components/shared/sermon-actions-dropdown";
 
 export default async function SermonPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ locale: string; id: string }>;
 }) {
   const { id } = await params;
 
@@ -45,16 +43,18 @@ export default async function SermonPage({
         <div className="flex items-center gap-1">
           <SaveIndicator />
           <div className="flex items-center gap-1 opacity-100 group-hover:opacity-100 transition-opacity">
-            <Button variant="ghost" size="sm" className="h-8 gap-1 text-muted-foreground">
-              <HugeiconsIcon icon={StarIcon} size={16} />
-            </Button>
+            <FavoriteButton
+              sermonId={sermon.id}
+              initialIsFavorite={sermon.is_favorite ?? false}
+            />
             <Button variant="ghost" size="sm" className="h-8 gap-1 text-muted-foreground">
               <HugeiconsIcon icon={Share01Icon} size={16} />
               <span className="hidden sm:inline">Share</span>
             </Button>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground">
-              <HugeiconsIcon icon={MoreHorizontalIcon} size={16} />
-            </Button>
+            <SermonActionsDropdown
+              sermonId={sermon.id}
+              sermonTitle={sermon.title}
+            />
           </div>
         </div>
       </header>

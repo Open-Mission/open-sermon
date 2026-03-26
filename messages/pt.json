@@ -49,7 +49,11 @@
     "series": "Séries",
     "seriesDesc": "Organize seus sermões em séries",
     "library": "Biblioteca",
-    "libraryDesc": "Seus blocos salvos para reutilizar"
+    "libraryDesc": "Seus blocos salvos para reutilizar",
+    "favorites": "Favoritos",
+    "noFavorites": "Clique na estrela para adicionar sermões aos favoritos.",
+    "addToFavorites": "Adicionar aos favoritos",
+    "removeFromFavorites": "Remover dos favoritos"
   },
   "sermon": {
     "title": "Título",

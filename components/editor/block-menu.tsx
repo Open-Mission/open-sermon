@@ -33,10 +33,17 @@ type SuggestionsItem = {
   label: string
   icon: LucideIcon
   command: (editor: Editor) => void
+  requiresInput?: boolean
 }
 
 type BlockMenuProps = {
   editor: Editor | null
+}
+
+export const VERSE_SEARCH_EVENT = 'open-verse-search'
+
+export function dispatchVerseSearchEvent() {
+  window.dispatchEvent(new CustomEvent(VERSE_SEARCH_EVENT))
 }
 
 export function BlockMenu({ editor }: BlockMenuProps) {
@@ -49,7 +56,7 @@ export function BlockMenu({ editor }: BlockMenuProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
 
   const BLOCK_ITEMS = React.useMemo<SuggestionsItem[]>(() => [
-    { label: t('blocks.verse', { default: 'Versículo Bíblico' }), icon: BookOpen, command: (e) => e.chain().focus().insertContent({ type: 'verseBlock', attrs: { reference: '', text: '', version: 'NVI' } }).run() },
+    { label: t('blocks.verse', { default: 'Versículo Bíblico' }), icon: BookOpen, command: () => {}, requiresInput: true },
     { label: t('blocks.illustration', { default: 'Ilustração' }), icon: Lightbulb, command: (e) => e.chain().focus().insertContent({ type: 'illustrationBlock' }).run() },
     { label: t('blocks.application', { default: 'Aplicação' }), icon: Target, command: (e) => e.chain().focus().insertContent({ type: 'applicationBlock' }).run() },
     { label: t('blocks.point', { default: 'Ponto Principal' }), icon: Pin, command: (e) => e.chain().focus().insertContent({ type: 'pointBlock' }).run() },
@@ -78,7 +85,13 @@ export function BlockMenu({ editor }: BlockMenuProps) {
       to: editor.state.selection.from 
     }).run()
     
-    item.command(editor)
+    if (item.requiresInput) {
+      // Insert placeholder block first for verse
+      editor.chain().focus().insertContent({ type: 'verseBlock', attrs: { reference: '', text: '', version: 'NVI' } }).run()
+      dispatchVerseSearchEvent()
+    } else {
+      item.command(editor)
+    }
     setIsVisible(false)
   }, [editor, query])
 

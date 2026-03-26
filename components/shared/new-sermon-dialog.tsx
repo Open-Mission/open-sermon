@@ -73,6 +73,7 @@ export function NewSermonDialog({ open, onOpenChange }: NewSermonDialogProps) {
               onChange={(e) => setTitle(e.target.value)}
               onKeyDown={handleKeyDown}
               autoFocus
+              className="select-none"
             />
           </div>
           <DrawerFooter>
@@ -101,6 +102,7 @@ export function NewSermonDialog({ open, onOpenChange }: NewSermonDialogProps) {
           onChange={(e) => setTitle(e.target.value)}
           onKeyDown={handleKeyDown}
           autoFocus
+          className="select-none"
         />
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>

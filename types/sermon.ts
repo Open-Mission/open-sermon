@@ -25,6 +25,7 @@ export interface Sermon {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+  is_favorite?: boolean;
 }
 
 export interface SavedBlock {

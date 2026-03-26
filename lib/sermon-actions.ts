@@ -126,3 +126,43 @@ export async function renameSermon(sermonId: string, newTitle: string) {
   revalidatePath("/", "layout");
   return { success: true };
 }
+
+export async function toggleFavorite(sermonId: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Unauthorized" };
+  }
+
+  const { data: sermon, error: fetchError } = await supabase
+    .from("sermons")
+    .select("is_favorite")
+    .eq("id", sermonId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (fetchError || !sermon) {
+    return { error: "Sermon not found" };
+  }
+
+  const { error } = await supabase
+    .from("sermons")
+    .update({ is_favorite: !sermon.is_favorite })
+    .eq("id", sermonId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  await Promise.all([
+    invalidateUserSermonCache(user.id),
+    invalidateCacheKey(sermonCacheKey(sermonId)),
+  ]);
+  revalidatePath("/", "layout");
+  return { success: true, isFavorite: !sermon.is_favorite };
+}

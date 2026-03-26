@@ -49,7 +49,11 @@
     "series": "Series",
     "seriesDesc": "Organize your sermons into series",
     "library": "Library",
-    "libraryDesc": "Your saved blocks for reuse"
+    "libraryDesc": "Your saved blocks for reuse",
+    "favorites": "Favorites",
+    "noFavorites": "Click the star to add sermons to favorites.",
+    "addToFavorites": "Add to favorites",
+    "removeFromFavorites": "Remove from favorites"
   },
   "sermon": {
     "title": "Title",

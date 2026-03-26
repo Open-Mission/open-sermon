@@ -5,7 +5,6 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -17,17 +16,19 @@ import {
   Home01Icon,
   UserCircleIcon,
 } from "@hugeicons/core-free-icons";
-import { getSermons } from "@/lib/sermon-data";
+import { getSermons, getFavoriteSermons } from "@/lib/sermon-data";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SermonItem } from "./sermon-item";
 import { NewSermonButton } from "./new-sermon-button";
 import { UserMenu } from "./user-menu";
+import { CollapsibleSidebarGroup } from "./collapsible-sidebar-group";
 
 export async function AppSidebar() {
   const recentSermons = await getSermons(5);
   const allSermons = await getSermons();
+  const favoriteSermons = await getFavoriteSermons();
   const t = await getTranslations("dashboard");
   const commonT = await getTranslations("common");
   const supabase = await createClient();
@@ -61,7 +62,7 @@ export async function AppSidebar() {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip={t("title")}>
-                <Link href="/dashboard">
+                <Link href="/app">
                   <HugeiconsIcon icon={Home01Icon} size={18} />
                   <span>{t("title")}</span>
                 </Link>
@@ -70,37 +71,50 @@ export async function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">{t("recentSermons")}</SidebarGroupLabel>
-          <SidebarGroupContent>
+        {favoriteSermons.length > 0 ? (
+          <CollapsibleSidebarGroup label={t("favorites")}>
             <SidebarMenu>
-              {recentSermons.map((sermon) => (
-                <SermonItem key={`recent-${sermon.id}`} sermon={sermon} />
+              {favoriteSermons.map((sermon) => (
+                <SermonItem key={`favorite-${sermon.id}`} sermon={sermon} />
               ))}
-              {recentSermons.length === 0 && (
-                <div className="px-2 py-4 text-xs text-muted-foreground italic group-data-[collapsible=icon]:hidden">
-                  {t("noSermons")}
-                </div>
-              )}
             </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+          </CollapsibleSidebarGroup>
+        ) : (
+          <SidebarGroup>
+            <div className="px-2 py-1 text-xs font-medium text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">
+              {t("favorites")}
+            </div>
+            <div className="px-2 py-3 text-xs text-muted-foreground italic group-data-[collapsible=icon]:hidden">
+              {t("noFavorites")}
+            </div>
+          </SidebarGroup>
+        )}
 
-        <SidebarGroup>
-          <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">{t("allSermons")}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="max-h-75 overflow-y-auto no-scrollbar">
-              {allSermons.map((sermon) => (
-                <SermonItem key={`all-${sermon.id}`} sermon={sermon} />
-              ))}
-              {allSermons.length === 0 && (
-                <div className="px-2 py-4 text-xs text-muted-foreground italic group-data-[collapsible=icon]:hidden">
-                  {t("noSermons")}
-                </div>
-              )}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <CollapsibleSidebarGroup label={t("recentSermons")} defaultOpen={true}>
+          <SidebarMenu>
+            {recentSermons.map((sermon) => (
+              <SermonItem key={`recent-${sermon.id}`} sermon={sermon} />
+            ))}
+            {recentSermons.length === 0 && (
+              <div className="px-2 py-4 text-xs text-muted-foreground italic">
+                {t("noSermons")}
+              </div>
+            )}
+          </SidebarMenu>
+        </CollapsibleSidebarGroup>
+
+        <CollapsibleSidebarGroup label={t("allSermons")} defaultOpen={false}>
+          <SidebarMenu className="max-h-75 overflow-y-auto no-scrollbar">
+            {allSermons.map((sermon) => (
+              <SermonItem key={`all-${sermon.id}`} sermon={sermon} />
+            ))}
+            {allSermons.length === 0 && (
+              <div className="px-2 py-4 text-xs text-muted-foreground italic">
+                {t("noSermons")}
+              </div>
+            )}
+          </SidebarMenu>
+        </CollapsibleSidebarGroup>
 
         <SidebarGroup>
           <SidebarMenu>

@@ -3,11 +3,13 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Clock, FileText, MoreHorizontal, Plus } from "lucide-react";
+import { Clock, FileText, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Note01Icon } from "@hugeicons/core-free-icons";
+import { Note01Icon, Add01Icon } from "@hugeicons/core-free-icons";
 import { UserMenu } from "@/components/shared/user-menu";
+import { NewSermonButtonInline } from "@/components/shared/new-sermon-button-inline";
+import { NewSermonFab } from "@/components/shared/new-sermon-fab";
 
 export default async function DashboardPage() {
   const t = await getTranslations("dashboard");
@@ -72,10 +74,13 @@ export default async function DashboardPage() {
 
       {/* Notion-style List Area */}
       <section className="space-y-4">
-        <div className="flex items-center gap-2 text-muted-foreground border-b pb-2">
-          <FileText className="h-4 w-4" />
-          <h2 className="text-sm font-medium">{t("allSermons")}</h2>
-          <span className="ml-2 text-xs bg-muted px-2 py-0.5 rounded-full">{allSermons.length}</span>
+        <div className="flex items-center justify-between border-b pb-2">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <FileText className="h-4 w-4" />
+            <h2 className="text-sm font-medium">{t("allSermons")}</h2>
+            <span className="ml-2 text-xs bg-muted px-2 py-0.5 rounded-full">{allSermons.length}</span>
+          </div>
+          <NewSermonButtonInline className="hidden sm:flex" />
         </div>
 
         {allSermons.length > 0 ? (
@@ -118,15 +123,17 @@ export default async function DashboardPage() {
             </div>
             <h3 className="font-semibold">{t("noSermons")}</h3>
             <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-              Você ainda não criou nenhum sermão. Comece agora escrevendo uma nova mensagem para usa equipe ou igreja.
+              Você ainda não criou nenhum sermão. Comece agora escrevendo uma nova mensagem para sua equipe ou igreja.
             </p>
-            <Button className="mt-6" variant="secondary">
-              <Plus className="h-4 w-4 mr-2" />
-              Novo Sermão
-            </Button>
+            <div className="mt-6">
+              <NewSermonButtonInline className="sm:hidden" />
+            </div>
           </div>
         )}
       </section>
+
+      {/* Floating Action Button for mobile */}
+      <NewSermonFab />
     </div>
   );
 }

@@ -8,6 +8,14 @@ export const VerseBlock = Node.create({
   content: '',
   addAttributes() {
     return {
+      id: {
+        default: null,
+        parseHTML: (element) => element.getAttribute('data-id'),
+        renderHTML: (attributes) => {
+          if (!attributes.id) return {};
+          return { 'data-id': attributes.id };
+        },
+      },
       reference: {
         default: '',
       },
