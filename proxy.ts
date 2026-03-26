@@ -5,7 +5,7 @@ import { createServerClient } from "@supabase/ssr";
 
 const intlMiddleware = createMiddleware(routing);
 
-const protectedRoutes = ["/dashboard", "/sermon", "/series", "/library"];
+const protectedRoutes = ["/dashboard", "/sermons", "/series", "/library"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -53,6 +53,6 @@ export async function proxy(request: NextRequest) {
   return intlMiddleware(request);
 }
 
-export const config = {
+export const proxyConfig = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };

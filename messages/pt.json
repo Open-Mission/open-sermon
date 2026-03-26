@@ -70,6 +70,9 @@
     },
     "newTitle": "Novo Sermão",
     "editTitle": "Editar Sermão",
+    "renameTitle": "Renomear Sermão",
+    "deleteTitle": "Excluir Sermão",
+    "deleteConfirmation": "Tem certeza que deseja excluir este sermão? Esta ação não pode ser desfeita.",
     "export": "Exportar",
     "exportPdf": "Exportar PDF",
     "exportMarkdown": "Exportar Markdown"

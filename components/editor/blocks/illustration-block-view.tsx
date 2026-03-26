@@ -1,3 +1,5 @@
+'use client';
+
 import { NodeViewWrapper, NodeViewContent } from '@tiptap/react'
 import { cn } from '@/lib/utils'
 

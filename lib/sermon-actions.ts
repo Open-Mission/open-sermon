@@ -33,3 +33,81 @@ export async function createSermon() {
   revalidatePath("/", "layout");
   redirect(`/${locale}/sermons/${sermon.id}`);
 }
+
+export async function createSermonWithTitle(title: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Unauthorized" };
+  }
+
+  const { data: sermon, error } = await supabase
+    .from("sermons")
+    .insert({
+      user_id: user.id,
+      title: title.trim() || "New Sermon",
+    })
+    .select()
+    .single();
+
+  if (error || !sermon) {
+    return { error: error?.message || "Failed to create sermon" };
+  }
+
+  revalidatePath("/", "layout");
+  return { success: true, sermonId: sermon.id };
+}
+
+export async function softDeleteSermon(sermonId: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Unauthorized" };
+  }
+
+  const { error } = await supabase
+    .from("sermons")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", sermonId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/", "layout");
+  return { success: true };
+}
+
+export async function renameSermon(sermonId: string, newTitle: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Unauthorized" };
+  }
+
+  const { error } = await supabase
+    .from("sermons")
+    .update({ title: newTitle.trim() })
+    .eq("id", sermonId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/", "layout");
+  return { success: true };
+}

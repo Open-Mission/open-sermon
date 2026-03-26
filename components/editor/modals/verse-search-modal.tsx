@@ -1,10 +1,12 @@
+'use client';
+
 import { useState } from 'react'
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { useTranslations } from 'next-intl'
-import { Lucas, BookOpen } from 'lucide-react'
+import { BookOpen } from 'lucide-react'
 
 type VerseSearchModalProps = {
   onClose: () => void
@@ -67,7 +69,7 @@ export function VerseSearchModal({ onClose, onInsert }: VerseSearchModalProps) {
     <Dialog>
       <DialogTrigger asChild>
         <Button variant="outline" size="icon">
-          <Lucas className="h-4 w-4" />
+          <BookOpen className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="w-[400px]">

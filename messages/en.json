@@ -70,6 +70,9 @@
     },
     "newTitle": "New Sermon",
     "editTitle": "Edit Sermon",
+    "renameTitle": "Rename Sermon",
+    "deleteTitle": "Delete Sermon",
+    "deleteConfirmation": "Are you sure you want to delete this sermon? This action cannot be undone.",
     "export": "Export",
     "exportPdf": "Export PDF",
     "exportMarkdown": "Export Markdown"

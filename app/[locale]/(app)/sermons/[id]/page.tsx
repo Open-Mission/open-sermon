@@ -1,8 +1,6 @@
-import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
 import { SermonEditor } from "@/components/editor/sermon-editor";
-import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default async function SermonPage({
   params,
@@ -10,8 +8,9 @@ export default async function SermonPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const supabase = await createClient();
 
+  // Fetch sermon data on server side
+  const supabase = createClient(); // This is now the browser client
   const { data: sermon } = await supabase
     .from("sermons")
     .select("*")
@@ -22,16 +21,6 @@ export default async function SermonPage({
     notFound();
   }
 
-  const [blocks, setBlocks] = useState(sermon.blocks || null);
-  const t = await getTranslations();
-
-  const handleSave = async (content: any) => {
-    await supabase
-      .from("sermons")
-      .update({ blocks: content })
-      .eq("id", id);
-  };
-
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="flex items-center justify-between">
@@ -41,20 +30,7 @@ export default async function SermonPage({
         </div>
       </div>
 
-      {blocks !== null && (
-        <div className="rounded-lg border bg-card p-6 min-h-[400px]">
-          <SermonEditor
-            content={blocks}
-            onChange={handleSave}
-          />
-        </div>
-      )}
-      
-      {blocks === null && (
-        <div className="rounded-lg border bg-card p-6 min-h-[400px]">
-          <p className="text-muted-foreground italic">{t('components.editor.loading', { default: 'Carregando editor...' })}</p>
-        </div>
-      )}
+      <SermonEditor initialContent={sermon.blocks || null} sermonId={id} />
     </div>
   );
 }

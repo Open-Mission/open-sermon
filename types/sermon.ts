@@ -20,10 +20,11 @@ export interface Sermon {
   type: SermonType;
   main_scripture: string | null;
   tags: string[];
-  blocks: unknown; // TipTap JSON content
+  blocks: unknown;
   preached_at: string | null;
   created_at: string;
   updated_at: string;
+  deleted_at: string | null;
 }
 
 export interface SavedBlock {

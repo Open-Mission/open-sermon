@@ -1,5 +1,7 @@
-import { useState, useRef, useEffect } from 'react'
-import { useEditor } from '@tiptap/react'
+'use client';
+
+import { useState, useRef, useEffect, useMemo } from 'react'
+import { type Editor } from '@tiptap/react'
 import { useTranslations } from 'next-intl'
 import { BookOpen, Lightbulb, Target, Pin, PlayCircle, CheckCircle, Type } from 'lucide-react'
 
@@ -9,9 +11,12 @@ type SuggestionsItems = Array<{
   command: string
 }>
 
-export function BlockMenu() {
+type BlockMenuProps = {
+  editor: Editor | null
+}
+
+export function BlockMenu({ editor }: BlockMenuProps) {
   const t = useTranslations('components.editor.blockMenu')
-  const editor = useEditor()
   const [isVisible, setIsVisible] = useState(false)
   const [query, setQuery] = useState('')
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
@@ -34,11 +39,12 @@ export function BlockMenu() {
       setQuery('')
       // Position the menu at the cursor
       setTimeout(() => {
-        if (editor.view) {
+        if (editor?.view) {
           const { state } = editor
           const { from } = state.selection
           const coords = editor.view.coordsAtPos(from)
-          setAnchorEl(document.elementFromPoint(coords.left, coords.top) || undefined)
+          const element = document.elementFromPoint(coords.left, coords.top)
+          if (element) setAnchorEl(element as HTMLElement)
         }
       }, 0)
     }
@@ -71,11 +77,10 @@ export function BlockMenu() {
   )
 
   const handleItemSelect = (command: string) => {
+    if (!editor) return
+    
     if (command === 'verseBlock') {
-      // For verse block, we'll open the modal instead of inserting directly
       setIsVisible(false)
-      // In a real implementation, we would open the verse search modal here
-      // For now, we'll just insert a placeholder
       editor.chain().focus().insertContent({ type: 'verseBlock', attrs: { reference: '', text: '', version: 'NVI' } }).run()
     } else {
       editor.chain().focus().insertContent({ type: command }).run()

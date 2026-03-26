@@ -4,10 +4,10 @@ import { Sermon } from "@/types/sermon";
 export async function getSermons(limit?: number) {
   const supabase = await createClient();
 
-  // No user check here, let RLS handle it, or check if we want to be explicit
   let query = supabase
     .from("sermons")
     .select("*")
+    .is("deleted_at", null)
     .order("updated_at", { ascending: false });
 
   if (limit) {
