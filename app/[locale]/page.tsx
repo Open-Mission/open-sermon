@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -14,7 +15,12 @@ import { Footer } from "@/components/shared/footer";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function Page() {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   const t = await getTranslations("landing");
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
