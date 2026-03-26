@@ -6,7 +6,6 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useTranslations } from 'next-intl'
 import { useBlockSelection } from '../block-selection-context'
-import { Checkbox } from '@/components/ui/checkbox'
 import { useLongPress } from '@/hooks/use-long-press'
 
 interface VerseAttrs {
@@ -54,24 +53,6 @@ export function VerseBlockView({ node, getPos }: {
           handleClick()
         }}
       >
-        {blockId && (
-          <div 
-            className={cn(
-              "absolute -left-6 top-1.5 hidden md:flex opacity-0 group-hover:opacity-100 transition-opacity z-10",
-              isSelected && "opacity-100"
-            )}
-            contentEditable={false}
-            onClick={(e) => {
-              e.stopPropagation()
-              toggleBlock(blockId)
-            }}
-          >
-            <Checkbox 
-              checked={isSelected}
-              onCheckedChange={() => toggleBlock(blockId)}
-            />
-          </div>
-        )}
         <div className="flex items-start space-x-3">
           <div className="shrink-0 pt-[2px] text-violet-500">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5">
@@ -118,24 +99,6 @@ export function VerseBlockView({ node, getPos }: {
           handleClick()
         }}
      >
-       {blockId && (
-         <div 
-           className={cn(
-             "absolute -left-6 top-1.5 hidden md:flex opacity-0 group-hover:opacity-100 transition-opacity z-10",
-             isSelected && "opacity-100"
-           )}
-           contentEditable={false}
-           onClick={(e) => {
-             e.stopPropagation()
-             toggleBlock(blockId)
-           }}
-         >
-           <Checkbox 
-             checked={isSelected}
-             onCheckedChange={() => toggleBlock(blockId)}
-           />
-         </div>
-       )}
        <div className="flex items-start space-x-3">
          {!reference ? (
            <>
@@ -173,19 +136,6 @@ export function VerseBlockView({ node, getPos }: {
              </div>
            </>
          )}
-         <div className="shrink-0 space-x-2">
-           <Button
-             variant="outline"
-             size="xs"
-             onClick={(e) => {
-               e.stopPropagation();
-               // Save to library functionality would go here
-               console.log('Save verse to library')
-             }}
-           >
-             {t('saveToLibrary')}
-           </Button>
-         </div>
        </div>
      </NodeViewWrapper>
    )

@@ -4,7 +4,6 @@ import { NodeViewWrapper, NodeViewContent } from '@tiptap/react'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
 import { useBlockSelection } from '../block-selection-context'
-import { Checkbox } from '@/components/ui/checkbox'
 import { useLongPress } from '@/hooks/use-long-press'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -27,24 +26,6 @@ export function IllustrationBlockView({ node, getPos }: { node: any, getPos: () 
         isSelected ? 'bg-amber-500/10 shadow-sm' : ''
       )}
     >
-      {blockId && (
-        <div 
-          className={cn(
-            "absolute -left-6 top-3.5 hidden md:flex opacity-0 group-hover:opacity-100 transition-opacity z-10",
-            isSelected && "opacity-100"
-          )}
-          contentEditable={false}
-          onClick={(e) => {
-            e.stopPropagation()
-            toggleBlock(blockId)
-          }}
-        >
-          <Checkbox 
-            checked={isSelected}
-            onCheckedChange={() => toggleBlock(blockId)}
-          />
-        </div>
-      )}
       <div className="flex items-start space-x-3">
         <div className="shrink-0 pt-[2px] text-amber-500">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5">
@@ -56,17 +37,6 @@ export function IllustrationBlockView({ node, getPos }: { node: any, getPos: () 
             {t('blocks.illustration')}
           </div>
           <NodeViewContent className="text-base text-foreground [&>p:first-child]:mt-0" />
-        </div>
-        <div className="shrink-0 space-x-2">
-          <button
-            onClick={() => {
-              // Save to library functionality would go here
-              console.log('Save illustration to library')
-            }}
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {t('saveBlock')}
-          </button>
         </div>
       </div>
     </NodeViewWrapper>
