@@ -1,0 +1,114 @@
+{
+  "common": {
+    "appName": "Open Sermon",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "back": "Back",
+    "confirm": "Confirm",
+    "close": "Close",
+    "logout": "Sign out"
+  },
+  "auth": {
+    "login": "Sign in",
+    "logout": "Sign out",
+    "register": "Create account",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password",
+    "loginTitle": "Welcome back",
+    "loginSubtitle": "Sign in to your account to continue",
+    "registerTitle": "Create your account",
+    "registerSubtitle": "Start organizing your sermons today",
+    "passwordTab": "Password",
+    "magicLinkTab": "Magic Link",
+    "sendMagicLink": "Send magic link",
+    "magicLinkSent": "Check your email for the magic link. Click the link to sign in.",
+    "tryAgain": "Try with a different email",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "checkEmail": "Account created! Please check your email to confirm.",
+    "registerSuccess": "Check your email",
+    "registerSuccessSubtitle": "We sent you a confirmation link. Click it to activate your account.",
+    "goToLogin": "Go to sign in"
+  },
+  "dashboard": {
+    "title": "My Sermons",
+    "welcome": "Welcome back! Start preparing your next sermon.",
+    "newSermon": "New Sermon",
+    "newSermonDesc": "Create a new sermon from scratch",
+    "recentSermons": "Recent",
+    "allSermons": "All Sermons",
+    "noSermons": "No sermons yet. Create your first one!",
+    "series": "Series",
+    "seriesDesc": "Organize your sermons into series",
+    "library": "Library",
+    "libraryDesc": "Your saved blocks for reuse"
+  },
+  "sermon": {
+    "title": "Title",
+    "mainScripture": "Main Scripture",
+    "series": "Series",
+    "type": "Type",
+    "status": "Status",
+    "tags": "Tags",
+    "preachedAt": "Preached At",
+    "types": {
+      "preaching": "Preaching",
+      "cell": "Cell Group",
+      "devotional": "Devotional"
+    },
+    "statuses": {
+      "draft": "Draft",
+      "in_progress": "In Progress",
+      "finished": "Finished",
+      "preached": "Preached"
+    },
+    "newTitle": "New Sermon",
+    "editTitle": "Edit Sermon",
+    "export": "Export",
+    "exportPdf": "Export PDF",
+    "exportMarkdown": "Export Markdown"
+  },
+  "editor": {
+    "placeholder": "Type '/' to insert a block...",
+    "blocks": {
+      "verse": "Bible Verse",
+      "illustration": "Illustration",
+      "application": "Application",
+      "point": "Main Point",
+      "intro": "Introduction / Hook",
+      "conclusion": "Conclusion / Call to Action",
+      "text": "Free Text"
+    },
+    "verse": {
+      "reference": "Reference (e.g. John 3:16)",
+      "search": "Search verse",
+      "version": "Version",
+      "insertVerse": "Insert verse"
+    },
+    "saveBlock": "Save to library",
+    "blockSaved": "Block saved to library!"
+  },
+  "series": {
+    "title": "Series",
+    "newSeries": "New Series",
+    "noSeries": "No series created yet.",
+    "sermons": "sermons"
+  },
+  "library": {
+    "title": "Block Library",
+    "subtitle": "Your saved blocks for reuse",
+    "noBlocks": "No saved blocks yet. Save blocks from the editor to reuse them here.",
+    "insertBlock": "Insert into sermon",
+    "filterAll": "All",
+    "filterVerse": "Verses",
+    "filterIllustration": "Illustrations",
+    "filterApplication": "Applications",
+    "filterPoint": "Points"
+  }
+}

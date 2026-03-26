@@ -1,0 +1,114 @@
+{
+  "common": {
+    "appName": "Open Sermon",
+    "loading": "Carregando...",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "create": "Criar",
+    "search": "Buscar",
+    "back": "Voltar",
+    "confirm": "Confirmar",
+    "close": "Fechar",
+    "logout": "Sair"
+  },
+  "auth": {
+    "login": "Entrar",
+    "logout": "Sair",
+    "register": "Criar conta",
+    "email": "E-mail",
+    "password": "Senha",
+    "forgotPassword": "Esqueci minha senha",
+    "loginTitle": "Bem-vindo de volta",
+    "loginSubtitle": "Entre na sua conta para continuar",
+    "registerTitle": "Crie sua conta",
+    "registerSubtitle": "Comece a organizar seus sermões hoje",
+    "passwordTab": "Senha",
+    "magicLinkTab": "Link mágico",
+    "sendMagicLink": "Enviar link mágico",
+    "magicLinkSent": "Verifique seu e-mail com o link mágico. Clique no link para entrar.",
+    "tryAgain": "Tentar com outro e-mail",
+    "noAccount": "Não tem uma conta?",
+    "hasAccount": "Já tem uma conta?",
+    "checkEmail": "Conta criada! Verifique seu e-mail para confirmar.",
+    "registerSuccess": "Verifique seu e-mail",
+    "registerSuccessSubtitle": "Enviamos um link de confirmação. Clique nele para ativar sua conta.",
+    "goToLogin": "Ir para o login"
+  },
+  "dashboard": {
+    "title": "Meus Sermões",
+    "welcome": "Bem-vindo de volta! Comece a preparar seu próximo sermão.",
+    "newSermon": "Novo Sermão",
+    "newSermonDesc": "Criar um novo sermão do zero",
+    "recentSermons": "Recentes",
+    "allSermons": "Todos os Sermões",
+    "noSermons": "Nenhum sermão ainda. Crie seu primeiro!",
+    "series": "Séries",
+    "seriesDesc": "Organize seus sermões em séries",
+    "library": "Biblioteca",
+    "libraryDesc": "Seus blocos salvos para reutilizar"
+  },
+  "sermon": {
+    "title": "Título",
+    "mainScripture": "Texto Principal",
+    "series": "Série",
+    "type": "Tipo",
+    "status": "Status",
+    "tags": "Tags",
+    "preachedAt": "Data da Pregação",
+    "types": {
+      "preaching": "Pregação",
+      "cell": "Célula",
+      "devotional": "Devocional"
+    },
+    "statuses": {
+      "draft": "Rascunho",
+      "in_progress": "Em desenvolvimento",
+      "finished": "Finalizado",
+      "preached": "Pregado"
+    },
+    "newTitle": "Novo Sermão",
+    "editTitle": "Editar Sermão",
+    "export": "Exportar",
+    "exportPdf": "Exportar PDF",
+    "exportMarkdown": "Exportar Markdown"
+  },
+  "editor": {
+    "placeholder": "Digite '/' para inserir um bloco...",
+    "blocks": {
+      "verse": "Versículo Bíblico",
+      "illustration": "Ilustração",
+      "application": "Aplicação",
+      "point": "Ponto Principal",
+      "intro": "Introdução / Gancho",
+      "conclusion": "Conclusão / Chamado",
+      "text": "Texto Livre"
+    },
+    "verse": {
+      "reference": "Referência (ex: João 3:16)",
+      "search": "Buscar versículo",
+      "version": "Versão",
+      "insertVerse": "Inserir versículo"
+    },
+    "saveBlock": "Salvar na biblioteca",
+    "blockSaved": "Bloco salvo na biblioteca!"
+  },
+  "series": {
+    "title": "Séries",
+    "newSeries": "Nova Série",
+    "noSeries": "Nenhuma série criada ainda.",
+    "sermons": "sermões"
+  },
+  "library": {
+    "title": "Biblioteca de Blocos",
+    "subtitle": "Seus blocos salvos para reutilizar",
+    "noBlocks": "Nenhum bloco salvo ainda. Salve blocos do editor para reutilizá-los aqui.",
+    "insertBlock": "Inserir no sermão",
+    "filterAll": "Todos",
+    "filterVerse": "Versículos",
+    "filterIllustration": "Ilustrações",
+    "filterApplication": "Aplicações",
+    "filterPoint": "Pontos"
+  }
+}
