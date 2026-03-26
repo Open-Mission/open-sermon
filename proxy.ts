@@ -9,7 +9,7 @@ const protectedRoutes = ["/dashboard", "/sermon", "/series", "/library"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const pathnameWithoutLocale = pathname.replace(/^\/(pt-BR|en)/, "");
+  const pathnameWithoutLocale = pathname.replace(/^\/(pt|en)/, "");
 
   // Pass through auth callback — let Next.js route handler deal with it
   if (pathnameWithoutLocale.startsWith("/auth/")) {
