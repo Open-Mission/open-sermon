@@ -1,25 +1,63 @@
 import { createClient } from "@/lib/supabase/server";
-import { Sermon } from "@/types/sermon";
+import { getCached, sermonsCacheKey, sermonCacheKey } from "@/lib/redis";
+import type { Sermon } from "@/types/sermon";
 
 export async function getSermons(limit?: number) {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  let query = supabase
-    .from("sermons")
-    .select("*")
-    .is("deleted_at", null)
-    .order("updated_at", { ascending: false });
+  if (!user) return [];
 
-  if (limit) {
-    query = query.limit(limit);
-  }
+  const cacheKey = sermonsCacheKey(user.id, limit);
 
-  const { data: sermons, error } = await query;
+  return getCached<Sermon[]>(
+    cacheKey,
+    async () => {
+      let query = supabase
+        .from("sermons")
+        .select("*")
+        .is("deleted_at", null)
+        .order("updated_at", { ascending: false });
 
-  if (error) {
-    console.error("getSermons - Error:", error);
-    return [];
-  }
-  
-  return (sermons || []) as Sermon[];
+      if (limit) {
+        query = query.limit(limit);
+      }
+
+      const { data: sermons, error } = await query;
+
+      if (error) {
+        console.error("getSermons - Error:", error);
+        return [];
+      }
+
+      return (sermons || []) as Sermon[];
+    },
+    30
+  );
+}
+
+export async function getSermon(id: string) {
+  const supabase = await createClient();
+  const cacheKey = sermonCacheKey(id);
+
+  return getCached<Sermon | null>(
+    cacheKey,
+    async () => {
+      const { data, error } = await supabase
+        .from("sermons")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) {
+        console.error("getSermon - Error:", error);
+        return null;
+      }
+
+      return data as Sermon;
+    },
+    60
+  );
 }

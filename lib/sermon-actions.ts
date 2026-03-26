@@ -4,6 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { revalidatePath } from "next/cache";
+import { invalidateCache, invalidateCacheKey, sermonCacheKey } from "@/lib/redis";
+
+async function invalidateUserSermonCache(userId: string) {
+  await invalidateCache(`sermons:${userId}:*`);
+}
 
 export async function createSermon() {
   const supabase = await createClient();
@@ -30,6 +35,7 @@ export async function createSermon() {
     throw new Error(error?.message || "Erro ao criar sermão");
   }
 
+  await invalidateUserSermonCache(user.id);
   revalidatePath("/", "layout");
   redirect(`/${locale}/sermons/${sermon.id}`);
 }
@@ -58,6 +64,7 @@ export async function createSermonWithTitle(title: string) {
     return { error: error?.message || "Failed to create sermon" };
   }
 
+  await invalidateUserSermonCache(user.id);
   revalidatePath("/", "layout");
   return { success: true, sermonId: sermon.id };
 }
@@ -83,6 +90,10 @@ export async function softDeleteSermon(sermonId: string) {
     return { error: error.message };
   }
 
+  await Promise.all([
+    invalidateUserSermonCache(user.id),
+    invalidateCacheKey(sermonCacheKey(sermonId)),
+  ]);
   revalidatePath("/", "layout");
   return { success: true };
 }
@@ -108,6 +119,10 @@ export async function renameSermon(sermonId: string, newTitle: string) {
     return { error: error.message };
   }
 
+  await Promise.all([
+    invalidateUserSermonCache(user.id),
+    invalidateCacheKey(sermonCacheKey(sermonId)),
+  ]);
   revalidatePath("/", "layout");
   return { success: true };
 }
