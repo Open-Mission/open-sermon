@@ -4,9 +4,8 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Clock, FileText, MoreHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Note01Icon, Add01Icon } from "@hugeicons/core-free-icons";
+import { Note01Icon } from "@hugeicons/core-free-icons";
 import { UserMenu } from "@/components/shared/user-menu";
 import { NewSermonButtonInline } from "@/components/shared/new-sermon-button-inline";
 import { NewSermonFab } from "@/components/shared/new-sermon-fab";
@@ -19,6 +18,7 @@ export default async function DashboardPage() {
   const { data: sermons } = await supabase
     .from("sermons")
     .select("*")
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   // Fetch user profile

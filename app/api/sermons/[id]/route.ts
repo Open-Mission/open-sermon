@@ -27,6 +27,7 @@ export async function GET(
           .from("sermons")
           .select("*")
           .eq("id", id)
+          .is("deleted_at", null)
           .single();
 
         if (error) {

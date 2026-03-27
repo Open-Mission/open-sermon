@@ -87,6 +87,7 @@
     "placeholder": "Type '/' to insert a block...",
     "blocks": {
       "verse": "Bible Verse",
+      "callout": "Callout",
       "illustration": "Illustration",
       "application": "Application",
       "point": "Main Point",
@@ -131,7 +132,14 @@
     "saveBlock": "Save to library",
     "blockSaved": "Block saved to library!",
     "search": "Search blocks...",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "toc": {
+      "title": "Contents",
+      "open": "Contents",
+      "description": "Navigate between sermon blocks",
+      "previous": "Previous",
+      "next": "Next"
+    }
   },
   "series": {
     "title": "Series",

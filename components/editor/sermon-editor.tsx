@@ -19,11 +19,11 @@ import { CalloutBlock } from "./blocks/callout-block";
 import { VerseSearchModal } from "./modals/verse-search-modal";
 import { HighlightColorPicker } from "./highlight-color-picker";
 import { BlockMenu } from "./block-menu";
+import { TableOfContents } from "./table-of-contents";
 
 import { createClient } from "@/lib/supabase/client";
 import { useSidebar } from "@/components/ui/sidebar";
-import { DragHandle } from "@tiptap/extension-drag-handle-react";
-import { GripVertical, Trash2, Bold, Italic, Underline as UnderlineIcon, Copy, X, Highlighter } from "lucide-react";
+import { Trash2, Bold, Italic, Underline as UnderlineIcon, Copy, X, Highlighter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BlockSelectionProvider, useBlockSelection } from "./block-selection-context";
 import { SelectableTextBlockView } from "./blocks/selectable-text-block-view";
@@ -190,6 +190,10 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
     }
   };
 
+  useEffect(() => {
+    if (!editor) return;
+  }, [editor]);
+
   return (
     <BlockSelectionProvider onDelete={handleBulkDelete} onCopy={handleBulkCopy}>
       <div className="relative min-h-[300px]">
@@ -315,6 +319,7 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
         }}
       />
       <BlockMenu editor={editor} />
+      {/* <TableOfContents editor={editor} /> */}
       {showModal && selectedBlock === "verse" && (
         <VerseSearchModal
           onClose={() => {

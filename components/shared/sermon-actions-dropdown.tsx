@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import {
@@ -69,7 +69,7 @@ export function SermonActionsDropdown({
       toast.error(result.error);
     } else {
       setIsDeleteDialogOpen(false);
-      router.push("/app");
+      router.push("/");
     }
   };
 

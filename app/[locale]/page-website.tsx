@@ -25,7 +25,7 @@ export default async function Page({
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (user) {
-    redirect(`/${locale}/app`);
+    redirect(`/${locale}/`);
   } else {
     redirect(`/${locale}/login`);
   }
@@ -49,7 +49,7 @@ export default async function Page({
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-5 duration-1000 fill-mode-both" style={{ animationDelay: "400ms" }}>
               {user ? (
-                <Link href="/app">
+                <Link href="/">
                   <Button size="lg" className="h-14 px-8 text-base font-bold rounded-2xl shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all hover:scale-[1.02] active:scale-[0.98]">
                     {t("accessApp")}
                     <HugeiconsIcon icon={ArrowRight01Icon} className="ml-2 size-5" />
@@ -131,7 +131,7 @@ export default async function Page({
                 <p className="text-muted-foreground text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
                   {t("ctaSubtitle")}
                 </p>
-                <Link href={user ? "/app" : "/register"}>
+                <Link href={user ? "/" : "/register"}>
                   <Button size="lg" className="h-16 px-10 text-lg font-bold rounded-2xl shadow-xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all">
                     {user ? t("accessApp") : t("getStarted")}
                     <HugeiconsIcon icon={ArrowRight01Icon} className="ml-2 size-6" />

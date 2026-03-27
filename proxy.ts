@@ -5,7 +5,12 @@ import { createServerClient } from "@supabase/ssr";
 
 const intlMiddleware = createMiddleware(routing);
 
-const protectedRoutes = ["/app", "/sermons", "/series", "/library"];
+const protectedRoutes = ["/", "/sermons", "/series", "/library"];
+
+const isProtectedRoute = (pathname: string) => {
+  if (pathname === "/") return true;
+  return protectedRoutes.some(route => route !== "/" && pathname.startsWith(route));
+};
 
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -25,9 +30,7 @@ export default async function proxy(request: NextRequest) {
   }
 
   // Check if it's a protected route
-  const isProtected = protectedRoutes.some((route) =>
-    pathnameWithoutLocale.startsWith(route)
-  );
+  const isProtected = isProtectedRoute(pathnameWithoutLocale);
 
   // Only check auth for protected routes
   if (isProtected) {

@@ -87,6 +87,7 @@
     "placeholder": "Digite '/' para inserir um bloco...",
     "blocks": {
       "verse": "Versículo Bíblico",
+      "callout": "Destaque",
       "illustration": "Ilustração",
       "application": "Aplicação",
       "point": "Ponto Principal",
@@ -131,7 +132,14 @@
     "saveBlock": "Salvar na biblioteca",
     "blockSaved": "Bloco salvo na biblioteca!",
     "search": "Buscar blocos...",
-    "noResults": "Nenhum resultado encontrado"
+    "noResults": "Nenhum resultado encontrado",
+    "toc": {
+      "title": "Sumário",
+      "open": "Sumário",
+      "description": "Navegue entre os blocos do sermão",
+      "previous": "Anterior",
+      "next": "Próximo"
+    }
   },
   "series": {
     "title": "Séries",

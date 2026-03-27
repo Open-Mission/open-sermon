@@ -15,7 +15,7 @@ export default async function RegisterPage({
   } = await supabase.auth.getUser();
 
   if (user) {
-    redirect(`/${locale}/app`);
+    redirect(`/${locale}`);
   }
 
   return <RegisterForm />;

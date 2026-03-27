@@ -8,7 +8,7 @@ export async function GET(
   const { locale } = await params;
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? `/${locale}/app`;
+  const next = searchParams.get("next") ?? `/${locale}`;
 
   if (code) {
     let response = NextResponse.redirect(new URL(next, request.url));
