@@ -14,6 +14,8 @@ export async function GET(
     return NextResponse.redirect(new URL(`/${locale}/login?error=auth`, request.url));
   }
 
+  let response = NextResponse.redirect(new URL(next, request.url));
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
@@ -25,6 +27,7 @@ export async function GET(
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
             request.cookies.set({ name, value, ...options });
+            response.cookies.set({ name, value, ...options });
           });
         },
       },
@@ -37,5 +40,5 @@ export async function GET(
     return NextResponse.redirect(new URL(`/${locale}/login?error=auth`, request.url));
   }
 
-  return NextResponse.redirect(new URL(next, request.url));
+  return response;
 }
