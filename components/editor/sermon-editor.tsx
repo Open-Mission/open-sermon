@@ -228,20 +228,13 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
             }
           }
           
-          /* Notion-style placeholder: shows on editor-empty AND on empty paragraphs */
+          /* Notion-style placeholder */
           .tiptap p.is-empty::before {
             content: attr(data-placeholder);
             float: left;
             color: hsl(var(--muted-foreground) / 0.5);
             pointer-events: none;
-            height: 0;
             font-style: normal;
-            transition: opacity 150ms ease;
-          }
-          
-          /* Stronger opacity for the first empty paragraph in an empty editor */
-          .tiptap.is-editor-empty p.is-empty::before {
-            color: hsl(var(--muted-foreground) / 0.6);
           }
         `}} />
         <BlockSelectionToolbar />
@@ -333,7 +326,7 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
           </button>
         </BubbleMenu>
       )}
-      <EditorContent editor={editor} />
+      <EditorContent editor={editor} className="tiptap" />
       <div 
         className="h-32 w-full cursor-text" 
         onClick={() => {
