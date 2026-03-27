@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCached, bibleVerseCacheKey } from "@/lib/redis";
-import { generateText } from "ai";
+import { generateText, gateway } from "ai";
 import { openai } from "@ai-sdk/openai";
 
 const VERSION_IDS: Record<string, string> = {
@@ -35,8 +35,9 @@ async function generateVerseText(reference: string, version: string): Promise<st
   const prompt = `You are a Bible verse provider. Return ONLY the exact text of ${reference} from the ${versionPrompt[version] || version} Bible translation. Do not include the reference, just the verse text. Do not add any commentary or explanation. If the verse doesn't exist, respond with "NOT_FOUND".`;
 
   try {
+    // Use AI Gateway with OpenAI model
     const { text } = await generateText({
-      model: openai("gpt-5.4-nano"),
+      model: gateway("openai/gpt-5.4-nano"),
       prompt,
       tools: {
         web_search: openai.tools.webSearch({
