@@ -104,11 +104,11 @@ export function DashboardClient({ user, userName, recentSermons, publishedSermon
 
             <div className="sm:hidden grid grid-cols-1 gap-3">
               {filteredSermons.map((sermon) => (
-                <DashboardSermonCard key={sermon.id} sermon={sermon} />
+                <DashboardSermonCard key={sermon.id} sermon={sermon} isFullWidth />
               ))}
               <Link
                 href="/sermons/new"
-                className="flex-none w-[85%] h-36 bg-transparent border-2 border-dashed border-border/50 rounded-xl flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors snap-start"
+                className="flex-none w-full h-36 bg-transparent border-2 border-dashed border-border/50 rounded-xl flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors"
               >
                 <div className="h-10 w-10 rounded-lg bg-muted/50 flex items-center justify-center">
                   <HugeiconsIcon icon={Add02Icon} size={20} />
