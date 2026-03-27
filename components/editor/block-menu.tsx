@@ -75,6 +75,14 @@ export function BlockMenu({ editor }: BlockMenuProps) {
     setSelectedIndex(0)
   }, [query])
 
+  useEffect(() => {
+    if (isVisible && isMobile) {
+      setTimeout(() => {
+        document.activeElement instanceof HTMLElement && document.activeElement.blur()
+      }, 100)
+    }
+  }, [isVisible, isMobile])
+
   type BlockGroup = {
     title: string
     items: SuggestionsItem[]
@@ -330,7 +338,17 @@ export function BlockMenu({ editor }: BlockMenuProps) {
 
   if (isMobile) {
     return (
-      <Drawer open={isVisible} onOpenChange={setIsVisible}>
+      <Drawer 
+        open={isVisible} 
+        onOpenChange={(open) => {
+          if (!open) {
+            setIsVisible(false)
+            setTimeout(() => {
+              document.activeElement instanceof HTMLElement && document.activeElement.blur()
+            }, 100)
+          }
+        }}
+      >
         <DrawerContent className="pb-8">
           <DrawerHeader>
             <DrawerTitle>{t('search', { default: 'Comandos' })}</DrawerTitle>
@@ -340,7 +358,7 @@ export function BlockMenu({ editor }: BlockMenuProps) {
           </DrawerHeader>
           <div className="px-4 pb-2">
             <input
-              type="text"
+              type="search"
               value={query}
               onChange={(e) => {
                 setQuery(e.target.value)
@@ -348,6 +366,7 @@ export function BlockMenu({ editor }: BlockMenuProps) {
               }}
               placeholder="Pesquisar..."
               className="w-full bg-muted/50 border border-input rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              enterKeyHint="search"
             />
           </div>
           <div className="px-3 pb-4">
