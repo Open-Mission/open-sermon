@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCached, bibleVerseCacheKey } from "@/lib/redis";
 import { generateText } from "ai";
-import { google } from "@ai-sdk/google";
+import { openai } from "@ai-sdk/openai";
 
 const VERSION_IDS: Record<string, string> = {
   NVI: "your-nvi-id",
@@ -36,8 +36,14 @@ async function generateVerseText(reference: string, version: string): Promise<st
 
   try {
     const { text } = await generateText({
-      model: google("gemini-3.1-flash-lite-preview"),
+      model: openai("gpt-5.4-nano"),
       prompt,
+      tools: {
+        web_search: openai.tools.webSearch({
+          searchContextSize: "medium",
+        }),
+      },
+      toolChoice: { type: "tool", toolName: "web_search" },
     });
 
     const cleanText = text.trim();
