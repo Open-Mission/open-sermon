@@ -92,7 +92,8 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
         },
         emptyEditorClass: 'is-editor-empty',
         emptyNodeClass: 'is-empty',
-        showOnlyCurrent: false,
+        showOnlyWhenEditable: true,
+        showOnlyCurrent: true,
       }),
       CalloutBlock,
       IllustrationBlock,
@@ -123,6 +124,13 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       },
     },
   });
+
+  // Focus editor on mount for new sermons
+  useEffect(() => {
+    if (editor && !initialContent) {
+      editor.commands.focus();
+    }
+  }, [editor, initialContent]);
 
   // Initialize editor with content
   useEffect(() => {
@@ -321,7 +329,6 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
         </BubbleMenu>
       )}
       <EditorContent editor={editor} className="tiptap" />
-      {editor && <EditorPlaceholder editor={editor} />}
       <div 
         className="h-32 w-full cursor-text" 
         onClick={() => {
@@ -371,24 +378,6 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       )}
     </div>
     </BlockSelectionProvider>
-  );
-}
-
-function EditorPlaceholder({ editor }: { editor: Editor }) {
-  const [isEmpty, setIsEmpty] = useState(editor.isEmpty);
-
-  useEffect(() => {
-    const update = () => setIsEmpty(editor.isEmpty);
-    editor.on('transaction', update);
-    return () => { editor.off('transaction', update); };
-  }, [editor]);
-
-  if (!isEmpty) return null;
-
-  return (
-    <div className="absolute top-4 left-1 pointer-events-none text-[rgba(120,119,116,0.6)] z-10">
-      Comece a escrever sua mensagem...
-    </div>
   );
 }
 
