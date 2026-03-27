@@ -1,13 +1,16 @@
 "use client";
 
 import { User } from "@supabase/supabase-js";
-import { FileText, Globe, Clock } from "lucide-react";
+import { FileText, Globe, Clock, Plus } from "lucide-react";
+import Link from "next/link";
 import { NewSermonButtonInline } from "@/components/shared/new-sermon-button-inline";
 import { NewSermonFab } from "@/components/shared/new-sermon-fab";
 import { UserMenu } from "@/components/shared/user-menu";
 import { DashboardSermonCard, CollapsibleSection, StatusFilter, SermonTableRow } from "@/components/shared/dashboard-sermon-card";
 import { useState } from "react";
 import { Sermon, SermonStatus } from "@/types/sermon";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Add02Icon } from "@hugeicons/core-free-icons";
 
 interface DashboardClientProps {
   user: User | null;
@@ -103,6 +106,15 @@ export function DashboardClient({ user, userName, recentSermons, publishedSermon
               {filteredSermons.map((sermon) => (
                 <DashboardSermonCard key={sermon.id} sermon={sermon} />
               ))}
+              <Link
+                href="/sermons/new"
+                className="flex-none w-[85%] h-36 bg-transparent border-2 border-dashed border-border/50 rounded-xl flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors snap-start"
+              >
+                <div className="h-10 w-10 rounded-lg bg-muted/50 flex items-center justify-center">
+                  <HugeiconsIcon icon={Add02Icon} size={20} />
+                </div>
+                <span className="text-sm font-medium">Novo sermão</span>
+              </Link>
             </div>
           </>
         ) : (
