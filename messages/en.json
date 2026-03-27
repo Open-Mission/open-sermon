@@ -87,6 +87,7 @@
     "placeholder": "Type '/' to insert a block...",
     "blocks": {
       "verse": "Bible Verse",
+      "inlineVerse": "Inline Verse",
       "callout": "Callout",
       "illustration": "Illustration",
       "application": "Application",

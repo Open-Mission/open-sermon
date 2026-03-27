@@ -16,10 +16,11 @@ import { IntroBlock } from "./blocks/intro-block";
 import { ConclusionBlock } from "./blocks/conclusion-block";
 import { VerseBlock } from "./blocks/verse-block";
 import { CalloutBlock } from "./blocks/callout-block";
+import { InlineVerse } from "./blocks/inline-verse";
 import { VerseSearchModal } from "./modals/verse-search-modal";
 import { HighlightColorPicker } from "./highlight-color-picker";
 import { BlockMenu } from "./block-menu";
-import { TableOfContents } from "./table-of-contents";
+
 
 import { createClient } from "@/lib/supabase/client";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -92,6 +93,7 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       IntroBlock,
       ConclusionBlock,
       VerseBlock,
+      InlineVerse,
       Underline,
       Highlight.configure({ multicolor: true }),
       UniqueId.configure({

@@ -87,6 +87,7 @@
     "placeholder": "Digite '/' para inserir um bloco...",
     "blocks": {
       "verse": "Versículo Bíblico",
+      "inlineVerse": "Versículo Inline",
       "callout": "Destaque",
       "illustration": "Ilustração",
       "application": "Aplicação",

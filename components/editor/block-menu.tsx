@@ -35,6 +35,7 @@ type SuggestionsItem = {
   icon: LucideIcon
   command: (editor: Editor) => void
   requiresInput?: boolean
+  isInlineVerse?: boolean
 }
 
 type BlockMenuProps = {
@@ -58,6 +59,7 @@ export function BlockMenu({ editor }: BlockMenuProps) {
 
   const BLOCK_ITEMS = React.useMemo<SuggestionsItem[]>(() => [
     { label: t('blocks.verse', { default: 'Versículo Bíblico' }), icon: BookOpen, command: () => {}, requiresInput: true },
+    { label: t('blocks.inlineVerse', { default: 'Versículo Inline' }), icon: Type, command: () => {}, isInlineVerse: true },
     { label: t('blocks.callout', { default: 'Callout' }), icon: MessageSquare, command: (e) => e.chain().focus().insertContent({ type: 'calloutBlock', content: [{ type: 'paragraph' }] }).run() },
     { label: t('blocks.illustration', { default: 'Ilustração' }), icon: Lightbulb, command: (e) => e.chain().focus().insertContent({ type: 'illustrationBlock' }).run() },
     { label: t('blocks.application', { default: 'Aplicação' }), icon: Target, command: (e) => e.chain().focus().insertContent({ type: 'applicationBlock' }).run() },
@@ -96,6 +98,14 @@ export function BlockMenu({ editor }: BlockMenuProps) {
           content: [{ type: 'paragraph' }]
         },
         { type: 'paragraph' }
+      ]).run()
+      dispatchVerseSearchEvent()
+    } else if (item.isInlineVerse) {
+      editor.chain().focus().insertContent([
+        { 
+          type: 'inlineVerse', 
+          attrs: { reference: '', text: '', version: 'NVI' },
+        },
       ]).run()
       dispatchVerseSearchEvent()
     } else {
