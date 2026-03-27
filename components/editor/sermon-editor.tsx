@@ -1,6 +1,6 @@
 "use client";
 
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, Editor } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
 import { useState, useEffect, useCallback } from "react";
 import { StarterKit } from "@tiptap/starter-kit";
@@ -321,6 +321,7 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
         </BubbleMenu>
       )}
       <EditorContent editor={editor} className="tiptap" />
+      {editor && <EditorPlaceholder editor={editor} />}
       <div 
         className="h-32 w-full cursor-text" 
         onClick={() => {
@@ -370,6 +371,24 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       )}
     </div>
     </BlockSelectionProvider>
+  );
+}
+
+function EditorPlaceholder({ editor }: { editor: Editor }) {
+  const [isEmpty, setIsEmpty] = useState(editor.isEmpty);
+
+  useEffect(() => {
+    const update = () => setIsEmpty(editor.isEmpty);
+    editor.on('transaction', update);
+    return () => { editor.off('transaction', update); };
+  }, [editor]);
+
+  if (!isEmpty) return null;
+
+  return (
+    <div className="absolute top-4 left-1 pointer-events-none text-[rgba(120,119,116,0.6)] z-10">
+      Comece a escrever sua mensagem...
+    </div>
   );
 }
 
