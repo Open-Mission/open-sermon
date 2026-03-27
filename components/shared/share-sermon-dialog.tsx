@@ -54,7 +54,7 @@ function ShareContent({
   const t = useTranslations();
   const [isPublic, setIsPublic] = React.useState(initialIsPublic);
   const [slug, setSlug] = React.useState(
-    existingSlug || generateSlug(sermonTitle)
+    existingSlug || generateSlug(sermonTitle),
   );
   const [isPublishing, setIsPublishing] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
@@ -132,7 +132,7 @@ function ShareContent({
                     .toLowerCase()
                     .replace(/[^a-z0-9-]/g, "-")
                     .replace(/-+/g, "-")
-                    .replace(/^-|-$/g, "")
+                    .replace(/^-|-$/g, ""),
                 )
               }
               disabled={isPublic}
@@ -149,7 +149,7 @@ function ShareContent({
           <div
             className={cn(
               "group flex items-center gap-0 rounded-lg border bg-muted/30 overflow-hidden transition-colors",
-              copied && "border-green-500/50 bg-green-500/5"
+              copied && "border-green-500/50 bg-green-500/5",
             )}
           >
             <div className="flex-1 flex items-center gap-2 px-3 py-2 min-w-0">
@@ -169,7 +169,7 @@ function ShareContent({
                 "flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-l transition-colors shrink-0",
                 copied
                   ? "text-green-600 bg-green-500/10"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted",
               )}
             >
               <HugeiconsIcon
@@ -212,11 +212,7 @@ function ShareContent({
   );
 }
 
-function MobileSheet({
-  open,
-  onOpenChange,
-  ...rest
-}: ShareSermonDialogProps) {
+function MobileSheet({ open, onOpenChange, ...rest }: ShareSermonDialogProps) {
   const t = useTranslations();
   const [copied, setCopied] = React.useState(false);
 
@@ -276,7 +272,7 @@ function DesktopDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[440px]">
+      <DialogContent className="" style={{ maxWidth: "640px" }}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <HugeiconsIcon
