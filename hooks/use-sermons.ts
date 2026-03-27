@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-keys";
+import { localdb, markAsSynced } from "@/lib/localdb";
 import type { Sermon } from "@/types/sermon";
 
 async function fetchSermons(limit?: number): Promise<Sermon[]> {
@@ -28,10 +29,41 @@ async function fetchSermon(id: string): Promise<Sermon> {
   return res.json();
 }
 
+async function fetchSermonWithLocalSync(id: string): Promise<Sermon> {
+  const localSermon = await localdb.getSermon(id);
+
+  try {
+    const serverSermon = await fetchSermon(id);
+    await localdb.saveSermon(serverSermon);
+    await markAsSynced(serverSermon.id);
+    return serverSermon;
+  } catch (error) {
+    if (localSermon) {
+      return localSermon;
+    }
+    throw error;
+  }
+}
+
+async function fetchSermonsWithLocalSync(limit?: number): Promise<Sermon[]> {
+  const localSermons = await localdb.getSermons();
+
+  try {
+    const serverSermons = await fetchSermons(limit);
+    await localdb.saveSermons(serverSermons);
+    return serverSermons;
+  } catch (error) {
+    if (localSermons.length > 0) {
+      return localSermons;
+    }
+    throw error;
+  }
+}
+
 export function useSermons(limit?: number) {
   return useQuery({
     queryKey: queryKeys.sermons.list(limit),
-    queryFn: () => fetchSermons(limit),
+    queryFn: () => fetchSermonsWithLocalSync(limit),
     staleTime: 30 * 1000,
   });
 }
@@ -39,9 +71,24 @@ export function useSermons(limit?: number) {
 export function useSermon(id: string) {
   return useQuery({
     queryKey: queryKeys.sermons.detail(id),
-    queryFn: () => fetchSermon(id),
+    queryFn: () => fetchSermonWithLocalSync(id),
     staleTime: 60 * 1000,
     enabled: !!id,
+  });
+}
+
+export function useSermonOfflineStatus(id: string) {
+  return useQuery({
+    queryKey: [...queryKeys.sermons.detail(id), "offline-status"],
+    queryFn: async () => {
+      const meta = await localdb.getMeta(id);
+      return {
+        isOfflineAvailable: meta?.isOfflineAvailable ?? false,
+        syncedAt: meta?.syncedAt ?? null,
+      };
+    },
+    enabled: !!id,
+    staleTime: Infinity,
   });
 }
 
@@ -65,6 +112,7 @@ export function useDeleteSermon() {
   return useMutation({
     mutationFn: async (sermonId: string) => {
       const { softDeleteSermon } = await import("@/lib/sermon-actions");
+      await localdb.deleteSermon(sermonId);
       return softDeleteSermon(sermonId);
     },
     onMutate: async (sermonId) => {
