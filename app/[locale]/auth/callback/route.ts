@@ -10,36 +10,32 @@ export async function GET(
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? `/${locale}`;
 
-  if (code) {
-    let response = NextResponse.redirect(new URL(next, request.url));
-
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll();
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value }) =>
-              request.cookies.set(name, value)
-            );
-            response = NextResponse.redirect(new URL(next, request.url));
-            cookiesToSet.forEach(({ name, value, options }) =>
-              response.cookies.set(name, value, options)
-            );
-          },
-        },
-      }
-    );
-
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    
-    if (!error) {
-      return response;
-    }
+  if (!code) {
+    return NextResponse.redirect(new URL(`/${locale}/login?error=auth`, request.url));
   }
 
-  return NextResponse.redirect(new URL(`/${locale}/login?error=auth`, request.url));
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            request.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+  if (error) {
+    return NextResponse.redirect(new URL(`/${locale}/login?error=auth`, request.url));
+  }
+
+  return NextResponse.redirect(new URL(next, request.url));
 }

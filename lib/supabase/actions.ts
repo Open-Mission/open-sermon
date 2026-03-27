@@ -77,12 +77,12 @@ export async function signInWithMagicLink(
 export async function signInWithGoogle(locale: string = "pt-BR") {
   const supabase = await createClient();
 
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_VERCEL_URL 
-        ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` 
-        : "http://localhost:3000"}/${locale}/auth/callback`,
+      redirectTo: `${siteUrl}/${locale}/auth/callback`,
     },
   });
 
