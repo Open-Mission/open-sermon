@@ -92,8 +92,10 @@
     "publish": "Publish",
     "unpublish": "Unpublish",
     "copy": "Copy",
+    "copyLink": "Copy Link",
     "copiedBtn": "Copied",
     "published": "Sermon published successfully!",
+    "publishedAndCopied": "Sermon published! Link copied to clipboard.",
     "unpublished": "Sermon unpublished.",
     "copied": "Link copied to clipboard!",
     "linkInactiveHint": "Link will only work after publishing."

@@ -85,7 +85,12 @@ function ShareContent({
       toast.error(result.error);
     } else {
       setIsPublic(true);
-      toast.success(t("share.published"));
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success(t("share.publishedAndCopied"));
+      } catch {
+        toast.success(t("share.published"));
+      }
     }
   };
 
@@ -235,7 +240,7 @@ function MobileSheet({ open, onOpenChange, ...rest }: ShareSermonDialogProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="rounded-t-2xl px-4 pb-8 pt-2">
+      <SheetContent side="bottom" className="rounded-t-2xl px-0 pb-8 pt-2 w-full max-w-none">
         <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-muted-foreground/20" />
         <SheetHeader className="text-left">
           <SheetTitle className="flex items-center gap-2 text-base">
@@ -251,13 +256,28 @@ function MobileSheet({ open, onOpenChange, ...rest }: ShareSermonDialogProps) {
           </SheetDescription>
         </SheetHeader>
 
-        <div className="mt-4">
+        <div className="mt-4 px-4">
           <ShareContent
             {...rest}
             initialIsPublic={rest.isPublic}
             onOpenChange={onOpenChange}
           />
         </div>
+
+        {rest.isPublic && (
+          <div className="px-4 mt-4">
+            <Button
+              onClick={handleCopy}
+              className="w-full gap-2"
+            >
+              <HugeiconsIcon
+                icon={copied ? Tick01Icon : Copy01Icon}
+                size={16}
+              />
+              {copied ? t("share.copiedBtn") : t("share.copyLink")}
+            </Button>
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   );

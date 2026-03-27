@@ -92,8 +92,10 @@
     "publish": "Publicar",
     "unpublish": "Despublicar",
     "copy": "Copiar",
+    "copyLink": "Copiar Link",
     "copiedBtn": "Copiado",
     "published": "Sermão publicado com sucesso!",
+    "publishedAndCopied": "Sermão publicado! Link copiado para a área de transferência.",
     "unpublished": "Sermão despublicado.",
     "copied": "Link copiado para a área de transferência!",
     "linkInactiveHint": "O link só funcionará após a publicação."
