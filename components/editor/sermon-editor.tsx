@@ -1,6 +1,6 @@
 "use client";
 
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, Editor } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
 import { useState, useEffect, useCallback } from "react";
 import { StarterKit } from "@tiptap/starter-kit";
@@ -84,7 +84,15 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       SelectableParagraph,
       SelectableHeading,
       Placeholder.configure({
-        placeholder: "Clique na barra de espaço para ativar a IA ou '/' para acessar os comandos",
+        placeholder: ({ editor, pos }) => {
+          if (pos <= 1 && editor.isEmpty) {
+            return "Comece a escrever sua mensagem...";
+          }
+          return "Pressione '/' para comandos";
+        },
+        emptyEditorClass: 'is-editor-empty',
+        emptyNodeClass: 'is-empty',
+        showOnlyCurrent: false,
       }),
       CalloutBlock,
       IllustrationBlock,
@@ -103,7 +111,7 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
     ],
     editorProps: {
       attributes: {
-        class: "focus:outline-none max-w-none prose dark:prose-invert min-h-[500px] cursor-text", // Notion-like: no focus ring, full width, min-height
+        class: "ProseMirror focus:outline-none max-w-none prose dark:prose-invert min-h-[500px] cursor-text",
       },
       handleKeyDown: (view, event) => {
         // Toggle sidebar with Ctrl+\ or Meta+\
@@ -215,6 +223,13 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
               right: 0px;
             }
           }
+          
+          /* Notion-style placeholder */
+          .ProseMirror [data-placeholder]::before {
+            content: attr(data-placeholder) !important;
+            color: rgba(120, 119, 116, 0.6) !important;
+            pointer-events: none !important;
+          }
         `}} />
         <BlockSelectionToolbar />
         {/* {editor && (
@@ -305,7 +320,8 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
           </button>
         </BubbleMenu>
       )}
-      <EditorContent editor={editor} />
+      <EditorContent editor={editor} className="tiptap" />
+      {editor && <EditorPlaceholder editor={editor} />}
       <div 
         className="h-32 w-full cursor-text" 
         onClick={() => {
@@ -355,6 +371,24 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       )}
     </div>
     </BlockSelectionProvider>
+  );
+}
+
+function EditorPlaceholder({ editor }: { editor: Editor }) {
+  const [isEmpty, setIsEmpty] = useState(editor.isEmpty);
+
+  useEffect(() => {
+    const update = () => setIsEmpty(editor.isEmpty);
+    editor.on('transaction', update);
+    return () => { editor.off('transaction', update); };
+  }, [editor]);
+
+  if (!isEmpty) return null;
+
+  return (
+    <div className="absolute top-4 left-1 pointer-events-none text-[rgba(120,119,116,0.6)] z-10">
+      Comece a escrever sua mensagem...
+    </div>
   );
 }
 
