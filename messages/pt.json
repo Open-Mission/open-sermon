@@ -117,6 +117,10 @@
       "italic": "Itálico",
       "underline": "Sublinhado"
     },
+    "blockGroups": {
+      "sections": "Seções",
+      "basic": "Básico"
+    },
     "verse": {
       "reference": "Referência",
       "search": "Buscar versículo",
