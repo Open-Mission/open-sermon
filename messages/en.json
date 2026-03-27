@@ -117,7 +117,13 @@
         "description": "Enter the verse reference (e.g. John 3:16)",
         "referencePlaceholder": "John 3:16",
         "selectVersion": "Select a version",
-        "insert": "Insert"
+        "insert": "Insert",
+        "tabSearch": "Search",
+        "tabManual": "Manual",
+        "referenceLabel": "Reference",
+        "manualReferencePlaceholder": "e.g. John 3:16",
+        "verseText": "Bible text",
+        "manualTextPlaceholder": "Enter the verse text..."
       },
       "editing": "Editing verse...",
       "saveToLibrary": "Save to library"

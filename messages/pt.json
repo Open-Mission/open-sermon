@@ -117,7 +117,13 @@
         "description": "Insira a referência do versículo (ex: João 3:16)",
         "referencePlaceholder": "João 3:16",
         "selectVersion": "Selecione uma versão",
-        "insert": "Inserir"
+        "insert": "Inserir",
+        "tabSearch": "Buscar",
+        "tabManual": "Manual",
+        "referenceLabel": "Referência",
+        "manualReferencePlaceholder": "Ex: João 3:16",
+        "verseText": "Texto bíblico",
+        "manualTextPlaceholder": "Digite o texto do versículo..."
       },
       "editing": "Editando versículo...",
       "saveToLibrary": "Salvar na biblioteca"
