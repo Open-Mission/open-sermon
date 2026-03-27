@@ -152,7 +152,8 @@ export function InlineVerseView({
           >
             {displayText}
           </span>
-          <Drawer open={isViewOpen} onOpenChange={setIsViewOpen} onDrag={true}>
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+          <Drawer open={isViewOpen} onOpenChange={setIsViewOpen} onDrag={true as any}>
             <DrawerContent className="min-h-[85vh] max-h-[85vh] bg-linear-to-b from-amber-50/30 to-background">
               <DrawerHeader className="text-left border-b border-amber-200/30 pb-4">
                 <div className="flex items-center justify-between">
