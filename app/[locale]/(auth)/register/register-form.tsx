@@ -26,13 +26,14 @@ export function RegisterForm() {
   const params = useParams();
   const locale = params.locale as string;
   const [state, action, pending] = useActionState(signUp, initialState);
-  const [success, setSuccess] = React.useState(false);
+  const [hasSubmitted, setHasSubmitted] = React.useState(false);
+  const success = hasSubmitted && !pending && state.error === undefined;
 
   React.useEffect(() => {
-    if (state.error === undefined && !pending) {
-      setSuccess(true);
+    if (pending) {
+      setHasSubmitted(true);
     }
-  }, [state, pending]);
+  }, [pending]);
 
   if (success) {
     return (
@@ -48,7 +49,7 @@ export function RegisterForm() {
         <CardContent className="px-8 pb-10">
           <Button
             className="w-full h-12 text-base font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all"
-            onClick={() => router.push("/login?registered=true")}
+            onClick={() => router.push(`/${locale}/login?registered=true`)}
           >
             {t("goToLogin")}
           </Button>
