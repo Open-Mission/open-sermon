@@ -83,6 +83,21 @@
     "exportPdf": "Export PDF",
     "exportMarkdown": "Export Markdown"
   },
+  "share": {
+    "button": "Share",
+    "title": "Share Sermon",
+    "description": "Publish this sermon so anyone with the link can view it.",
+    "slugLabel": "Public URL",
+    "shareLink": "Share Link",
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "copy": "Copy",
+    "copiedBtn": "Copied",
+    "published": "Sermon published successfully!",
+    "unpublished": "Sermon unpublished.",
+    "copied": "Link copied to clipboard!",
+    "linkInactiveHint": "Link will only work after publishing."
+  },
   "editor": {
     "placeholder": "Type '/' to insert a block...",
     "blocks": {

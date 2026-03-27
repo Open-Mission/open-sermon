@@ -26,6 +26,7 @@ export interface Sermon {
   updated_at: string;
   deleted_at: string | null;
   is_favorite?: boolean;
+  is_public?: boolean;
 }
 
 export interface SavedBlock {

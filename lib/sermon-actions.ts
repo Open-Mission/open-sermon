@@ -127,6 +127,80 @@ export async function renameSermon(sermonId: string, newTitle: string) {
   return { success: true };
 }
 
+export async function publishSermon(sermonId: string, slug: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Unauthorized" };
+  }
+
+  const { data: existing, error: checkError } = await supabase
+    .from("sermons")
+    .select("id")
+    .eq("slug", slug)
+    .eq("is_public", true)
+    .neq("id", sermonId)
+    .maybeSingle();
+
+  if (checkError) {
+    return { error: checkError.message };
+  }
+
+  if (existing) {
+    return { error: "Slug already in use" };
+  }
+
+  const { error } = await supabase
+    .from("sermons")
+    .update({ is_public: true, slug })
+    .eq("id", sermonId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  await Promise.all([
+    invalidateUserSermonCache(user.id),
+    invalidateCacheKey(sermonCacheKey(sermonId)),
+  ]);
+  revalidatePath("/", "layout");
+  return { success: true };
+}
+
+export async function unpublishSermon(sermonId: string) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Unauthorized" };
+  }
+
+  const { error } = await supabase
+    .from("sermons")
+    .update({ is_public: false })
+    .eq("id", sermonId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  await Promise.all([
+    invalidateUserSermonCache(user.id),
+    invalidateCacheKey(sermonCacheKey(sermonId)),
+  ]);
+  revalidatePath("/", "layout");
+  return { success: true };
+}
+
 export async function toggleFavorite(sermonId: string) {
   const supabase = await createClient();
 

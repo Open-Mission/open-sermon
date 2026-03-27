@@ -2,11 +2,9 @@ import { notFound } from "next/navigation";
 import { SermonEditor } from "@/components/editor/sermon-editor";
 import { createClient } from "@/lib/supabase/server";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { Share01Icon } from "@hugeicons/core-free-icons";
 import { SaveIndicator } from "@/components/editor/save-indicator";
 import { FavoriteButton } from "@/components/shared/favorite-button";
+import { ShareButton } from "@/components/shared/share-button";
 import { SermonActionsDropdown } from "@/components/shared/sermon-actions-dropdown";
 
 export default async function SermonPage({
@@ -48,10 +46,12 @@ export default async function SermonPage({
               sermonId={sermon.id}
               initialIsFavorite={sermon.is_favorite ?? false}
             />
-            <Button variant="ghost" size="sm" className="h-8 gap-1 text-muted-foreground">
-              <HugeiconsIcon icon={Share01Icon} size={16} />
-              <span className="hidden sm:inline">Share</span>
-            </Button>
+            <ShareButton
+              sermonId={sermon.id}
+              sermonTitle={sermon.title}
+              isPublic={sermon.is_public ?? false}
+              slug={sermon.slug}
+            />
             <SermonActionsDropdown
               sermonId={sermon.id}
               sermonTitle={sermon.title}

@@ -83,6 +83,21 @@
     "exportPdf": "Exportar PDF",
     "exportMarkdown": "Exportar Markdown"
   },
+  "share": {
+    "button": "Compartilhar",
+    "title": "Compartilhar Sermão",
+    "description": "Publique este sermão para que qualquer pessoa com o link possa visualizá-lo.",
+    "slugLabel": "URL Pública",
+    "shareLink": "Link de Compartilhamento",
+    "publish": "Publicar",
+    "unpublish": "Despublicar",
+    "copy": "Copiar",
+    "copiedBtn": "Copiado",
+    "published": "Sermão publicado com sucesso!",
+    "unpublished": "Sermão despublicado.",
+    "copied": "Link copiado para a área de transferência!",
+    "linkInactiveHint": "O link só funcionará após a publicação."
+  },
   "editor": {
     "placeholder": "Digite '/' para inserir um bloco...",
     "blocks": {
