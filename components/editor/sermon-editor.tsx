@@ -84,19 +84,15 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       SelectableParagraph,
       SelectableHeading,
       Placeholder.configure({
-        placeholder: ({ editor, node, pos }) => {
-          // First empty paragraph in an empty editor
-          if (node.type.name === 'paragraph') {
-            // Check if this is the first node (pos 0 or 1 for doc start)
-            if (pos <= 1 && editor.isEmpty) {
-              return "Comece a escrever sua mensagem...";
-            }
-            return "Pressione '/' para comandos";
+        placeholder: ({ editor, pos }) => {
+          if (pos <= 1 && editor.isEmpty) {
+            return "Comece a escrever sua mensagem...";
           }
-          return "";
+          return "Pressione '/' para comandos";
         },
         emptyEditorClass: 'is-editor-empty',
         emptyNodeClass: 'is-empty',
+        showOnlyCurrent: false,
       }),
       CalloutBlock,
       IllustrationBlock,
@@ -229,10 +225,10 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
           }
           
           /* Notion-style placeholder */
-          .tiptap p.is-empty::before {
+          .ProseMirror p.is-empty::before {
             content: attr(data-placeholder);
             float: left;
-            color: hsl(var(--muted-foreground) / 0.5);
+            color: rgba(120, 119, 116, 0.6);
             pointer-events: none;
             font-style: normal;
           }
