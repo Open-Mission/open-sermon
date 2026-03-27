@@ -42,12 +42,34 @@ export function DashboardSermonCard({ sermon }: DashboardSermonCardProps) {
       <Link
         key={sermon.id}
         href={`/sermons/${sermon.id}`}
-        className="group flex-none w-full sm:w-64 h-36 bg-card border border-border/50 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 flex flex-col p-4 relative overflow-hidden snap-start"
+        className="group flex-none w-[85%] sm:w-64 h-36 bg-card border border-border/50 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 flex flex-col p-4 relative overflow-hidden snap-start"
       >
-        <div className="flex items-start justify-between">
-          <div className="h-10 w-10 bg-primary/10 text-primary rounded-lg flex items-center justify-center mb-3 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+        <div className="flex items-start justify-between mb-2">
+          <div className="h-10 w-10 bg-primary/10 text-primary rounded-lg flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
             <HugeiconsIcon icon={Note01Icon} size={20} />
           </div>
+          <span className="text-[10px] text-muted-foreground shrink-0">
+            {format(new Date(sermon.created_at), "dd MMM", { locale: ptBR })}
+          </span>
+        </div>
+        
+        <h3 className="font-semibold text-base line-clamp-2 group-hover:text-primary transition-colors min-h-[2.5rem]">
+          {sermon.title || "Sem título"}
+        </h3>
+        
+        <div className="flex items-center gap-2 mt-auto">
+          <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium", status.className)}>
+            {status.label}
+          </span>
+          {sermon.is_public && (
+            <span className="inline-flex items-center rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-medium text-blue-600 dark:text-blue-400">
+              <HugeiconsIcon icon={Link01Icon} size={10} className="mr-1" />
+              Público
+            </span>
+          )}
+        </div>
+
+        <div className="absolute top-3 right-3">
           <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
             <DropdownMenuTrigger asChild>
               <button
@@ -72,26 +94,6 @@ export function DashboardSermonCard({ sermon }: DashboardSermonCardProps) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        
-        <h3 className="font-semibold text-base line-clamp-1 group-hover:text-primary transition-colors">
-          {sermon.title || "Sem título"}
-        </h3>
-        
-        <div className="flex items-center gap-2 mt-2">
-          <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium", status.className)}>
-            {status.label}
-          </span>
-          {sermon.is_public && (
-            <span className="inline-flex items-center rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-medium text-blue-600 dark:text-blue-400">
-              <HugeiconsIcon icon={Link01Icon} size={10} className="mr-1" />
-              Público
-            </span>
-          )}
-        </div>
-        
-        <p className="text-xs text-muted-foreground mt-auto">
-          {format(new Date(sermon.created_at), "dd MMM yyyy", { locale: ptBR })}
-        </p>
       </Link>
 
       <ShareSermonDialog
