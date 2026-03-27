@@ -26,7 +26,8 @@ import {
   Heading3, 
   Bold, 
   Italic, 
-  Underline 
+  Underline,
+  MessageSquare
 } from 'lucide-react'
 
 type SuggestionsItem = {
@@ -57,6 +58,7 @@ export function BlockMenu({ editor }: BlockMenuProps) {
 
   const BLOCK_ITEMS = React.useMemo<SuggestionsItem[]>(() => [
     { label: t('blocks.verse', { default: 'Versículo Bíblico' }), icon: BookOpen, command: () => {}, requiresInput: true },
+    { label: t('blocks.callout', { default: 'Callout' }), icon: MessageSquare, command: (e) => e.chain().focus().insertContent({ type: 'calloutBlock', content: [{ type: 'paragraph' }] }).run() },
     { label: t('blocks.illustration', { default: 'Ilustração' }), icon: Lightbulb, command: (e) => e.chain().focus().insertContent({ type: 'illustrationBlock' }).run() },
     { label: t('blocks.application', { default: 'Aplicação' }), icon: Target, command: (e) => e.chain().focus().insertContent({ type: 'applicationBlock' }).run() },
     { label: t('blocks.point', { default: 'Ponto Principal' }), icon: Pin, command: (e) => e.chain().focus().insertContent({ type: 'pointBlock' }).run() },
@@ -86,8 +88,15 @@ export function BlockMenu({ editor }: BlockMenuProps) {
     }).run()
     
     if (item.requiresInput) {
-      // Insert placeholder block first for verse
-      editor.chain().focus().insertContent({ type: 'verseBlock', attrs: { reference: '', text: '', version: 'NVI' } }).run()
+      // Insert placeholder block first for verse, and append an empty paragraph after it
+      editor.chain().focus().insertContent([
+        { 
+          type: 'verseBlock', 
+          attrs: { reference: '', text: '', version: 'NVI' },
+          content: [{ type: 'paragraph' }]
+        },
+        { type: 'paragraph' }
+      ]).run()
       dispatchVerseSearchEvent()
     } else {
       item.command(editor)

@@ -43,5 +43,5 @@ export function sermonCacheKey(sermonId: string) {
 }
 
 export function bibleVerseCacheKey(ref: string, version: string) {
-  return `bible:${version}:${ref}`;
+  return `bible:v4:${version}:${ref}`;
 }

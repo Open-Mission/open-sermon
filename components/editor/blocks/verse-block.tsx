@@ -5,7 +5,7 @@ import { VerseBlockView } from './verse-block-view'
 export const VerseBlock = Node.create({
   name: 'verseBlock',
   group: 'block',
-  content: '',
+  content: 'block+',
   addAttributes() {
     return {
       id: {

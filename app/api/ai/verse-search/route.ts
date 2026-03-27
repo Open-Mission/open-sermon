@@ -1,5 +1,5 @@
 import { generateText } from 'ai';
-import { google } from '@ai-sdk/google';
+import { openai } from '@ai-sdk/openai';
 import { NextResponse } from 'next/server';
 
 const VERSE_REFERENCE_PROMPT = `You are a Bible verse reference parser. Your task is to normalize user input into a standard Bible verse reference format.
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     }
 
     const { text } = await generateText({
-      model: google('gemini-3.1-flash-lite-preview'),
+      model: openai('gpt-4o-mini'),
       system: VERSE_REFERENCE_PROMPT,
       prompt: input.trim(),
     });

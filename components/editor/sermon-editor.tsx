@@ -15,10 +15,11 @@ import { PointBlock } from "./blocks/point-block";
 import { IntroBlock } from "./blocks/intro-block";
 import { ConclusionBlock } from "./blocks/conclusion-block";
 import { VerseBlock } from "./blocks/verse-block";
+import { CalloutBlock } from "./blocks/callout-block";
 import { VerseSearchModal } from "./modals/verse-search-modal";
 import { HighlightColorPicker } from "./highlight-color-picker";
 import { BlockMenu } from "./block-menu";
-import { useTranslations } from "next-intl";
+
 import { createClient } from "@/lib/supabase/client";
 import { useSidebar } from "@/components/ui/sidebar";
 import { DragHandle } from "@tiptap/extension-drag-handle-react";
@@ -56,7 +57,6 @@ type SermonEditorProps = {
 };
 
 export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
-  const t = useTranslations("editor");
   const [showModal, setShowModal] = useState(false);
   const [selectedBlock, setSelectedBlock] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -83,10 +83,9 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       SelectableParagraph,
       SelectableHeading,
       Placeholder.configure({
-        placeholder: t("placeholder", {
-          default: "Digite '/' para inserir um bloco...",
-        }),
+        placeholder: "Clique na barra de espaço para ativar a IA ou '/' para acessar os comandos",
       }),
+      CalloutBlock,
       IllustrationBlock,
       ApplicationBlock,
       PointBlock,
@@ -96,7 +95,7 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       Underline,
       Highlight.configure({ multicolor: true }),
       UniqueId.configure({
-        types: ['paragraph', 'heading', 'verseBlock', 'illustrationBlock', 'applicationBlock', 'pointBlock', 'introBlock', 'conclusionBlock'],
+        types: ['paragraph', 'heading', 'verseBlock', 'calloutBlock', 'illustrationBlock', 'applicationBlock', 'pointBlock', 'introBlock', 'conclusionBlock'],
         generateID: () => crypto.randomUUID(),
       }),
     ],
@@ -300,7 +299,21 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
           </button>
         </BubbleMenu>
       )}
-      <EditorContent editor={editor} className="min-h-[300px]" />
+      <EditorContent editor={editor} />
+      <div 
+        className="h-32 w-full cursor-text" 
+        onClick={() => {
+          if (editor) {
+            const { doc } = editor.state;
+            const lastNode = doc.lastChild;
+            if (lastNode && lastNode.type.name !== 'paragraph') {
+               editor.chain().focus().insertContentAt(doc.content.size, { type: 'paragraph' }).run();
+            } else {
+               editor.commands.focus('end');
+            }
+          }
+        }}
+      />
       <BlockMenu editor={editor} />
       {showModal && selectedBlock === "verse" && (
         <VerseSearchModal
@@ -309,13 +322,24 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
             setSelectedBlock(null);
           }}
           onInsert={(reference, text, version) => {
+            const paragraphs = text
+              ? text.split('\n').map(line => {
+                  const l = line.trim();
+                  return l ? { type: 'paragraph', content: [{ type: 'text', text: l }] } : { type: 'paragraph' };
+                })
+              : [{ type: 'paragraph' }];
+              
             editor
               ?.chain()
               .focus()
-              .insertContent({
-                type: "verseBlock",
-                attrs: { reference, text, version },
-              })
+              .insertContent([
+                {
+                  type: "verseBlock",
+                  attrs: { reference, text: '', version },
+                  content: paragraphs.length > 0 ? paragraphs : [{ type: 'paragraph' }]
+                },
+                { type: 'paragraph' }
+              ])
               .run();
             setShowModal(false);
             setSelectedBlock(null);

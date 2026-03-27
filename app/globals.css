@@ -156,6 +156,7 @@
     color: oklch(0.21 0.006 285.885) !important;
 }
 
-.ProseMirror p.is-editor-empty:first-child::before {
+.ProseMirror p.is-editor-empty:first-child::before,
+.ProseMirror p.is-empty::before {
     @apply text-muted-foreground float-left h-0 pointer-events-none content-[attr(data-placeholder)];
 }

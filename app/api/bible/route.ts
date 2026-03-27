@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCached, bibleVerseCacheKey } from "@/lib/redis";
-import { generateText, gateway } from "ai";
+import { generateText, stepCountIs } from "ai";
 import { openai } from "@ai-sdk/openai";
 
 const VERSION_IDS: Record<string, string> = {
@@ -12,15 +12,7 @@ const VERSION_IDS: Record<string, string> = {
   NIV: "your-niv-id",
 };
 
-const mockVerseTexts: Record<string, string> = {
-  "João 3:16":
-    "Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito, para que todo o que nele crê não pereça, mas tenha a vida eterna.",
-  "Gênesis 1:1": "No princípio criou Deus os céus e a terra.",
-  "Salmo 23:1": "O Senhor é o meu pastor; nada me faltará.",
-  "Filipenses 4:13": "Posso todas as coisas naquele que me fortalece.",
-  "Mateus 11:28":
-    "Vinde a mim, todos os que estais cansados e sobrecarregados, e eu vos darei descanso.",
-};
+
 
 async function generateVerseText(reference: string, version: string): Promise<string> {
   const versionPrompt: Record<string, string> = {
@@ -32,20 +24,22 @@ async function generateVerseText(reference: string, version: string): Promise<st
     NIV: "New International Version (NIV) in English",
   };
 
-  const prompt = `You are a Bible verse provider. Return ONLY the exact text of ${reference} from the ${versionPrompt[version] || version} Bible translation. Do not include the reference, just the verse text. Do not add any commentary or explanation. If the verse doesn't exist, respond with "NOT_FOUND".`;
+  const prompt = `You are a Bible verse provider. Return ONLY the exact text of ${reference} from the ${versionPrompt[version] || version} Bible translation. Do not add any commentary or explanation. If the reference spans multiple verses (or an entire chapter), you MUST include the verse numbers at the beginning of each verse followed by a dot (e.g., "1. No princípio... 2. A terra, porém..."). Do not include the book or chapter reference in the output text. If it is only a single verse, do not include the verse number. If the reference doesn't exist, respond with "NOT_FOUND".`;
 
   try {
     // Use AI Gateway with OpenAI model
     const { text } = await generateText({
-      model: gateway("openai/gpt-5.4-nano"),
+      model: openai("gpt-4o-mini"),
       prompt,
       tools: {
         web_search: openai.tools.webSearch({
           searchContextSize: "medium",
         }),
       },
-      toolChoice: { type: "tool", toolName: "web_search" },
+      stopWhen: stepCountIs(3),
     });
+
+    console.log(text)
 
     const cleanText = text.trim();
     if (cleanText === "NOT_FOUND" || cleanText.length < 10) {
@@ -79,7 +73,7 @@ export async function GET(request: Request) {
       cacheKey,
       async () => {
         // First check mock data
-        let verseText = mockVerseTexts[ref];
+        let verseText = "";
 
         // If not in mock data, use AI to generate the verse
         if (!verseText) {

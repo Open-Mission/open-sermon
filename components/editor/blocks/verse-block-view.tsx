@@ -1,6 +1,6 @@
 'use client';
 
-import { NodeViewWrapper } from '@tiptap/react';
+import { NodeViewWrapper, NodeViewContent } from '@tiptap/react';
 import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,6 @@ import { useTranslations } from 'next-intl';
 import { useBlockSelection } from '../block-selection-context';
 import { useLongPress } from '@/hooks/use-long-press';
 import { VerseSearchSheet } from '../modals/verse-search-sheet';
-import { BookOpen } from 'lucide-react';
 import { VERSE_SEARCH_EVENT } from '../block-menu';
 
 interface VerseAttrs {
@@ -20,6 +19,8 @@ interface VerseAttrs {
 
 interface VerseNode {
   attrs: VerseAttrs;
+  textContent: string;
+  nodeSize: number;
 }
 
 interface UpdateAttributes {
@@ -35,18 +36,16 @@ export function VerseBlockView({
   node: VerseNode;
   getPos: () => number | undefined;
   updateAttributes: UpdateAttributes;
-  editor: { isEditable: boolean };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  editor: any;
 }) {
   const t = useTranslations('editor');
-  const tCommon = useTranslations('common');
-  const { reference, text, version } = node.attrs;
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  const { reference, text, version } = node.attrs;  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { isBlockSelected, toggleBlock } = useBlockSelection();
   const blockId = node.attrs.id as string | undefined;
   const isSelected = blockId ? isBlockSelected(blockId) : false;
 
-  // Listen for verse search event from block menu
   useEffect(() => {
     const handleOpenSearch = () => {
       if (!reference) {
@@ -57,146 +56,91 @@ export function VerseBlockView({
     return () => window.removeEventListener(VERSE_SEARCH_EVENT, handleOpenSearch);
   }, [reference]);
 
+  // Migrate old text attribute into interactive content if present
+  useEffect(() => {
+    if (text && node.textContent.trim() === '') {
+      const pos = getPos();
+      if (typeof pos === 'number' && editor.isEditable) {
+        updateAttributes({ text: '' });
+        const paragraphs = text.split('\n').map((line: string) => {
+          const l = line.trim();
+          return l ? editor.schema.nodes.paragraph.create(null, editor.schema.text(l)) : editor.schema.nodes.paragraph.create();
+        });
+        const tr = editor.state.tr;
+        tr.replaceWith(pos + 1, pos + node.nodeSize - 1, paragraphs);
+        editor.view.dispatch(tr);
+      }
+    }
+  }, [text, node.textContent, getPos, editor, updateAttributes, node]);
+
   const longPressProps = useLongPress(() => {
     if (blockId) toggleBlock(blockId);
   }, { delay: 400 });
-
-  const handleClick = () => {
-    if (!reference) {
-      setIsSearchOpen(true);
-    } else {
-      setIsEditing(!isEditing);
-    }
-  };
 
   const handleInsertVerse = (
     newReference: string,
     newText: string,
     newVersion: string
   ) => {
+    const pos = getPos();
+    if (typeof pos !== 'number' || !editor.isEditable) return;
+
+    // First update the reference and version
     updateAttributes({
       reference: newReference,
-      text: newText,
       version: newVersion,
+      text: '', // clear old text attribute
     });
+
+    // Replace the content with the new text using paragraphs
+    const paragraphs = newText
+      .split('\n')
+      .map((line: string) => {
+        const trLine = line.trim();
+        if (trLine.length === 0) {
+          return editor.schema.nodes.paragraph.create();
+        }
+        return editor.schema.nodes.paragraph.create(null, editor.schema.text(trLine));
+      });
+
+    const tr = editor.state.tr;
+    tr.replaceWith(pos + 1, pos + node.nodeSize - 1, paragraphs);
+    editor.view.dispatch(tr);
+
     setIsSearchOpen(false);
   };
 
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-  };
-
-  if (isEditing) {
-    return (
-      <NodeViewWrapper
-        {...longPressProps}
-        className={cn(
-          'group relative rounded-md border border-violet-200/40 bg-violet-500/5 px-4 py-3 my-3 transition-colors dark:border-violet-800/40 dark:bg-violet-500/10',
-          getPos() === undefined ? 'opacity-50' : ''
-        )}
-        onClick={(e: React.MouseEvent) => {
-          longPressProps.onClick(e);
-        }}
-      >
-        <div className="flex items-start space-x-3">
-          <div className="shrink-0 pt-[2px] text-violet-500">
-            <BookOpen className="h-5 w-5" />
+  return (
+    <NodeViewWrapper
+      {...longPressProps}
+      className={cn(
+        'group relative my-4 border-l-4 border-violet-500/40 pl-4 py-1 transition-colors cursor-text',
+        getPos() === undefined ? 'opacity-50' : '',
+        isSelected ? 'bg-violet-500/5 shadow-sm rounded-r-md' : ''
+      )}
+      onClick={longPressProps.onClick}
+    >
+      <div className="flex flex-col gap-1.5">
+        <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-violet-500/80">
+          <div className="flex gap-2 items-center">
+            <span>{reference || t('blocks.verse')}</span>
+            {version && <span className="text-violet-500/60 font-normal">({version})</span>}
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="mb-0.5 text-[11px] font-bold uppercase tracking-wider text-violet-500/80">
-              {t('verse.editing')}
-            </div>
-            <div className="mb-0.5 flex items-center gap-2 text-sm font-medium text-muted-foreground/80">
-              <span>{reference}</span>
-              <span className="text-muted-foreground/60 font-normal">({version})</span>
-            </div>
-            <blockquote className="border-l-2 border-violet-300/50 pl-3 italic text-base text-foreground mb-1">
-              {text}
-            </blockquote>
-          </div>
-          <div className="shrink-0 space-x-2">
-            <Button
-              variant="outline"
-              size="xs"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleCancelEdit();
-              }}
-            >
-              {tCommon('cancel')}
-            </Button>
-            <Button
-              variant="default"
-              size="xs"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsSearchOpen(true);
-              }}
-            >
+          {!reference && (
+            <Button variant="ghost" size="xs" onClick={() => setIsSearchOpen(true)} className="h-5 px-2 text-[10px]">
               {t('verse.search')}
             </Button>
-          </div>
-        </div>
-        <VerseSearchSheet
-          open={isSearchOpen}
-          onOpenChange={setIsSearchOpen}
-          onInsert={handleInsertVerse}
-        />
-      </NodeViewWrapper>
-    );
-  }
-
-  return (
-    <>
-      <NodeViewWrapper
-        {...longPressProps}
-        className={cn(
-          'group relative rounded-md border border-violet-200/40 bg-violet-500/5 px-4 py-3 my-3 transition-colors dark:border-violet-800/40 dark:bg-violet-500/10 cursor-text',
-          getPos() === undefined ? 'opacity-50' : ''
-        )}
-        onClick={(e: React.MouseEvent) => {
-          longPressProps.onClick(e);
-          handleClick();
-        }}
-      >
-        <div className="flex items-start space-x-3">
-          {!reference ? (
-            <>
-              <div className="shrink-0 pt-[2px] text-violet-500">
-                <BookOpen className="h-5 w-5" />
-              </div>
-              <div className="flex-1 min-w-0 mt-[2px]">
-                <div className="mb-0.5 text-[11px] font-bold uppercase tracking-wider text-violet-500/80">
-                  {t('blocks.verse')}
-                </div>
-                <div className="text-base text-muted-foreground italic font-medium">
-                  {t('verse.search')}
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="shrink-0 pt-[2px] text-violet-500">
-                <BookOpen className="h-5 w-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="mb-0.5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-violet-500/80">
-                  <span>{reference}</span>
-                  <span className="text-violet-500/60 font-normal">({version})</span>
-                </div>
-                <blockquote className="border-l-2 border-violet-300/50 pl-3 italic text-base text-foreground">
-                  {text}
-                </blockquote>
-              </div>
-            </>
           )}
         </div>
-      </NodeViewWrapper>
+        <div className="text-foreground/90 text-base italic [&_p]:before:content-none [&_p]:after:content-none [&_blockquote]:border-none [&_blockquote]:pl-0 [&_p]:m-0! flex flex-col gap-2">
+          <NodeViewContent className="[&>p:first-child]:mt-0" />
+        </div>
+      </div>
       <VerseSearchSheet
         open={isSearchOpen}
         onOpenChange={setIsSearchOpen}
         onInsert={handleInsertVerse}
       />
-    </>
+    </NodeViewWrapper>
   );
 }

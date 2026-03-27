@@ -26,6 +26,8 @@ export default async function Page({
   const { data: { user } } = await supabase.auth.getUser();
   if (user) {
     redirect(`/${locale}/app`);
+  } else {
+    redirect(`/${locale}/login`);
   }
   return (
     <div className="relative min-h-screen flex flex-col bg-background selection:bg-primary/20">
