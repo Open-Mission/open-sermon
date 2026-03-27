@@ -225,9 +225,8 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
           }
           
           /* Notion-style placeholder */
-          .ProseMirror p.is-empty::before {
+          .ProseMirror [data-placeholder]::before {
             content: attr(data-placeholder);
-            float: left;
             color: rgba(120, 119, 116, 0.6);
             pointer-events: none;
             font-style: normal;
