@@ -107,7 +107,7 @@ export function InlineVerseView({
           <span className="text-4xl font-serif text-amber-600 leading-none select-none">&ldquo;</span>
         </div>
         
-        <blockquote className="text-lg md:text-xl leading-relaxed text-amber-950/85 whitespace-pre-wrap pl-5 border-l-[3px] border-amber-300/40 font-serif italic">
+        <blockquote className="text-lg md:text-xl leading-relaxed text-foreground whitespace-pre-wrap pl-5 border-l-[3px] border-amber-300/40 font-serif italic">
           {text}
         </blockquote>
         
@@ -154,7 +154,7 @@ export function InlineVerseView({
           </span>
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           <Drawer open={isViewOpen} onOpenChange={setIsViewOpen} onDrag={true as any}>
-            <DrawerContent className="min-h-[85vh] max-h-[85vh] bg-linear-to-b from-amber-50/30 to-background">
+            <DrawerContent className="min-h-[85vh] max-h-[85vh]">
               <DrawerHeader className="text-left border-b border-amber-200/30 pb-4">
                 <div className="flex items-center justify-between">
                   <DrawerTitle className="text-xs font-medium uppe  rcase tracking-[0.2em] text-amber-700/70">
@@ -176,15 +176,15 @@ export function InlineVerseView({
         <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
           <span 
             onClick={() => setIsViewOpen(true)}
-            className="text-amber-700 font-serif italic cursor-pointer underline decoration-amber-400/40 underline-offset-[3px] hover:decoration-amber-500/70 hover:text-amber-800 rounded-sm px-0.5 transition-all duration-200"
+            className="text-amber-700 font-serif italic cursor-pointer underline decoration-amber-400/40 underline-offset-[3px] hover:decoration-amber-500/70 rounded-sm px-0.5 transition-all duration-200"
           >
             {displayText}
           </span>
-          <DialogContent className="max-w-2xl p-8 border-amber-200/30 shadow-2xl bg-linear-to-br from-amber-50/95 via-background/98 to-amber-50/90 backdrop-blur-sm overflow-hidden" showCloseButton={true}>
+          <DialogContent className="max-w-2xl p-8 border-amber-200/30 shadow-2xl bg-background backdrop-blur-sm overflow-hidden" showCloseButton={true}>
             <DialogHeader className="sr-only">
                <DialogTitle>{reference}</DialogTitle>
             </DialogHeader>
-            <div className="animate-in fade-in-0 slide-in-from-bottom-3 duration-400 ease-out">
+            <div className="animate-in fade-in-0 slide-in-from-bottom-3 duration-400 ease-out text-foreground">
               {viewContent}
             </div>
             
