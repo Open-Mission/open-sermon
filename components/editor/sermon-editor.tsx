@@ -84,7 +84,19 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       SelectableParagraph,
       SelectableHeading,
       Placeholder.configure({
-        placeholder: "Clique na barra de espaço para ativar a IA ou '/' para acessar os comandos",
+        placeholder: ({ editor, node, pos }) => {
+          // First empty paragraph in an empty editor
+          if (node.type.name === 'paragraph') {
+            // Check if this is the first node (pos 0 or 1 for doc start)
+            if (pos <= 1 && editor.isEmpty) {
+              return "Comece a escrever sua mensagem...";
+            }
+            return "Pressione '/' para comandos";
+          }
+          return "";
+        },
+        emptyEditorClass: 'is-editor-empty',
+        emptyNodeClass: 'is-empty',
       }),
       CalloutBlock,
       IllustrationBlock,
@@ -214,6 +226,22 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
             .my-drag-handle-inner {
               right: 0px;
             }
+          }
+          
+          /* Notion-style placeholder: shows on editor-empty AND on empty paragraphs */
+          .tiptap p.is-empty::before {
+            content: attr(data-placeholder);
+            float: left;
+            color: hsl(var(--muted-foreground) / 0.5);
+            pointer-events: none;
+            height: 0;
+            font-style: normal;
+            transition: opacity 150ms ease;
+          }
+          
+          /* Stronger opacity for the first empty paragraph in an empty editor */
+          .tiptap.is-editor-empty p.is-empty::before {
+            color: hsl(var(--muted-foreground) / 0.6);
           }
         `}} />
         <BlockSelectionToolbar />
