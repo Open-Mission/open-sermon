@@ -111,7 +111,7 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
     ],
     editorProps: {
       attributes: {
-        class: "focus:outline-none max-w-none prose dark:prose-invert min-h-[500px] cursor-text", // Notion-like: no focus ring, full width, min-height
+        class: "ProseMirror focus:outline-none max-w-none prose dark:prose-invert min-h-[500px] cursor-text",
       },
       handleKeyDown: (view, event) => {
         // Toggle sidebar with Ctrl+\ or Meta+\
