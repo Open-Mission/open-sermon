@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCached, bibleVerseCacheKey } from "@/lib/redis";
+import { generateText } from "ai";
+import { google } from "@ai-sdk/google";
 
 const VERSION_IDS: Record<string, string> = {
   NVI: "your-nvi-id",
@@ -19,6 +21,35 @@ const mockVerseTexts: Record<string, string> = {
   "Mateus 11:28":
     "Vinde a mim, todos os que estais cansados e sobrecarregados, e eu vos darei descanso.",
 };
+
+async function generateVerseText(reference: string, version: string): Promise<string> {
+  const versionPrompt: Record<string, string> = {
+    NVI: "Nova Versão Internacional (NVI) em português",
+    ARA: "Almeida Revista e Atualizada (ARA) em português",
+    ACF: "Almeida Corrigida e Fiel (ACF) em português",
+    NTLH: "Nova Tradução na Linguagem de Hoje (NTLH) em português",
+    KJV: "King James Version (KJV) in English",
+    NIV: "New International Version (NIV) in English",
+  };
+
+  const prompt = `You are a Bible verse provider. Return ONLY the exact text of ${reference} from the ${versionPrompt[version] || version} Bible translation. Do not include the reference, just the verse text. Do not add any commentary or explanation. If the verse doesn't exist, respond with "NOT_FOUND".`;
+
+  try {
+    const { text } = await generateText({
+      model: google("gemini-3.1-flash-lite-preview"),
+      prompt,
+    });
+
+    const cleanText = text.trim();
+    if (cleanText === "NOT_FOUND" || cleanText.length < 10) {
+      return "";
+    }
+    return cleanText;
+  } catch (error) {
+    console.error("Error generating verse:", error);
+    return "";
+  }
+}
 
 export async function GET(request: Request) {
   try {
@@ -40,9 +71,22 @@ export async function GET(request: Request) {
     const verseData = await getCached(
       cacheKey,
       async () => {
-        const verseText =
-          mockVerseTexts[ref] ||
-          `[Texto do versículo ${ref} na versão ${version}]`;
+        // First check mock data
+        let verseText = mockVerseTexts[ref];
+
+        // If not in mock data, use AI to generate the verse
+        if (!verseText) {
+          verseText = await generateVerseText(ref, version);
+        }
+
+        if (!verseText) {
+          return {
+            reference: ref,
+            text: null,
+            version: version,
+            error: "Verse not found",
+          };
+        }
 
         return {
           reference: ref,
@@ -50,7 +94,7 @@ export async function GET(request: Request) {
           version: version,
         };
       },
-      3600
+      86400 // Cache for 24 hours
     );
 
     return NextResponse.json(verseData);
