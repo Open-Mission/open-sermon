@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { useTranslations } from 'next-intl';
-import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import * as React from "react";
+import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +16,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Sheet,
   SheetContent,
@@ -24,17 +24,17 @@ import {
   SheetTitle,
   SheetDescription,
   SheetFooter,
-} from '@/components/ui/sheet';
-import { BookOpen, Loader2, Search, Pencil } from 'lucide-react';
+} from "@/components/ui/sheet";
+import { BookOpen, Loader2, Search, Pencil } from "lucide-react";
 
 const VERSIONS = [
-  { value: 'NVI', label: 'NVI' },
-  { value: 'ARA', label: 'ARA' },
-  { value: 'ACF', label: 'ACF' },
-  { value: 'NTLH', label: 'NTLH' },
+  { value: "NVI", label: "NVI" },
+  { value: "ARA", label: "ARA" },
+  { value: "ACF", label: "ACF" },
+  { value: "NTLH", label: "NTLH" },
 ] as const;
 
-type Version = (typeof VERSIONS)[number]['value'];
+type Version = (typeof VERSIONS)[number]["value"];
 
 interface VerseSearchSheetProps {
   open: boolean;
@@ -47,46 +47,46 @@ export function VerseSearchSheet({
   onOpenChange,
   onInsert,
 }: VerseSearchSheetProps) {
-  const t = useTranslations('editor');
-  const tCommon = useTranslations('common');
+  const t = useTranslations("editor");
+  const tCommon = useTranslations("common");
   const isMobile = useIsMobile();
 
   // Search tab state
-  const [input, setInput] = React.useState('');
-  const [verseText, setVerseText] = React.useState('');
-  const [reference, setReference] = React.useState('');
+  const [input, setInput] = React.useState("");
+  const [verseText, setVerseText] = React.useState("");
+  const [reference, setReference] = React.useState("");
 
   // Manual tab state
-  const [manualReference, setManualReference] = React.useState('');
-  const [manualText, setManualText] = React.useState('');
+  const [manualReference, setManualReference] = React.useState("");
+  const [manualText, setManualText] = React.useState("");
 
-  const [version, setVersion] = React.useState<Version>('NVI');
+  const [version, setVersion] = React.useState<Version>("NVI");
   const [isLoading, setIsLoading] = React.useState(false);
   const [isParsing, setIsParsing] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [activeTab, setActiveTab] = React.useState('search');
+  const [activeTab, setActiveTab] = React.useState("search");
 
   const handleSearch = async () => {
     if (!input.trim()) {
-      setError(t('verse.errors.emptyReference'));
+      setError(t("verse.errors.emptyReference"));
       return;
     }
 
     setIsParsing(true);
     setIsLoading(true);
     setError(null);
-    setVerseText('');
+    setVerseText("");
 
     try {
-      const parseRes = await fetch('/api/ai/verse-search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const parseRes = await fetch("/api/ai/verse-search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ input: input.trim() }),
       });
 
       if (!parseRes.ok) {
         const parseData = await parseRes.json();
-        setError(parseData.error || t('verse.errors.verseNotFound'));
+        setError(parseData.error || t("verse.errors.verseNotFound"));
         setIsParsing(false);
         setIsLoading(false);
         return;
@@ -97,24 +97,24 @@ export function VerseSearchSheet({
       setIsParsing(false);
 
       const verseRes = await fetch(
-        `/api/bible?ref=${encodeURIComponent(normalizedRef)}&version=${version}`
+        `/api/bible?ref=${encodeURIComponent(normalizedRef)}&version=${version}`,
       );
 
       if (!verseRes.ok) {
-        setError(t('verse.errors.fetchFailed'));
+        setError(t("verse.errors.fetchFailed"));
         return;
       }
 
       const verseData = await verseRes.json();
 
       if (!verseData.text) {
-        setError(t('verse.errors.verseNotFound'));
+        setError(t("verse.errors.verseNotFound"));
         return;
       }
 
       setVerseText(verseData.text);
     } catch {
-      setError(t('verse.errors.fetchFailed'));
+      setError(t("verse.errors.fetchFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -122,7 +122,7 @@ export function VerseSearchSheet({
 
   const handleInsertSearch = () => {
     if (!reference || !verseText) {
-      setError(t('verse.errors.verseRequired'));
+      setError(t("verse.errors.verseRequired"));
       return;
     }
 
@@ -132,7 +132,7 @@ export function VerseSearchSheet({
 
   const handleInsertManual = () => {
     if (!manualReference.trim() || !manualText.trim()) {
-      setError(t('verse.errors.verseRequired'));
+      setError(t("verse.errors.verseRequired"));
       return;
     }
 
@@ -141,18 +141,18 @@ export function VerseSearchSheet({
   };
 
   const handleClose = () => {
-    setInput('');
-    setVerseText('');
-    setReference('');
-    setManualReference('');
-    setManualText('');
+    setInput("");
+    setVerseText("");
+    setReference("");
+    setManualReference("");
+    setManualText("");
     setError(null);
-    setActiveTab('search');
+    setActiveTab("search");
     onOpenChange(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !isLoading && activeTab === 'search') {
+    if (e.key === "Enter" && !isLoading && activeTab === "search") {
       e.preventDefault();
       handleSearch();
     }
@@ -172,7 +172,7 @@ export function VerseSearchSheet({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={t('verse.searchModal.referencePlaceholder')}
+            placeholder={t("verse.searchModal.referencePlaceholder")}
             className="pr-10 select-none"
             disabled={isLoading}
           />
@@ -193,7 +193,7 @@ export function VerseSearchSheet({
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">
-            {t('verse.version')}
+            {t("verse.version")}
           </label>
           <ToggleGroup
             type="single"
@@ -242,19 +242,19 @@ export function VerseSearchSheet({
       <div className="space-y-4">
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">
-            {t('verse.searchModal.referenceLabel')}
+            {t("verse.searchModal.referenceLabel")}
           </label>
           <Input
             value={manualReference}
             onChange={(e) => setManualReference(e.target.value)}
-            placeholder={t('verse.searchModal.manualReferencePlaceholder')}
+            placeholder={t("verse.searchModal.manualReferencePlaceholder")}
             className="select-none"
           />
         </div>
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">
-            {t('verse.version')}
+            {t("verse.version")}
           </label>
           <ToggleGroup
             type="single"
@@ -273,12 +273,12 @@ export function VerseSearchSheet({
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">
-            {t('verse.searchModal.verseText')}
+            {t("verse.searchModal.verseText")}
           </label>
           <Textarea
             value={manualText}
             onChange={(e) => setManualText(e.target.value)}
-            placeholder={t('verse.searchModal.manualTextPlaceholder')}
+            placeholder={t("verse.searchModal.manualTextPlaceholder")}
             rows={4}
             className="select-none resize-none"
           />
@@ -292,11 +292,11 @@ export function VerseSearchSheet({
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="search" className="flex items-center gap-2">
           <Search className="h-4 w-4" />
-          {t('verse.searchModal.tabSearch')}
+          {t("verse.searchModal.tabSearch")}
         </TabsTrigger>
         <TabsTrigger value="manual" className="flex items-center gap-2">
           <Pencil className="h-4 w-4" />
-          {t('verse.searchModal.tabManual')}
+          {t("verse.searchModal.tabManual")}
         </TabsTrigger>
       </TabsList>
       <TabsContent value="search" className="mt-4">
@@ -311,29 +311,33 @@ export function VerseSearchSheet({
   if (isMobile) {
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="bottom" className="rounded-t-xl">
+        <SheetContent side="bottom" className="rounded-t-xl px-4">
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-violet-500" />
-              {t('verse.searchModal.title')}
+              {t("verse.searchModal.title")}
             </SheetTitle>
-            <SheetDescription>{t('verse.searchModal.description')}</SheetDescription>
+            <SheetDescription>
+              {t("verse.searchModal.description")}
+            </SheetDescription>
           </SheetHeader>
           <div className="py-4">{tabs}</div>
           <SheetFooter className="flex-row gap-2">
             <Button variant="outline" className="flex-1" onClick={handleClose}>
-              {tCommon('cancel')}
+              {tCommon("cancel")}
             </Button>
             <Button
               className="flex-1"
-              onClick={activeTab === 'search' ? handleInsertSearch : handleInsertManual}
+              onClick={
+                activeTab === "search" ? handleInsertSearch : handleInsertManual
+              }
               disabled={
-                activeTab === 'search'
+                activeTab === "search"
                   ? !reference || !verseText || isLoading
                   : !manualReference.trim() || !manualText.trim()
               }
             >
-              {t('verse.searchModal.insert')}
+              {t("verse.searchModal.insert")}
             </Button>
           </SheetFooter>
         </SheetContent>
@@ -347,24 +351,28 @@ export function VerseSearchSheet({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <BookOpen className="h-5 w-5 text-violet-500" />
-            {t('verse.searchModal.title')}
+            {t("verse.searchModal.title")}
           </DialogTitle>
-          <DialogDescription>{t('verse.searchModal.description')}</DialogDescription>
+          <DialogDescription>
+            {t("verse.searchModal.description")}
+          </DialogDescription>
         </DialogHeader>
         <div className="py-2">{tabs}</div>
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>
-            {tCommon('cancel')}
+            {tCommon("cancel")}
           </Button>
           <Button
-            onClick={activeTab === 'search' ? handleInsertSearch : handleInsertManual}
+            onClick={
+              activeTab === "search" ? handleInsertSearch : handleInsertManual
+            }
             disabled={
-              activeTab === 'search'
+              activeTab === "search"
                 ? !reference || !verseText || isLoading
                 : !manualReference.trim() || !manualText.trim()
             }
           >
-            {t('verse.searchModal.insert')}
+            {t("verse.searchModal.insert")}
           </Button>
         </DialogFooter>
       </DialogContent>
