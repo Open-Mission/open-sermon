@@ -226,10 +226,9 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
           
           /* Notion-style placeholder */
           .ProseMirror [data-placeholder]::before {
-            content: attr(data-placeholder);
-            color: rgba(120, 119, 116, 0.6);
-            pointer-events: none;
-            font-style: normal;
+            content: attr(data-placeholder) !important;
+            color: rgba(120, 119, 116, 0.6) !important;
+            pointer-events: none !important;
           }
         `}} />
         <BlockSelectionToolbar />
