@@ -57,23 +57,43 @@ export function BlockMenu({ editor }: BlockMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null)
   const [selectedIndex, setSelectedIndex] = useState(0)
 
-  const BLOCK_ITEMS = React.useMemo<SuggestionsItem[]>(() => [
-    { label: t('blocks.verse', { default: 'Versículo Bíblico' }), icon: BookOpen, command: () => {}, requiresInput: true },
-    { label: t('blocks.inlineVerse', { default: 'Versículo Inline' }), icon: Type, command: () => {}, isInlineVerse: true },
-    { label: t('blocks.callout', { default: 'Callout' }), icon: MessageSquare, command: (e) => e.chain().focus().insertContent({ type: 'calloutBlock', content: [{ type: 'paragraph' }] }).run() },
-    { label: t('blocks.illustration', { default: 'Ilustração' }), icon: Lightbulb, command: (e) => e.chain().focus().insertContent({ type: 'illustrationBlock' }).run() },
-    { label: t('blocks.application', { default: 'Aplicação' }), icon: Target, command: (e) => e.chain().focus().insertContent({ type: 'applicationBlock' }).run() },
-    { label: t('blocks.point', { default: 'Ponto Principal' }), icon: Pin, command: (e) => e.chain().focus().insertContent({ type: 'pointBlock' }).run() },
-    { label: t('blocks.intro', { default: 'Introdução' }), icon: PlayCircle, command: (e) => e.chain().focus().insertContent({ type: 'introBlock' }).run() },
-    { label: t('blocks.conclusion', { default: 'Conclusão' }), icon: CheckCircle, command: (e) => e.chain().focus().insertContent({ type: 'conclusionBlock' }).run() },
-    { label: t('blocks.h1', { default: 'Título 1' }), icon: Heading1, command: (e) => e.chain().focus().toggleHeading({ level: 1 }).run() },
-    { label: t('blocks.h2', { default: 'Título 2' }), icon: Heading2, command: (e) => e.chain().focus().toggleHeading({ level: 2 }).run() },
-    { label: t('blocks.h3', { default: 'Título 3' }), icon: Heading3, command: (e) => e.chain().focus().toggleHeading({ level: 3 }).run() },
-    { label: t('blocks.text', { default: 'Texto Livre' }), icon: Type, command: (e) => e.chain().focus().setParagraph().run() },
-    { label: t('blocks.bold', { default: 'Negrito' }), icon: Bold, command: (e) => e.chain().focus().toggleBold().run() },
-    { label: t('blocks.italic', { default: 'Itálico' }), icon: Italic, command: (e) => e.chain().focus().toggleItalic().run() },
-    { label: t('blocks.underline', { default: 'Sublinhado' }), icon: Underline, command: (e) => e.chain().focus().toggleUnderline().run() },
+  type BlockGroup = {
+    title: string
+    items: SuggestionsItem[]
+  }
+
+  const BLOCK_GROUPS = React.useMemo<BlockGroup[]>(() => [
+    {
+      title: t('blockGroups.sections', { default: 'Seções' }),
+      items: [
+        { label: t('blocks.verse', { default: 'Versículo Bíblico' }), icon: BookOpen, command: () => {}, requiresInput: true },
+        { label: t('blocks.inlineVerse', { default: 'Versículo Inline' }), icon: Type, command: () => {}, isInlineVerse: true },
+        { label: t('blocks.callout', { default: 'Callout' }), icon: MessageSquare, command: (e) => e.chain().focus().insertContent({ type: 'calloutBlock', content: [{ type: 'paragraph' }] }).run() },
+        { label: t('blocks.illustration', { default: 'Ilustração' }), icon: Lightbulb, command: (e) => e.chain().focus().insertContent({ type: 'illustrationBlock' }).run() },
+        { label: t('blocks.application', { default: 'Aplicação' }), icon: Target, command: (e) => e.chain().focus().insertContent({ type: 'applicationBlock' }).run() },
+        { label: t('blocks.point', { default: 'Ponto Principal' }), icon: Pin, command: (e) => e.chain().focus().insertContent({ type: 'pointBlock' }).run() },
+        { label: t('blocks.intro', { default: 'Introdução' }), icon: PlayCircle, command: (e) => e.chain().focus().insertContent({ type: 'introBlock' }).run() },
+        { label: t('blocks.conclusion', { default: 'Conclusão' }), icon: CheckCircle, command: (e) => e.chain().focus().insertContent({ type: 'conclusionBlock' }).run() },
+      ]
+    },
+    {
+      title: t('blockGroups.basic', { default: 'Básico' }),
+      items: [
+        { label: t('blocks.h1', { default: 'Título 1' }), icon: Heading1, command: (e) => e.chain().focus().toggleHeading({ level: 1 }).run() },
+        { label: t('blocks.h2', { default: 'Título 2' }), icon: Heading2, command: (e) => e.chain().focus().toggleHeading({ level: 2 }).run() },
+        { label: t('blocks.h3', { default: 'Título 3' }), icon: Heading3, command: (e) => e.chain().focus().toggleHeading({ level: 3 }).run() },
+        { label: t('blocks.text', { default: 'Texto Livre' }), icon: Type, command: (e) => e.chain().focus().setParagraph().run() },
+        { label: t('blocks.bold', { default: 'Negrito' }), icon: Bold, command: (e) => e.chain().focus().toggleBold().run() },
+        { label: t('blocks.italic', { default: 'Itálico' }), icon: Italic, command: (e) => e.chain().focus().toggleItalic().run() },
+        { label: t('blocks.underline', { default: 'Sublinhado' }), icon: Underline, command: (e) => e.chain().focus().toggleUnderline().run() },
+      ]
+    }
   ], [t])
+
+  const BLOCK_ITEMS = React.useMemo<SuggestionsItem[]>(() => 
+    BLOCK_GROUPS.flatMap(group => group.items),
+    [BLOCK_GROUPS]
+  )
 
   const filteredItems = React.useMemo(() => 
     BLOCK_ITEMS.filter(item => item.label.toLowerCase().includes(query.toLowerCase())),
