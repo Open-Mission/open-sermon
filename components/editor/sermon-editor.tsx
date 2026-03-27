@@ -85,8 +85,12 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       SelectableHeading,
       Placeholder.configure({
         placeholder: ({ editor, pos }) => {
+          const hasContent = editor.getText().trim().length > 0 || editor.getHTML().length > 50
           if (pos <= 1 && editor.isEmpty) {
             return "Comece a escrever sua mensagem...";
+          }
+          if (hasContent) {
+            return "";
           }
           return "Pressione '/' para comandos";
         },

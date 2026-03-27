@@ -129,6 +129,8 @@ export function BlockMenu({ editor }: BlockMenuProps) {
   const handleItemSelect = useCallback((item: SuggestionsItem) => {
     if (!editor) return
     
+    const wasVisible = isVisible
+    
     // Clear the '/' and the search query before running command
     editor.chain().focus().deleteRange({ 
       from: editor.state.selection.from - 1 - query.length, 
@@ -157,8 +159,21 @@ export function BlockMenu({ editor }: BlockMenuProps) {
     } else {
       item.command(editor)
     }
+    
+    // Focus editor after inserting content (especially important for mobile)
+    setTimeout(() => {
+      editor.chain().focus().run()
+    }, 50)
+    
     setIsVisible(false)
-  }, [editor, query])
+    
+    // Blur active element to close keyboard on mobile
+    if (isMobile && wasVisible) {
+      setTimeout(() => {
+        document.activeElement instanceof HTMLElement && document.activeElement.blur()
+      }, 150)
+    }
+  }, [editor, query, isVisible, isMobile])
 
   useEffect(() => {
     if (!editor) return
