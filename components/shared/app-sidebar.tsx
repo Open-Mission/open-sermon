@@ -66,7 +66,7 @@ export async function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        <SidebarGroup>
+        {/* <SidebarGroup>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip={t("title")}>
@@ -85,7 +85,7 @@ export async function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
-        </SidebarGroup>
+        </SidebarGroup> */}
 
         {favoriteSermons.length > 0 ? (
           <CollapsibleSidebarGroup label={t("favorites")}>
@@ -132,7 +132,7 @@ export async function AppSidebar() {
           </SidebarMenu>
         </CollapsibleSidebarGroup>
 
-        <SidebarGroup>
+        {/* <SidebarGroup>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip={t("series")}>
@@ -152,6 +152,26 @@ export async function AppSidebar() {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
+        <SidebarGroup>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip={t("title")}>
+                <Link href="/">
+                  <HugeiconsIcon icon={Home01Icon} size={18} />
+                  <span>{t("title")}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/profile">
+                  <HugeiconsIcon icon={UserCircleIcon} size={18} />
+                  <span>{profileT("title")}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup> */}
       </SidebarContent>
 
       <SidebarFooter className="p-2 border-t mt-auto">
