@@ -102,8 +102,10 @@ ALTER TABLE public.saved_blocks ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "sermons_select" ON public.sermons
   FOR SELECT USING (auth.uid() = user_id);
 
+-- Public sermons visible only to anonymous users (direct link access)
+-- Authenticated users only see their own sermons via sermons_select policy
 CREATE POLICY "sermons_public_select" ON public.sermons
-  FOR SELECT USING (is_public = TRUE AND deleted_at IS NULL);
+  FOR SELECT TO anon USING (is_public = TRUE AND deleted_at IS NULL);
 
 CREATE POLICY "sermons_insert" ON public.sermons
   FOR INSERT WITH CHECK (auth.uid() = user_id);
