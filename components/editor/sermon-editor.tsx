@@ -20,6 +20,7 @@ import { InlineVerse } from "./blocks/inline-verse";
 import { VerseSearchModal } from "./modals/verse-search-modal";
 import { HighlightColorPicker } from "./highlight-color-picker";
 import { BlockMenu } from "./block-menu";
+import { FloatingAddButton } from "./floating-add-button";
 
 
 import { createClient } from "@/lib/supabase/client";
@@ -366,6 +367,7 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
         }}
       />
       <BlockMenu editor={editor} />
+      <FloatingAddButton editor={editor} />
       {/* <TableOfContents editor={editor} /> */}
       {showModal && selectedBlock === "verse" && (
         <VerseSearchModal

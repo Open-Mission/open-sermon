@@ -43,9 +43,14 @@ type BlockMenuProps = {
 }
 
 export const VERSE_SEARCH_EVENT = 'open-verse-search'
+export const OPEN_BLOCK_MENU_EVENT = 'open-block-menu'
 
 export function dispatchVerseSearchEvent() {
   window.dispatchEvent(new CustomEvent(VERSE_SEARCH_EVENT))
+}
+
+export function openBlockMenu() {
+  window.dispatchEvent(new CustomEvent(OPEN_BLOCK_MENU_EVENT))
 }
 
 export function BlockMenu({ editor }: BlockMenuProps) {
@@ -277,6 +282,19 @@ export function BlockMenu({ editor }: BlockMenuProps) {
     document.addEventListener('keydown', handleMobileKeyDown)
     return () => document.removeEventListener('keydown', handleMobileKeyDown)
   }, [isVisible, isMobile, filteredItems, selectedIndex, handleItemSelect, BLOCK_ITEMS])
+
+  useEffect(() => {
+    if (!isMobile || !editor) return
+
+    const handleOpenBlockMenu = () => {
+      setIsVisible(true)
+      setQuery('')
+      setSelectedIndex(0)
+    }
+
+    window.addEventListener(OPEN_BLOCK_MENU_EVENT, handleOpenBlockMenu)
+    return () => window.removeEventListener(OPEN_BLOCK_MENU_EVENT, handleOpenBlockMenu)
+  }, [isMobile, editor])
 
   const MenuList = ({ grouped = false }: { grouped?: boolean }): React.ReactNode => {
     const flatItems = grouped 
