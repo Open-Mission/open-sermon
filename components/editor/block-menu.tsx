@@ -77,16 +77,10 @@ export function BlockMenu({ editor }: BlockMenuProps) {
 
   useEffect(() => {
     itemRefs.current = []
-    setSelectedIndex(0)
-  }, [query])
-
-  useEffect(() => {
-    if (isVisible && isMobile) {
-      setTimeout(() => {
-        document.activeElement instanceof HTMLElement && document.activeElement.blur()
-      }, 100)
+    if (!isMobile) {
+      setSelectedIndex(0)
     }
-  }, [isVisible, isMobile])
+  }, [query, isMobile])
 
   type BlockGroup = {
     title: string
@@ -309,10 +303,7 @@ export function BlockMenu({ editor }: BlockMenuProps) {
                     className={`w-full text-left flex items-center space-x-2 px-3 py-2.5 text-sm rounded transition-colors ${
                       !isMobile && globalIndex === selectedIndex ? 'bg-primary text-primary-foreground' : 'hover:bg-muted/80'
                     }`}
-                    onClick={() => {
-                      setSelectedIndex(globalIndex)
-                      handleItemSelect(item)
-                    }}
+                    onClick={() => handleItemSelect(item)}
                     onMouseEnter={() => !isMobile && setSelectedIndex(globalIndex)}
                   >
                     <item.icon className={`h-4 w-4 ${!isMobile && globalIndex === selectedIndex ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
