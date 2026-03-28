@@ -269,7 +269,12 @@ export function SlashCommandMenu({ editor }: SlashCommandMenuProps) {
       setRange(detail.range)
       setQuery('')
       setSelectedIndex(0)
-      setIsClosing(false)
+      if (isMobile) {
+        const active = document.activeElement;
+        if (active instanceof HTMLElement) {
+          active.blur();
+        }
+      }
       setIsOpen(true)
     }
 
@@ -289,7 +294,7 @@ export function SlashCommandMenu({ editor }: SlashCommandMenuProps) {
       window.removeEventListener(SLASH_MENU_CLOSE_EVENT, handleClose)
       window.removeEventListener(SLASH_MENU_QUERY_EVENT, handleQuery)
     }
-  }, [closeMenu])
+  }, [closeMenu, isMobile])
 
   // Auto-focus search on open
   useEffect(() => {

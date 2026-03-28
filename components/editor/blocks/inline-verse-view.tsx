@@ -38,6 +38,12 @@ export function InlineVerseView({
   const [isViewOpen, setIsViewOpen] = useState(false);
 
   useEffect(() => {
+    if (isViewOpen && isMobile) {
+      document.activeElement instanceof HTMLElement && document.activeElement.blur();
+    }
+  }, [isViewOpen, isMobile]);
+
+  useEffect(() => {
     const handleOpenSearch = () => {
       if (!reference) {
         setIsSearchOpen(true);

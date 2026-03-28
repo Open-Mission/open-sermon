@@ -229,7 +229,11 @@ export function BlockMenu({ editor }: BlockMenuProps) {
       setSelectedIndex(0)
       
       if (isMobile) {
-        setIsVisible(true)
+        const active = document.activeElement;
+        if (active instanceof HTMLElement) {
+          active.blur();
+        }
+        setIsVisible(true);
       } else {
         const { state } = editor
         const { from } = state.selection
