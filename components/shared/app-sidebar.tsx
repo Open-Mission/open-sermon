@@ -4,19 +4,10 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  Book01Icon,
-  Home01Icon,
-  UserCircleIcon,
-  Bookmark01Icon,
-} from "@hugeicons/core-free-icons";
 import { getSermons, getFavoriteSermons } from "@/lib/sermon-data";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
@@ -32,7 +23,6 @@ export async function AppSidebar() {
   const favoriteSermons = await getFavoriteSermons();
   const t = await getTranslations("dashboard");
   const commonT = await getTranslations("common");
-  const profileT = await getTranslations("profile");
   const supabase = await createClient();
   const {
     data: { user },
@@ -48,8 +38,8 @@ export async function AppSidebar() {
     <Sidebar variant="sidebar" collapsible="offcanvas">
       <SidebarHeader className="h-14 flex flex-row items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 group-data-[collapsible=icon]:mx-auto hover:opacity-80 transition-opacity">
-          <div className="size-8 rounded-lg overflow-hidden flex items-center justify-center border shadow-sm relative">
-            <Image src="/logo.png" alt="Open Sermon" fill className="object-cover" />
+          <div className="size-10 rounded-lg flex items-center justify-center relative">
+            <Image src="/logo-monochrome.svg" alt="Open Sermon" fill className="object-contain p-1.5" />
           </div>
           <span className="font-bold text-lg leading-none tracking-tight group-data-[collapsible=icon]:hidden">
             {commonT("appName")}

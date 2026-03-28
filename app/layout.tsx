@@ -17,7 +17,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
@@ -60,8 +59,8 @@ export const metadata: Metadata = {
     description: APP_DESCRIPTION,
   },
   icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
+    icon: "/logo-monochrome.svg",
+    apple: "/logo-monochrome.svg",
   },
 };
 
