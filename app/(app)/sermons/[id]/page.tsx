@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { SermonEditor } from "@/components/editor/sermon-editor";
 import { createClient } from "@/lib/supabase/server";
+import { type SermonType } from "@/lib/sermon-actions";
 import { SaveIndicator } from "@/components/editor/save-indicator";
 import { FavoriteButton } from "@/components/shared/favorite-button";
 import { ShareButton } from "@/components/shared/share-button";
@@ -50,6 +51,10 @@ export default async function SermonPage({
             <SermonActionsDropdown
               sermonId={sermon.id}
               sermonTitle={sermon.title}
+              sermonDescription={sermon.description ?? ""}
+              sermonType={sermon.type as SermonType}
+              sermonPreachedAt={sermon.preached_at}
+              sermonTags={sermon.tags ?? []}
             />
           </div>
         </div>

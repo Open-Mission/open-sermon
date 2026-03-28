@@ -25,22 +25,33 @@ import {
   MoreHorizontalIcon,
   Edit02Icon,
   Delete01Icon,
+  Settings01Icon,
 } from "@hugeicons/core-free-icons";
-import { softDeleteSermon, renameSermon } from "@/lib/sermon-actions";
+import { softDeleteSermon, renameSermon, type SermonType } from "@/lib/sermon-actions";
+import { EditSermonSheet } from "./edit-sermon-sheet";
 
 interface SermonActionsDropdownProps {
   sermonId: string;
   sermonTitle: string;
+  sermonDescription?: string;
+  sermonType?: SermonType;
+  sermonPreachedAt?: string | null;
+  sermonTags?: string[];
 }
 
 export function SermonActionsDropdown({
   sermonId,
   sermonTitle,
+  sermonDescription = "",
+  sermonType = "preaching",
+  sermonPreachedAt = null,
+  sermonTags = [],
 }: SermonActionsDropdownProps) {
   const t = useTranslations();
   const router = useRouter();
   const [isRenameDialogOpen, setIsRenameDialogOpen] = React.useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
+  const [isEditSheetOpen, setIsEditSheetOpen] = React.useState(false);
   const [newTitle, setNewTitle] = React.useState(sermonTitle);
   const [isRenaming, setIsRenaming] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
@@ -88,7 +99,11 @@ export function SermonActionsDropdown({
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setIsRenameDialogOpen(true)}>
             <HugeiconsIcon icon={Edit02Icon} size={14} />
-            {t("common.edit")}
+            {t("sermon.renameTitle")}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setIsEditSheetOpen(true)}>
+            <HugeiconsIcon icon={Settings01Icon} size={14} />
+            {t("sermon.editTitle")}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
@@ -153,6 +168,19 @@ export function SermonActionsDropdown({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <EditSermonSheet
+        open={isEditSheetOpen}
+        onOpenChange={setIsEditSheetOpen}
+        sermonId={sermonId}
+        initialData={{
+          title: sermonTitle,
+          description: sermonDescription,
+          type: sermonType,
+          preachedAt: sermonPreachedAt,
+          tags: sermonTags,
+        }}
+      />
     </>
   );
 }

@@ -36,11 +36,12 @@ import {
 import { CloudOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { softDeleteSermon, renameSermon, toggleFavorite } from "@/lib/sermon-actions";
+import { softDeleteSermon, renameSermon, toggleFavorite, type SermonType } from "@/lib/sermon-actions";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { offlineDb } from "@/lib/offline-db";
+import { EditSermonSheet } from "./edit-sermon-sheet";
 
 interface SermonItemProps {
   sermon: Sermon;
@@ -53,6 +54,7 @@ export function SermonItem({ sermon }: SermonItemProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
   const [isRenameDialogOpen, setIsRenameDialogOpen] = React.useState(false);
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
+  const [isEditSheetOpen, setIsEditSheetOpen] = React.useState(false);
   const [newTitle, setNewTitle] = React.useState(sermon.title);
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [isRenaming, setIsRenaming] = React.useState(false);
@@ -135,7 +137,17 @@ export function SermonItem({ sermon }: SermonItemProps) {
         className="flex items-center gap-2 px-3 py-2.5 text-sm cursor-pointer hover:bg-muted/50 transition-colors"
       >
         <HugeiconsIcon icon={Edit02Icon} size={16} />
-        <span>{t("common.edit")}</span>
+        <span>{t("sermon.renameTitle")}</span>
+      </div>
+      <div
+        onClick={() => {
+          setIsSheetOpen(false);
+          setIsEditSheetOpen(true);
+        }}
+        className="flex items-center gap-2 px-3 py-2.5 text-sm cursor-pointer hover:bg-muted/50 transition-colors"
+      >
+        <HugeiconsIcon icon={Edit02Icon} size={16} />
+        <span>{t("sermon.editTitle")}</span>
       </div>
       <div className="h-px bg-border mx-3" />
       <div
@@ -205,7 +217,11 @@ export function SermonItem({ sermon }: SermonItemProps) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setIsRenameDialogOpen(true)}>
                   <HugeiconsIcon icon={Edit02Icon} size={14} />
-                  {t("common.edit")}
+                  {t("sermon.renameTitle")}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsEditSheetOpen(true)}>
+                  <HugeiconsIcon icon={Edit02Icon} size={14} />
+                  {t("sermon.editTitle")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -283,6 +299,19 @@ export function SermonItem({ sermon }: SermonItemProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <EditSermonSheet
+        open={isEditSheetOpen}
+        onOpenChange={setIsEditSheetOpen}
+        sermonId={sermon.id}
+        initialData={{
+          title: sermon.title,
+          description: sermon.description ?? "",
+          type: (sermon.type as SermonType) || "preaching",
+          preachedAt: sermon.preached_at,
+          tags: sermon.tags ?? [],
+        }}
+      />
     </>
   );
 }

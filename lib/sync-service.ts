@@ -218,6 +218,7 @@ class SyncService {
       series_id: null,
       title: title || "Novo Sermão",
       slug: null,
+      description: "",
       status: "draft",
       type: "preaching",
       main_scripture: null,

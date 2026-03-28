@@ -1,5 +1,5 @@
 export type SermonStatus = "draft" | "in_progress" | "finished" | "preached";
-export type SermonType = "preaching" | "cell" | "devotional";
+export type SermonType = "preaching" | "ebd_class" | "devotional" | "video_script" | "cell";
 
 export interface Series {
   id: string;
@@ -16,6 +16,7 @@ export interface Sermon {
   series_id: string | null;
   title: string;
   slug: string | null;
+  description: string;
   status: SermonStatus;
   type: SermonType;
   main_scripture: string | null;

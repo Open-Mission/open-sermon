@@ -69,6 +69,96 @@ export async function createSermonWithTitle(title: string) {
   return { success: true, sermonId: sermon.id };
 }
 
+export type SermonType = "preaching" | "ebd_class" | "devotional" | "video_script" | "cell";
+
+export interface CreateSermonParams {
+  title: string;
+  description?: string;
+  type?: SermonType;
+  preachedAt?: string;
+  tags?: string[];
+}
+
+export async function createSermonWithDetails(params: CreateSermonParams) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Unauthorized" };
+  }
+
+  const { data: sermon, error } = await supabase
+    .from("sermons")
+    .insert({
+      user_id: user.id,
+      title: params.title.trim() || "New Sermon",
+      description: params.description || "",
+      type: params.type || "preaching",
+      preached_at: params.preachedAt ? new Date(params.preachedAt).toISOString() : null,
+      tags: params.tags || [],
+    })
+    .select()
+    .single();
+
+  if (error || !sermon) {
+    return { error: error?.message || "Failed to create sermon" };
+  }
+
+  await invalidateUserSermonCache(user.id);
+  revalidatePath("/", "layout");
+  return { success: true, sermonId: sermon.id };
+}
+
+export interface UpdateSermonParams {
+  title?: string;
+  description?: string;
+  type?: SermonType;
+  preachedAt?: string | null;
+  tags?: string[];
+}
+
+export async function updateSermon(sermonId: string, params: UpdateSermonParams) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Unauthorized" };
+  }
+
+  const updateData: Record<string, unknown> = {};
+  
+  if (params.title !== undefined) updateData.title = params.title.trim();
+  if (params.description !== undefined) updateData.description = params.description;
+  if (params.type !== undefined) updateData.type = params.type;
+  if (params.preachedAt !== undefined) {
+    updateData.preached_at = params.preachedAt ? new Date(params.preachedAt).toISOString() : null;
+  }
+  if (params.tags !== undefined) updateData.tags = params.tags;
+
+  const { error } = await supabase
+    .from("sermons")
+    .update(updateData)
+    .eq("id", sermonId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  await Promise.all([
+    invalidateUserSermonCache(user.id),
+    invalidateCacheKey(sermonCacheKey(sermonId)),
+  ]);
+  revalidatePath("/", "layout");
+  return { success: true };
+}
+
 export async function softDeleteSermon(sermonId: string) {
   const supabase = await createClient();
 

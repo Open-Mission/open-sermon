@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+} from "@/components/ui/sheet";
 import {
   Drawer,
   DrawerContent,
@@ -31,38 +31,55 @@ import {
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { createSermonWithDetails, type SermonType } from "@/lib/sermon-actions";
+import { updateSermon, type SermonType } from "@/lib/sermon-actions";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Add01Icon, CalendarIcon, ArrowDown01Icon } from "@hugeicons/core-free-icons";
+import { CalendarIcon, ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
 const SERMON_TYPES: SermonType[] = ["preaching", "ebd_class", "devotional", "video_script", "cell"];
 
-interface NewSermonDialogProps {
+interface EditSermonSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  sermonId: string;
+  initialData: {
+    title: string;
+    description: string;
+    type: SermonType;
+    preachedAt: string | null;
+    tags: string[];
+  };
 }
 
-export function NewSermonDialog({ open, onOpenChange }: NewSermonDialogProps) {
+export function EditSermonSheet({
+  open,
+  onOpenChange,
+  sermonId,
+  initialData,
+}: EditSermonSheetProps) {
   const t = useTranslations();
   const router = useRouter();
   const isMobile = useIsMobile();
-  const [title, setTitle] = React.useState("");
-  const [description, setDescription] = React.useState("");
-  const [type, setType] = React.useState<SermonType>("preaching");
-  const [preachedAt, setPreachedAt] = React.useState<Date | undefined>(undefined);
-  const [tagsInput, setTagsInput] = React.useState("");
-  const [isCreating, setIsCreating] = React.useState(false);
+  const [title, setTitle] = React.useState(initialData.title);
+  const [description, setDescription] = React.useState(initialData.description);
+  const [type, setType] = React.useState<SermonType>(initialData.type);
+  const [preachedAt, setPreachedAt] = React.useState<Date | undefined>(
+    initialData.preachedAt ? new Date(initialData.preachedAt) : undefined
+  );
+  const [tagsInput, setTagsInput] = React.useState(initialData.tags.join(", "));
+  const [isSaving, setIsSaving] = React.useState(false);
 
-  const resetForm = () => {
-    setTitle("");
-    setDescription("");
-    setType("preaching");
-    setPreachedAt(undefined);
-    setTagsInput("");
-  };
+  React.useEffect(() => {
+    if (open) {
+      setTitle(initialData.title);
+      setDescription(initialData.description);
+      setType(initialData.type);
+      setPreachedAt(initialData.preachedAt ? new Date(initialData.preachedAt) : undefined);
+      setTagsInput(initialData.tags.join(", "));
+    }
+  }, [open, initialData]);
 
   const getTags = () => {
     return tagsInput
@@ -71,54 +88,42 @@ export function NewSermonDialog({ open, onOpenChange }: NewSermonDialogProps) {
       .filter((tag) => tag.length > 0);
   };
 
-  const handleCreate = async () => {
+  const handleSave = async () => {
     if (!title.trim()) return;
 
-    setIsCreating(true);
-    const result = await createSermonWithDetails({
+    setIsSaving(true);
+    const result = await updateSermon(sermonId, {
       title,
       description,
       type,
-      preachedAt: preachedAt?.toISOString(),
+      preachedAt: preachedAt ? preachedAt.toISOString() : null,
       tags: getTags(),
     });
-    setIsCreating(false);
+    setIsSaving(false);
 
     if (result.error) {
       toast.error(result.error);
-    } else if (result.success && result.sermonId) {
-      resetForm();
+    } else {
       onOpenChange(false);
-      router.push(`/sermons/${result.sermonId}`);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleCreate();
+      router.refresh();
     }
   };
 
   const renderForm = () => (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="title">{t("sermon.title")}</Label>
+        <Label htmlFor="edit-title">{t("sermon.title")}</Label>
         <Input
-          id="title"
-          placeholder={t("sermon.title")}
+          id="edit-title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          onKeyDown={handleKeyDown}
-          autoFocus
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">{t("sermon.description")}</Label>
+        <Label htmlFor="edit-description">{t("sermon.description")}</Label>
         <Textarea
-          id="description"
-          placeholder={t("sermon.description")}
+          id="edit-description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
@@ -171,9 +176,9 @@ export function NewSermonDialog({ open, onOpenChange }: NewSermonDialogProps) {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="tags">{t("sermon.tags")}</Label>
+        <Label htmlFor="edit-tags">{t("sermon.tags")}</Label>
         <Input
-          id="tags"
+          id="edit-tags"
           placeholder={t("sermon.tagsHint")}
           value={tagsInput}
           onChange={(e) => setTagsInput(e.target.value)}
@@ -199,13 +204,12 @@ export function NewSermonDialog({ open, onOpenChange }: NewSermonDialogProps) {
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>{t("dashboard.newSermon")}</DrawerTitle>
+            <DrawerTitle>{t("sermon.editTitle")}</DrawerTitle>
           </DrawerHeader>
           <div className="px-4">{renderForm()}</div>
           <DrawerFooter>
-            <Button onClick={handleCreate} disabled={isCreating || !title.trim()}>
-              <HugeiconsIcon icon={Add01Icon} size={16} />
-              {isCreating ? t("common.loading") : t("common.create")}
+            <Button onClick={handleSave} disabled={isSaving || !title.trim()}>
+              {isSaving ? t("common.loading") : t("common.save")}
             </Button>
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               {t("common.cancel")}
@@ -217,22 +221,21 @@ export function NewSermonDialog({ open, onOpenChange }: NewSermonDialogProps) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>{t("dashboard.newSermon")}</DialogTitle>
-        </DialogHeader>
-        {renderForm()}
-        <DialogFooter>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="sm:max-w-[450px]">
+        <SheetHeader>
+          <SheetTitle>{t("sermon.editTitle")}</SheetTitle>
+        </SheetHeader>
+        <div className="py-4">{renderForm()}</div>
+        <SheetFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {t("common.cancel")}
           </Button>
-          <Button onClick={handleCreate} disabled={isCreating || !title.trim()}>
-            <HugeiconsIcon icon={Add01Icon} size={16} />
-            {isCreating ? t("common.loading") : t("common.create")}
+          <Button onClick={handleSave} disabled={isSaving || !title.trim()}>
+            {isSaving ? t("common.loading") : t("common.save")}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }
