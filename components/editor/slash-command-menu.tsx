@@ -67,7 +67,121 @@ export function updateSlashMenuQuery(query: string) {
   window.dispatchEvent(new CustomEvent(SLASH_MENU_QUERY_EVENT, { detail: { query } }))
 }
 
-// ─── Component ──────────────────────────────────────────────────────────────
+// ─── Components ─────────────────────────────────────────────────────────────
+
+const CommandList = ({ 
+  groups, 
+  flatFiltered, 
+  selectedIndex, 
+  isMobile, 
+  onSelect, 
+  onHover,
+  itemRefs 
+}: { 
+  groups: CommandGroup[], 
+  flatFiltered: CommandItem[], 
+  selectedIndex: number, 
+  isMobile: boolean, 
+  onSelect: (item: CommandItem) => void,
+  onHover: (index: number) => void,
+  itemRefs: React.MutableRefObject<(HTMLButtonElement | null)[]>
+}) => {
+  if (groups.length === 0) {
+    return (
+      <div className={cn(
+        "text-center text-muted-foreground",
+        isMobile ? "py-12 animate-in fade-in zoom-in-95" : "px-3 py-6 text-sm"
+      )}>
+        <Search className="mx-auto h-8 w-8 mb-3 opacity-20" />
+        <p>Nenhum resultado</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className={cn(
+      "space-y-6",
+      !isMobile && "max-h-[min(400px,80vh)] overflow-y-auto p-1.5 custom-scrollbar"
+    )}>
+      {groups.map((group) => {
+        const groupStartIndex = flatFiltered.findIndex(i => i.id === group.items[0]?.id)
+        return (
+          <div key={group.id} className={cn("space-y-2", !isMobile && "mb-2 last:mb-0")}>
+            <div className={cn(
+              "px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60",
+              !isMobile && "py-1.5 text-muted-foreground/70"
+            )}>
+              {group.title}
+            </div>
+            <div className={cn(
+              isMobile ? "grid grid-cols-2 gap-2" : "space-y-0.5"
+            )}>
+              {group.items.map((item, idx) => {
+                const globalIdx = groupStartIndex + idx
+                const isSelected = globalIdx === selectedIndex
+                
+                if (isMobile) {
+                  return (
+                    <button
+                      key={item.id}
+                      className={cn(
+                        "flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-200",
+                        isSelected 
+                          ? "bg-primary/10 border-primary/20 shadow-sm" 
+                          : "bg-secondary/20 border-transparent active:scale-95 active:bg-secondary/40"
+                      )}
+                      onClick={() => onSelect(item)}
+                    >
+                      <div className={cn(
+                        "w-10 h-10 rounded-xl flex items-center justify-center mb-2 transition-colors",
+                        isSelected ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground"
+                      )}>
+                        <item.icon size={20} />
+                      </div>
+                      <span className="text-[13px] font-semibold text-foreground">{item.label}</span>
+                    </button>
+                  )
+                }
+
+                return (
+                  <button
+                    ref={el => { itemRefs.current[globalIdx] = el }}
+                    key={item.id}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-all duration-75",
+                      isSelected ? "bg-primary text-primary-foreground shadow-sm" : "hover:bg-muted text-foreground"
+                    )}
+                    onClick={() => onSelect(item)}
+                    onMouseEnter={() => onHover(globalIdx)}
+                  >
+                    <div className={cn(
+                      "flex items-center justify-center w-7 h-7 rounded-md shrink-0",
+                      isSelected ? "bg-background/20" : "bg-muted"
+                    )}>
+                      <item.icon size={16} />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-sm font-medium truncate leading-tight">
+                        {item.label}
+                      </span>
+                      {!isSelected && (
+                        <span className="text-[10px] text-muted-foreground truncate leading-tight">
+                          {item.description}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// ─── Main Component ──────────────────────────────────────────────────────────────
 
 export function SlashCommandMenu({ editor }: { editor: Editor | null }) {
   const t = useTranslations('editor')
@@ -80,6 +194,7 @@ export function SlashCommandMenu({ editor }: { editor: Editor | null }) {
   
   const menuRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLInputElement>(null)
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
 
   // ─── Commands definition ────────────────────────────
 
@@ -255,10 +370,10 @@ export function SlashCommandMenu({ editor }: { editor: Editor | null }) {
     [filteredGroups]
   )
 
-  // Reset index when query changes
-  useEffect(() => {
+  const handleQueryChange = useCallback((newQuery: string) => {
+    setQuery(newQuery)
     setSelectedIndex(0)
-  }, [query])
+  }, [])
 
   // ─── Handlers ──────────────────────────────────────
 
@@ -302,10 +417,6 @@ export function SlashCommandMenu({ editor }: { editor: Editor | null }) {
           active.blur();
         }
       }
-      setIsOpen(isOpen => {
-        if (!isOpen) return true;
-        return isOpen;
-      });
       setIsOpen(true)
     }
 
@@ -313,6 +424,7 @@ export function SlashCommandMenu({ editor }: { editor: Editor | null }) {
     const handleQuery = (e: Event) => {
       const detail = (e as CustomEvent).detail as { query: string }
       setQuery(detail.query)
+      setSelectedIndex(0)
     }
 
     window.addEventListener(SLASH_MENU_EVENT, handleOpen)
@@ -332,6 +444,16 @@ export function SlashCommandMenu({ editor }: { editor: Editor | null }) {
       setTimeout(() => searchRef.current?.focus(), 50)
     }
   }, [isOpen, isMobile])
+
+  // Scroll selected item into view on desktop
+  useEffect(() => {
+    if (isOpen && !isMobile && itemRefs.current[selectedIndex]) {
+      itemRefs.current[selectedIndex]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+      })
+    }
+  }, [selectedIndex, isOpen, isMobile])
 
   // Keyboard navigation (Desktop)
   useEffect(() => {
@@ -386,7 +508,6 @@ export function SlashCommandMenu({ editor }: { editor: Editor | null }) {
         }}
       >
         <DrawerContent className="pb-8 max-h-[92vh]">
-          {/* Handle is built-in to DrawerContent usually, but we keep header clear */}
           <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
 
           {/* Header */}
@@ -405,7 +526,7 @@ export function SlashCommandMenu({ editor }: { editor: Editor | null }) {
                 ref={searchRef}
                 type="search"
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => handleQueryChange(e.target.value)}
                 placeholder="Pesquisar comandos..."
                 className="w-full h-11 bg-muted/50 border border-transparent focus:border-primary/20 focus:bg-background rounded-xl pl-10 pr-4 text-base outline-none transition-all"
                 autoComplete="off"
@@ -415,7 +536,7 @@ export function SlashCommandMenu({ editor }: { editor: Editor | null }) {
               {query && (
                 <button 
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground" 
-                  onClick={() => setQuery('')}
+                  onClick={() => handleQueryChange('')}
                 >
                   <X size={16} />
                 </button>
@@ -427,55 +548,16 @@ export function SlashCommandMenu({ editor }: { editor: Editor | null }) {
             Selecione um bloco ou comando para inserir no editor
           </DrawerDescription>
 
-          {/* Items Container */}
           <div ref={menuRef} className="px-3 pb-4 overflow-y-auto">
-            {filteredGroups.length === 0 ? (
-              <div className="py-12 text-center text-muted-foreground animate-in fade-in zoom-in-95">
-                <Search className="mx-auto h-8 w-8 mb-3 opacity-20" />
-                <p className="text-sm">Nenhum resultado para &ldquo;{query}&rdquo;</p>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {filteredGroups.map((group) => {
-                  const groupStartIndex = flatFiltered.findIndex(i => i.id === group.items[0]?.id)
-                  return (
-                    <div key={group.id} className="space-y-2">
-                      <div className="px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-                        {group.title}
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        {group.items.map((item, idx) => {
-                          const globalIdx = groupStartIndex + idx
-                          const isSelected = globalIdx === selectedIndex
-                          return (
-                            <button
-                              key={item.id}
-                              data-index={globalIdx}
-                              className={cn(
-                                "flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-200",
-                                isSelected 
-                                  ? "bg-primary/10 border-primary/20 shadow-sm" 
-                                  : "bg-secondary/20 border-transparent active:scale-95 active:bg-secondary/40"
-                              )}
-                              onClick={() => executeCommand(item)}
-                              onMouseEnter={() => !isMobile && setSelectedIndex(globalIdx)}
-                            >
-                              <div className={cn(
-                                "w-10 h-10 rounded-xl flex items-center justify-center mb-2 transition-colors",
-                                isSelected ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground"
-                              )}>
-                                <item.icon size={20} />
-                              </div>
-                              <span className="text-[13px] font-semibold text-foreground">{item.label}</span>
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+            <CommandList 
+              groups={filteredGroups}
+              flatFiltered={flatFiltered}
+              selectedIndex={selectedIndex}
+              isMobile={isMobile}
+              onSelect={executeCommand}
+              onHover={setSelectedIndex}
+              itemRefs={itemRefs}
+            />
           </div>
         </DrawerContent>
       </Drawer>
@@ -492,59 +574,15 @@ export function SlashCommandMenu({ editor }: { editor: Editor | null }) {
         left: position.left,
       }}
     >
-      {/* Scrollable area */}
-      <div className="max-h-[min(400px,80vh)] overflow-y-auto p-1.5 custom-scrollbar">
-        {filteredGroups.length === 0 ? (
-          <div className="px-3 py-6 text-center text-muted-foreground text-sm">
-            Nenhum resultado
-          </div>
-        ) : (
-          filteredGroups.map((group) => {
-            const groupStartIndex = flatFiltered.findIndex(i => i.id === group.items[0]?.id)
-            return (
-              <div key={group.id} className="mb-2 last:mb-0">
-                <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
-                  {group.title}
-                </div>
-                <div className="space-y-0.5">
-                  {group.items.map((item, idx) => {
-                    const globalIdx = groupStartIndex + idx
-                    const isSelected = globalIdx === selectedIndex
-                    return (
-                      <button
-                        key={item.id}
-                        className={cn(
-                          "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-all duration-75",
-                          isSelected ? "bg-primary text-primary-foreground shadow-sm" : "hover:bg-muted text-foreground"
-                        )}
-                        onClick={() => executeCommand(item)}
-                        onMouseEnter={() => setSelectedIndex(globalIdx)}
-                      >
-                        <div className={cn(
-                          "flex items-center justify-center w-7 h-7 rounded-md shrink-0",
-                          isSelected ? "bg-background/20" : "bg-muted"
-                        )}>
-                          <item.icon size={16} />
-                        </div>
-                        <div className="flex flex-col min-w-0">
-                          <span className="text-sm font-medium truncate leading-tight">
-                            {item.label}
-                          </span>
-                          {!isSelected && (
-                            <span className="text-[10px] text-muted-foreground truncate leading-tight">
-                              {item.description}
-                            </span>
-                          )}
-                        </div>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            )
-          })
-        )}
-      </div>
+      <CommandList 
+        groups={filteredGroups}
+        flatFiltered={flatFiltered}
+        selectedIndex={selectedIndex}
+        isMobile={isMobile}
+        onSelect={executeCommand}
+        onHover={setSelectedIndex}
+        itemRefs={itemRefs}
+      />
     </div>
   )
 }

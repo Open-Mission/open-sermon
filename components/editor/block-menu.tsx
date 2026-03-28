@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react'
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { type Editor } from '@tiptap/react'
 import { useTranslations } from 'next-intl'
 import { useIsMobile } from '@/hooks/use-mobile'
@@ -53,6 +53,71 @@ export function openBlockMenu() {
   window.dispatchEvent(new CustomEvent(OPEN_BLOCK_MENU_EVENT))
 }
 
+type BlockGroup = {
+  title: string
+  items: SuggestionsItem[]
+}
+
+// ─── UI Components (Outside main component to avoid re-creation) ────────────
+
+const GroupedMenuList = ({ 
+  groups, 
+  query, 
+  isMobile, 
+  selectedIndex, 
+  onSelect, 
+  onHover,
+  listRef,
+  itemRefs
+}: { 
+  groups: BlockGroup[], 
+  query: string, 
+  isMobile: boolean, 
+  selectedIndex: number,
+  onSelect: (item: SuggestionsItem) => void,
+  onHover: (index: number) => void,
+  listRef: React.RefObject<HTMLDivElement | null>,
+  itemRefs: React.MutableRefObject<(HTMLButtonElement | null)[]>
+}) => (
+  <div ref={listRef} className={isMobile ? '' : 'max-h-[60vh] overflow-y-auto'}>
+    {groups.map((group, groupIndex) => {
+      const groupFilteredItems = group.items.filter(item => 
+        item.label.toLowerCase().includes(query.toLowerCase())
+      )
+      if (groupFilteredItems.length === 0) return null
+      
+      return (
+        <div key={groupIndex} className="mb-4">
+          <div className="px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            {group.title}
+          </div>
+          <div className="space-y-0.5">
+            {groupFilteredItems.map((item, index) => {
+              const globalIndex = groups.slice(0, groupIndex).reduce((acc, g) => acc + g.items.length, 0) + index
+              return (
+                <button
+                  key={globalIndex}
+                  ref={(el) => { itemRefs.current[globalIndex] = el }}
+                  className={`w-full text-left flex items-center space-x-2 px-3 py-2.5 text-sm rounded transition-colors ${
+                    !isMobile && globalIndex === selectedIndex ? 'bg-primary text-primary-foreground' : 'hover:bg-muted/80'
+                  }`}
+                  onClick={() => onSelect(item)}
+                  onMouseEnter={() => !isMobile && onHover(globalIndex)}
+                >
+                  <item.icon className={`h-4 w-4 ${!isMobile && globalIndex === selectedIndex ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
+                  <span>{item.label}</span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )
+    })}
+  </div>
+)
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
 export function BlockMenu({ editor }: BlockMenuProps) {
   const t = useTranslations('editor')
   const isMobile = useIsMobile()
@@ -75,6 +140,7 @@ export function BlockMenu({ editor }: BlockMenuProps) {
     }
   }, [selectedIndex, isVisible, isMobile])
 
+  // Reset index when query changes
   useEffect(() => {
     itemRefs.current = []
     if (!isMobile) {
@@ -82,12 +148,7 @@ export function BlockMenu({ editor }: BlockMenuProps) {
     }
   }, [query, isMobile])
 
-  type BlockGroup = {
-    title: string
-    items: SuggestionsItem[]
-  }
-
-  const BLOCK_GROUPS = React.useMemo<BlockGroup[]>(() => [
+  const BLOCK_GROUPS = useMemo<BlockGroup[]>(() => [
     {
       title: t('blockGroups.basic', { default: 'Básico' }),
       items: [
@@ -115,20 +176,18 @@ export function BlockMenu({ editor }: BlockMenuProps) {
     }
   ], [t])
 
-  const BLOCK_ITEMS = React.useMemo<SuggestionsItem[]>(() => 
+  const BLOCK_ITEMS = useMemo<SuggestionsItem[]>(() => 
     BLOCK_GROUPS.flatMap(group => group.items),
     [BLOCK_GROUPS]
   )
 
-  const filteredItems = React.useMemo(() => 
+  const filteredItems = useMemo(() => 
     BLOCK_ITEMS.filter(item => item.label.toLowerCase().includes(query.toLowerCase())),
     [BLOCK_ITEMS, query]
   )
 
   const handleItemSelect = useCallback((item: SuggestionsItem) => {
     if (!editor) return
-    
-    const wasVisible = isVisible
     
     // Clear the '/' and the search query before running command
     editor.chain().focus().deleteRange({ 
@@ -137,7 +196,6 @@ export function BlockMenu({ editor }: BlockMenuProps) {
     }).run()
     
     if (item.requiresInput) {
-      // Insert placeholder block first for verse, and append an empty paragraph after it
       editor.chain().focus().insertContent([
         { 
           type: 'verseBlock', 
@@ -159,20 +217,21 @@ export function BlockMenu({ editor }: BlockMenuProps) {
       item.command(editor)
     }
     
-    // Focus editor after inserting content (especially important for mobile)
     setTimeout(() => {
       editor.chain().focus().run()
     }, 50)
     
     setIsVisible(false)
     
-    // Blur active element to close keyboard on mobile
-    if (isMobile && wasVisible) {
+    if (isMobile) {
       setTimeout(() => {
-        document.activeElement instanceof HTMLElement && document.activeElement.blur()
+        const active = document.activeElement;
+        if (active instanceof HTMLElement) {
+          active.blur();
+        }
       }, 150)
     }
-  }, [editor, query, isVisible, isMobile])
+  }, [editor, query, isMobile])
 
   useEffect(() => {
     if (!editor) return
@@ -251,109 +310,25 @@ export function BlockMenu({ editor }: BlockMenuProps) {
     return () => window.removeEventListener(OPEN_BLOCK_MENU_EVENT, handleOpenBlockMenu)
   }, [isMobile, editor])
 
-  const MenuList = ({ grouped = false }: { grouped?: boolean }): React.ReactNode => {
-    const flatItems = grouped 
-      ? BLOCK_GROUPS.flatMap(group => group.items).filter(item => 
-          item.label.toLowerCase().includes(query.toLowerCase())
-        )
-      : filteredItems
-
-    return (
-      <div className="max-h-80 overflow-y-auto p-1 space-y-0.5">
-        {flatItems.length === 0 ? (
-          <div className="px-2 py-1 text-sm text-muted-foreground">
-            {t('noResults', { default: 'Nenhum resultado encontrado' })}
-          </div>
-        ) : (
-          flatItems.map((item, index) => (
-            <button
-              key={index}
-              ref={(el) => { itemRefs.current[index] = el }}
-              className={`w-full text-left flex items-center space-x-2 px-2 py-2 text-sm rounded transition-colors ${
-                index === selectedIndex ? 'bg-primary text-primary-foreground' : 'hover:bg-muted/80'
-              }`}
-              onClick={() => handleItemSelect(item)}
-              onMouseEnter={() => !isMobile && setSelectedIndex(index)}
-            >
-              <item.icon className={`h-4 w-4 ${index === selectedIndex ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
-              <span>{item.label}</span>
-            </button>
-          ))
-        )}
-      </div>
-    )
-  }
-
-  const GroupedMenuList = () => (
-    <div ref={groupedListRef} className={isMobile ? '' : 'max-h-[60vh] overflow-y-auto'}>
-      {BLOCK_GROUPS.map((group, groupIndex) => {
-        const groupFilteredItems = group.items.filter(item => 
-          item.label.toLowerCase().includes(query.toLowerCase())
-        )
-        if (groupFilteredItems.length === 0) return null
-        
-        return (
-          <div key={groupIndex} className="mb-4">
-            <div className="px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              {group.title}
-            </div>
-            <div className="space-y-0.5">
-              {groupFilteredItems.map((item, index) => {
-                const globalIndex = BLOCK_GROUPS.slice(0, groupIndex).reduce((acc, g) => acc + g.items.length, 0) + index
-                return (
-                  <button
-                    key={globalIndex}
-                    ref={(el) => { itemRefs.current[globalIndex] = el }}
-                    className={`w-full text-left flex items-center space-x-2 px-3 py-2.5 text-sm rounded transition-colors ${
-                      !isMobile && globalIndex === selectedIndex ? 'bg-primary text-primary-foreground' : 'hover:bg-muted/80'
-                    }`}
-                    onClick={() => handleItemSelect(item)}
-                    onMouseEnter={() => !isMobile && setSelectedIndex(globalIndex)}
-                  >
-                    <item.icon className={`h-4 w-4 ${!isMobile && globalIndex === selectedIndex ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
-                    <span>{item.label}</span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-        )
-      })}
-    </div>
-  )
-
   if (!isVisible) return null
 
   if (isMobile) {
     return (
       <Drawer 
         open={isVisible} 
-        modal={true}
-        dismissible={false}
-        shouldScaleBackground={false}
         onOpenChange={(open) => {
           if (!open) {
-            setIsVisible(false)
-            setTimeout(() => {
-              document.activeElement instanceof HTMLElement && document.activeElement.blur()
-            }, 100)
+            setIsVisible(false);
           }
         }}
+        shouldScaleBackground={false}
       >
         <DrawerContent className="pb-8">
-          <DrawerHeader className="flex flex-row items-center justify-between">
-            <div>
-              <DrawerTitle>{t('search', { default: 'Comandos' })}</DrawerTitle>
-              <DrawerDescription>
-                Selecione um bloco para inserir no seu sermão
-              </DrawerDescription>
-            </div>
-            <button
-              onClick={() => setIsVisible(false)}
-              className="p-2 text-muted-foreground hover:text-foreground"
-            >
-              ✕
-            </button>
+          <DrawerHeader className="text-left">
+            <DrawerTitle>{t('search', { default: 'Comandos' })}</DrawerTitle>
+            <DrawerDescription>
+              Selecione um bloco para inserir no seu sermão
+            </DrawerDescription>
           </DrawerHeader>
           <div className="px-4 pb-2">
             <input
@@ -368,7 +343,16 @@ export function BlockMenu({ editor }: BlockMenuProps) {
             />
           </div>
           <div className="px-3 pb-4 overflow-y-auto max-h-[50vh]">
-            <GroupedMenuList />
+            <GroupedMenuList 
+              groups={BLOCK_GROUPS}
+              query={query}
+              isMobile={isMobile}
+              selectedIndex={selectedIndex}
+              onSelect={handleItemSelect}
+              onHover={setSelectedIndex}
+              listRef={groupedListRef}
+              itemRefs={itemRefs}
+            />
           </div>
         </DrawerContent>
       </Drawer>
@@ -390,14 +374,22 @@ export function BlockMenu({ editor }: BlockMenuProps) {
           value={query}
           onChange={(e) => {
             setQuery(e.target.value)
-            setSelectedIndex(0)
           }}
           placeholder={t('search', { default: 'Pesquisar comandos...' })}
           className="flex-1 bg-muted/50 border-none px-2 py-1 text-sm focus:outline-none focus:ring-0"
           autoFocus
         />
       </div>
-      <GroupedMenuList />
+      <GroupedMenuList 
+        groups={BLOCK_GROUPS}
+        query={query}
+        isMobile={isMobile}
+        selectedIndex={selectedIndex}
+        onSelect={handleItemSelect}
+        onHover={setSelectedIndex}
+        listRef={groupedListRef}
+        itemRefs={itemRefs}
+      />
     </div>
   )
 }
