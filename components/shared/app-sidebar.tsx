@@ -77,24 +77,18 @@ export async function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup> */}
 
-        {favoriteSermons.length > 0 ? (
-          <CollapsibleSidebarGroup label={t("favorites")}>
-            <SidebarMenu>
-              {favoriteSermons.map((sermon) => (
-                <SermonItem key={`favorite-${sermon.id}`} sermon={sermon} />
-              ))}
-            </SidebarMenu>
-          </CollapsibleSidebarGroup>
-        ) : (
-          <SidebarGroup>
-            <div className="px-2 py-1 text-xs font-medium text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">
-              {t("favorites")}
-            </div>
-            <div className="px-2 py-3 text-xs text-muted-foreground italic group-data-[collapsible=icon]:hidden">
-              {t("noFavorites")}
-            </div>
-          </SidebarGroup>
-        )}
+        <CollapsibleSidebarGroup label={t("favorites")} defaultOpen={favoriteSermons.length > 0}>
+          <SidebarMenu>
+            {favoriteSermons.map((sermon) => (
+              <SermonItem key={`favorite-${sermon.id}`} sermon={sermon} />
+            ))}
+            {favoriteSermons.length === 0 && (
+              <div className="px-2 py-3 text-xs text-muted-foreground italic group-data-[collapsible=icon]:hidden">
+                {t("noFavorites")}
+              </div>
+            )}
+          </SidebarMenu>
+        </CollapsibleSidebarGroup>
 
         <CollapsibleSidebarGroup label={t("recentSermons")} defaultOpen={true}>
           <SidebarMenu>

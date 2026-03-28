@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { User } from "@supabase/supabase-js";
@@ -9,7 +10,6 @@ import { OfflineBanner } from "@/components/shared/offline-banner";
 import { DashboardGreeting } from "@/components/shared/dashboard-greeting";
 import { RecentSermonsSection } from "@/components/shared/recent-sermons-section";
 import { PublishedSermonsSection } from "@/components/shared/published-sermons-section";
-import { AvailableOfflineSection } from "@/components/shared/available-offline-section";
 import { AllSermonsSection } from "@/components/shared/all-sermons-section";
 import { OnboardingModal } from "@/components/shared/onboarding-modal";
 
@@ -39,6 +39,7 @@ export function DashboardClient({ user, userName, profile, recentSermons, publis
 
   useEffect(() => {
     if (needsOnboarding && user?.id) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowOnboarding(true);
     }
   }, [needsOnboarding, user?.id]);
@@ -148,14 +149,6 @@ export function DashboardClient({ user, userName, profile, recentSermons, publis
 
         <PublishedSermonsSection
           sermons={displayPublishedSermons}
-          syncedSermonIds={syncedSermonIds}
-          localOnlySermonIds={localOnlySermonIds}
-          isOffline={isOffline}
-        />
-
-        <AvailableOfflineSection
-          displaySermons={displaySermons}
-          offlineSermons={offlineSermons}
           syncedSermonIds={syncedSermonIds}
           localOnlySermonIds={localOnlySermonIds}
           isOffline={isOffline}
