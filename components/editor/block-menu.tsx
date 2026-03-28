@@ -184,77 +184,8 @@ export function BlockMenu({ editor }: BlockMenuProps) {
     if (!editor) return
 
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
-      if (isVisible) {
-        if (event.key === 'Escape') {
-          setIsVisible(false)
-          return
-        }
-        if (event.key === 'ArrowDown') {
-          event.preventDefault()
-          setSelectedIndex(prev => (prev + 1) % BLOCK_ITEMS.length)
-          return
-        }
-        if (event.key === 'ArrowUp') {
-          event.preventDefault()
-          setSelectedIndex(prev => (prev - 1 + BLOCK_ITEMS.length) % BLOCK_ITEMS.length)
-          return
-        }
-        if (event.key === 'Enter') {
-          event.preventDefault()
-          if (filteredItems.length > 0) {
-            const itemToSelect = filteredItems[selectedIndex] || filteredItems[0]
-            handleItemSelect(itemToSelect)
-          }
-          return
-        }
-        return
-      }
-
-      if (event.key === '/') {
-        if (isMobile) {
-          event.preventDefault()
-          setIsVisible(true)
-          setQuery('')
-          setSelectedIndex(0)
-        } else {
-          event.preventDefault()
-          const { state } = editor
-          const { from } = state.selection
-          const coords = editor.view.coordsAtPos(from)
-          
-          setIsVisible(true)
-          setQuery('')
-          setSelectedIndex(0)
-          
-          setPosition({ 
-            top: window.scrollY + 20, 
-            left: coords.left + window.scrollX 
-          })
-        }
-      }
-    }
-
-    document.addEventListener('keydown', handleGlobalKeyDown)
-    return () => document.removeEventListener('keydown', handleGlobalKeyDown)
-  }, [editor, isVisible, filteredItems, selectedIndex, handleItemSelect, isMobile, BLOCK_ITEMS])
-
-  useEffect(() => {
-    if (!isVisible || isMobile) return
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsVisible(false)
-      }
-    }
-    
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [isVisible, isMobile])
-
-  useEffect(() => {
-    if (!isVisible || !isMobile) return
-
-    const handleMobileKeyDown = (event: KeyboardEvent) => {
+      if (!isVisible) return
+      
       if (event.key === 'Escape') {
         setIsVisible(false)
         return
@@ -279,17 +210,43 @@ export function BlockMenu({ editor }: BlockMenuProps) {
       }
     }
 
-    document.addEventListener('keydown', handleMobileKeyDown)
-    return () => document.removeEventListener('keydown', handleMobileKeyDown)
-  }, [isVisible, isMobile, filteredItems, selectedIndex, handleItemSelect, BLOCK_ITEMS])
+    document.addEventListener('keydown', handleGlobalKeyDown)
+    return () => document.removeEventListener('keydown', handleGlobalKeyDown)
+  }, [editor, isVisible, filteredItems, selectedIndex, handleItemSelect, BLOCK_ITEMS])
 
   useEffect(() => {
-    if (!isMobile || !editor) return
+    if (!isVisible || isMobile) return
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsVisible(false)
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [isVisible, isMobile])
+
+  useEffect(() => {
+    if (!editor) return
 
     const handleOpenBlockMenu = () => {
-      setIsVisible(true)
       setQuery('')
       setSelectedIndex(0)
+      
+      if (isMobile) {
+        setIsVisible(true)
+      } else {
+        const { state } = editor
+        const { from } = state.selection
+        const coords = editor.view.coordsAtPos(from)
+        
+        setIsVisible(true)
+        setPosition({ 
+          top: window.scrollY + 20, 
+          left: coords.left + window.scrollX 
+        })
+      }
     }
 
     window.addEventListener(OPEN_BLOCK_MENU_EVENT, handleOpenBlockMenu)

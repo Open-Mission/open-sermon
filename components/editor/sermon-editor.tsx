@@ -35,6 +35,7 @@ import { SelectableTextBlockView } from "./blocks/selectable-text-block-view";
 import Paragraph from "@tiptap/extension-paragraph";
 import Heading from "@tiptap/extension-heading";
 import { ReactNodeViewRenderer } from "@tiptap/react";
+import { OPEN_BLOCK_MENU_EVENT } from "./block-menu";
 
 const SelectableParagraph = Paragraph.extend({
   addNodeView() {
@@ -122,11 +123,17 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       attributes: {
         class: "ProseMirror focus:outline-none max-w-none prose dark:prose-invert min-h-[500px] cursor-text",
       },
+      handleTextInput: (view, from, to, text) => {
+        if (text === '/') {
+          window.dispatchEvent(new CustomEvent(OPEN_BLOCK_MENU_EVENT))
+          return true
+        }
+        return false
+      },
       handleKeyDown: (view, event) => {
-        // Toggle sidebar with Ctrl+\ or Meta+\
         if ((event.ctrlKey || event.metaKey) && event.code === 'Backslash') {
           toggleSidebar();
-          return true; // Prevent propagation and default bold action
+          return true;
         }
         return false;
       },
@@ -367,7 +374,6 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
         }}
       />
       <BlockMenu editor={editor} />
-      <FloatingAddButton editor={editor} />
       {/* <TableOfContents editor={editor} /> */}
       {showModal && selectedBlock === "verse" && (
         <VerseSearchModal
