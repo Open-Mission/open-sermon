@@ -24,7 +24,7 @@ self.addEventListener("install", (event) => {
           await cache.put(HOME_URL, homeResponse);
           console.log("[SW] Home page cached");
         }
-      } catch (e) {
+      } catch {
         console.log("[SW] Could not pre-cache home page");
       }
     })()
@@ -96,7 +96,7 @@ self.addEventListener("fetch", (event) => {
             cache.put(pathname, networkResponse.clone());
           }
           return networkResponse;
-        } catch (error) {
+        } catch {
           console.log("[SW] Network failed, checking for cached home...");
           
           const cachedHome = await cache.match(HOME_URL);
@@ -139,7 +139,7 @@ self.addEventListener("fetch", (event) => {
               cache.put(request, networkResponse.clone());
             }
             return networkResponse;
-          } catch (error) {
+          } catch {
             const cachedResponse = await cache.match(request);
             if (cachedResponse) return cachedResponse;
             return new Response("", { status: 408 });

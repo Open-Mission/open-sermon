@@ -13,15 +13,23 @@ import {
   PlayCircle,
   CheckCircle,
   Type,
-  type LucideIcon,
   Heading1,
   Heading2,
   Heading3,
   MessageSquare,
   Quote,
   Hash,
+  Search,
+  X,
+  type LucideIcon,
 } from 'lucide-react'
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+} from '@/components/ui/drawer'
 import { dispatchVerseSearchEvent } from './block-menu'
+import { cn } from '@/lib/utils'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -41,12 +49,7 @@ type CommandGroup = {
   items: CommandItem[]
 }
 
-export type SlashMenuState = {
-  isOpen: boolean
-  position: { top: number; left: number }
-  query: string
-  range: { from: number; to: number } | null
-}
+// ─── Constants ─────────────────────────────────────────────────────────────
 
 export const SLASH_MENU_EVENT = 'slash-menu:open'
 export const SLASH_MENU_CLOSE_EVENT = 'slash-menu:close'
@@ -64,204 +67,228 @@ export function updateSlashMenuQuery(query: string) {
   window.dispatchEvent(new CustomEvent(SLASH_MENU_QUERY_EVENT, { detail: { query } }))
 }
 
-// ─── Command definitions ──────────────────────────────────────────────────────
+// ─── Component ──────────────────────────────────────────────────────────────
 
-function useCommandGroups(t: ReturnType<typeof useTranslations<'editor'>>): CommandGroup[] {
-  return useMemo(() => [
+export function SlashCommandMenu({ editor }: { editor: Editor | null }) {
+  const t = useTranslations('editor')
+  const isMobile = useIsMobile()
+  const [isOpen, setIsOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [position, setPosition] = useState({ top: 0, left: 0 })
+  const [range, setRange] = useState<{ from: number; to: number } | null>(null)
+  
+  const menuRef = useRef<HTMLDivElement>(null)
+  const searchRef = useRef<HTMLInputElement>(null)
+
+  // ─── Commands definition ────────────────────────────
+
+  const COMMAND_GROUPS = useMemo<CommandGroup[]>(() => [
     {
       id: 'basic',
-      title: t('blockGroups.basic', { default: 'Básico' }),
+      title: 'Básico',
       items: [
         {
           id: 'text',
-          label: t('blocks.text', { default: 'Texto' }),
-          description: 'Parágrafo de texto comum',
+          label: 'Texto',
+          description: 'Comece a escrever com texto simples.',
           icon: Type,
-          keywords: ['text', 'paragraph', 'parágrafo', 'texto'],
+          keywords: ['p', 'paragrafo', 'texto'],
           group: 'basic',
           command: (e) => e.chain().focus().setParagraph().run(),
         },
         {
           id: 'h1',
-          label: t('blocks.h1', { default: 'Título 1' }),
-          description: 'Seção principal',
+          label: 'Título 1',
+          description: 'Título de seção grande.',
           icon: Heading1,
-          keywords: ['h1', 'heading', 'title', 'título', 'grande'],
+          keywords: ['h1', 'titulo', 'grande'],
           group: 'basic',
           command: (e) => e.chain().focus().toggleHeading({ level: 1 }).run(),
         },
         {
           id: 'h2',
-          label: t('blocks.h2', { default: 'Título 2' }),
-          description: 'Seção secundária',
+          label: 'Título 2',
+          description: 'Título de seção médio.',
           icon: Heading2,
-          keywords: ['h2', 'heading', 'subtitle', 'título', 'médio'],
+          keywords: ['h2', 'titulo', 'medio'],
           group: 'basic',
           command: (e) => e.chain().focus().toggleHeading({ level: 2 }).run(),
         },
         {
           id: 'h3',
-          label: t('blocks.h3', { default: 'Título 3' }),
-          description: 'Subseção',
+          label: 'Título 3',
+          description: 'Título de seção pequeno.',
           icon: Heading3,
-          keywords: ['h3', 'heading', 'subheading', 'subtítulo', 'pequeno'],
+          keywords: ['h3', 'titulo', 'pequeno'],
           group: 'basic',
           command: (e) => e.chain().focus().toggleHeading({ level: 3 }).run(),
-        },
-        {
-          id: 'quote',
-          label: 'Citação',
-          description: 'Bloco de citação',
-          icon: Quote,
-          keywords: ['quote', 'blockquote', 'citação', 'citar'],
-          group: 'basic',
-          command: (e) => e.chain().focus().toggleBlockquote().run(),
-        },
-        {
-          id: 'callout',
-          label: t('blocks.callout', { default: 'Destaque' }),
-          description: 'Caixa de destaque com emoji',
-          icon: MessageSquare,
-          keywords: ['callout', 'note', 'info', 'destaque', 'aviso'],
-          group: 'basic',
-          command: (e) => e.chain().focus().insertContent({ type: 'calloutBlock', content: [{ type: 'paragraph' }] }).run(),
         },
       ],
     },
     {
-      id: 'sermon',
-      title: t('blockGroups.sections', { default: 'Seções do Sermão' }),
+      id: 'scripture',
+      title: 'Escrituras',
       items: [
         {
           id: 'verse',
-          label: t('blocks.verse', { default: 'Versículo Bíblico' }),
-          description: 'Buscar e inserir versículo',
+          label: 'Versículo',
+          description: 'Insira um bloco de versículo bíblico.',
           icon: BookOpen,
-          keywords: ['verse', 'bible', 'versículo', 'bíblia', 'scripture'],
-          group: 'sermon',
+          keywords: ['biblia', 'versiculo', 'bloco'],
+          group: 'scripture',
           command: (e) => {
-            e.chain().focus().insertContent([
-              { type: 'verseBlock', attrs: { reference: '', text: '', version: 'NVI' }, content: [{ type: 'paragraph' }] },
-              { type: 'paragraph' },
+             e.chain().focus().insertContent([
+              { 
+                type: 'verseBlock', 
+                attrs: { reference: '', text: '', version: 'NVI' },
+                content: [{ type: 'paragraph' }]
+              },
+              { type: 'paragraph' }
             ]).run()
             dispatchVerseSearchEvent()
           },
         },
         {
-          id: 'inlineVerse',
-          label: t('blocks.inlineVerse', { default: 'Verso Inline' }),
-          description: 'Versículo como referência inline',
-          icon: Hash,
-          keywords: ['inline', 'verse', 'versículo', 'referência'],
-          group: 'sermon',
+          id: 'inline-verse',
+          label: 'Versículo Inline',
+          description: 'Insira um versículo dentro do texto.',
+          icon: Quote,
+          keywords: ['biblia', 'versiculo', 'inline', 'texto'],
+          group: 'scripture',
           command: (e) => {
             e.chain().focus().insertContent([
-              { type: 'inlineVerse', attrs: { reference: '', text: '', version: 'NVI' } },
+              { 
+                type: 'inlineVerse', 
+                attrs: { reference: '', text: '', version: 'NVI' },
+              },
             ]).run()
             dispatchVerseSearchEvent()
           },
         },
+      ],
+    },
+    {
+      id: 'blocks',
+      title: 'Blocos de Estudo',
+      items: [
         {
-          id: 'intro',
-          label: t('blocks.intro', { default: 'Introdução' }),
-          description: 'Bloco de abertura do sermão',
-          icon: PlayCircle,
-          keywords: ['intro', 'introduction', 'abertura', 'introdução'],
-          group: 'sermon',
-          command: (e) => e.chain().focus().insertContent({ type: 'introBlock', content: [{ type: 'paragraph' }] }).run(),
-        },
-        {
-          id: 'point',
-          label: t('blocks.point', { default: 'Ponto Principal' }),
-          description: 'Argumento central da mensagem',
-          icon: Pin,
-          keywords: ['point', 'main', 'ponto', 'central', 'argumento'],
-          group: 'sermon',
-          command: (e) => e.chain().focus().insertContent({ type: 'pointBlock', content: [{ type: 'paragraph' }] }).run(),
+          id: 'callout',
+          label: 'Callout',
+          description: 'Destaque uma informação importante.',
+          icon: MessageSquare,
+          keywords: ['callout', 'destaque', 'info'],
+          group: 'blocks',
+          command: (e) => e.chain().focus().insertContent({ type: 'calloutBlock', content: [{ type: 'paragraph' }] }).run(),
         },
         {
           id: 'illustration',
-          label: t('blocks.illustration', { default: 'Ilustração' }),
-          description: 'História ou exemplo ilustrativo',
+          label: 'Ilustração',
+          description: 'Uma história ou exemplo ilustrativo.',
           icon: Lightbulb,
-          keywords: ['illustration', 'story', 'example', 'ilustração', 'história', 'exemplo'],
-          group: 'sermon',
+          keywords: ['ilustracao', 'exemplo', 'historia'],
+          group: 'blocks',
           command: (e) => e.chain().focus().insertContent({ type: 'illustrationBlock', content: [{ type: 'paragraph' }] }).run(),
         },
         {
           id: 'application',
-          label: t('blocks.application', { default: 'Aplicação' }),
-          description: 'Como aplicar na vida prática',
+          label: 'Aplicação',
+          description: 'Como aplicar esse ensino na vida.',
           icon: Target,
-          keywords: ['application', 'apply', 'aplicação', 'aplicar', 'prática'],
-          group: 'sermon',
+          keywords: ['aplicacao', 'pratica', 'vida'],
+          group: 'blocks',
           command: (e) => e.chain().focus().insertContent({ type: 'applicationBlock', content: [{ type: 'paragraph' }] }).run(),
         },
         {
+          id: 'point',
+          label: 'Ponto Principal',
+          description: 'Um dos pontos principais da mensagem.',
+          icon: Pin,
+          keywords: ['ponto', 'principal', 'topico'],
+          group: 'blocks',
+          command: (e) => e.chain().focus().insertContent({ type: 'pointBlock', content: [{ type: 'paragraph' }] }).run(),
+        },
+      ],
+    },
+    {
+      id: 'structure',
+      title: 'Estrutura',
+      items: [
+        {
+          id: 'intro',
+          label: 'Introdução',
+          description: 'Início da sua mensagem.',
+          icon: PlayCircle,
+          keywords: ['inicio', 'introducao', 'start'],
+          group: 'structure',
+          command: (e) => e.chain().focus().insertContent({ type: 'introBlock', content: [{ type: 'paragraph' }] }).run(),
+        },
+        {
           id: 'conclusion',
-          label: t('blocks.conclusion', { default: 'Conclusão' }),
-          description: 'Fechamento e chamado à ação',
+          label: 'Conclusão',
+          description: 'Encerramento e apelo.',
           icon: CheckCircle,
-          keywords: ['conclusion', 'closing', 'conclusão', 'fechamento'],
-          group: 'sermon',
+          keywords: ['fim', 'conclusao', 'encerramento'],
+          group: 'structure',
           command: (e) => e.chain().focus().insertContent({ type: 'conclusionBlock', content: [{ type: 'paragraph' }] }).run(),
         },
       ],
     },
-  ], [t])
-}
+  ], [])
 
-// ─── Main component ───────────────────────────────────────────────────────────
-
-type SlashCommandMenuProps = {
-  editor: Editor | null
-}
-
-export function SlashCommandMenu({ editor }: SlashCommandMenuProps) {
-  const t = useTranslations('editor')
-  const isMobile = useIsMobile()
-  const [isOpen, setIsOpen] = useState(false)
-  const [query, setQuery] = useState('')
-  const [position, setPosition] = useState({ top: 0, left: 0 })
-  const [range, setRange] = useState<{ from: number; to: number } | null>(null)
-  const [selectedIndex, setSelectedIndex] = useState(0)
-  const [isClosing, setIsClosing] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
-  const searchRef = useRef<HTMLInputElement>(null)
-  const commandGroups = useCommandGroups(t)
-
+  // ─── Filtering logic ───────────────────────────────
 
   const filteredGroups = useMemo(() => {
-    if (!query.trim()) return commandGroups
-    const q = query.toLowerCase()
-    return commandGroups
-      .map(group => ({
-        ...group,
-        items: group.items.filter(item =>
-          item.label.toLowerCase().includes(q) ||
-          item.description.toLowerCase().includes(q) ||
-          item.keywords.some(k => k.includes(q))
-        ),
-      }))
-      .filter(group => group.items.length > 0)
-  }, [commandGroups, query])
+    if (!query) return COMMAND_GROUPS
+    
+    return COMMAND_GROUPS.map(group => ({
+      ...group,
+      items: group.items.filter(item => 
+        item.label.toLowerCase().includes(query.toLowerCase()) ||
+        item.keywords.some(k => k.toLowerCase().includes(query.toLowerCase()))
+      )
+    })).filter(group => group.items.length > 0)
+  }, [query, COMMAND_GROUPS])
 
-  const flatFiltered = useMemo(() => filteredGroups.flatMap(g => g.items), [filteredGroups])
+  const flatFiltered = useMemo(() => 
+    filteredGroups.flatMap(g => g.items), 
+    [filteredGroups]
+  )
 
-  const closeMenu = useCallback((restoreFocus = true) => {
-    setIsClosing(true)
-    setTimeout(() => {
-      setIsOpen(false)
-      setIsClosing(false)
-      setQuery('')
-      setSelectedIndex(0)
-      if (restoreFocus && editor) {
-        setTimeout(() => editor.commands.focus(), 50)
-      }
-    }, 180)
-  }, [editor])
+  // Reset index when query changes
+  useEffect(() => {
+    setSelectedIndex(0)
+  }, [query])
 
-  // Listen for open events
+  // ─── Handlers ──────────────────────────────────────
+
+  const closeMenu = useCallback(() => {
+    setIsOpen(false)
+    setQuery('')
+    setSelectedIndex(0)
+    window.dispatchEvent(new CustomEvent(SLASH_MENU_CLOSE_EVENT))
+  }, [])
+
+  const executeCommand = useCallback((item: CommandItem) => {
+    if (!editor) return
+
+    // Delete the '/' and the query
+    if (range) {
+      editor.chain().focus().deleteRange(range).run()
+    } else {
+      // Fallback
+      editor.chain().focus().deleteRange({
+        from: editor.state.selection.from - 1 - query.length,
+        to: editor.state.selection.from
+      }).run()
+    }
+
+    item.command(editor, range || undefined)
+    closeMenu()
+  }, [editor, query, range, closeMenu])
+
+  // ─── Events ────────────────────────────────────────
+
   useEffect(() => {
     const handleOpen = (e: Event) => {
       const detail = (e as CustomEvent).detail as { position: { top: number; left: number }; range: { from: number; to: number } }
@@ -275,20 +302,23 @@ export function SlashCommandMenu({ editor }: SlashCommandMenuProps) {
           active.blur();
         }
       }
+      setIsOpen(isOpen => {
+        if (!isOpen) return true;
+        return isOpen;
+      });
       setIsOpen(true)
     }
 
-    const handleClose = () => closeMenu(true)
-
+    const handleClose = () => closeMenu()
     const handleQuery = (e: Event) => {
       const detail = (e as CustomEvent).detail as { query: string }
       setQuery(detail.query)
-      setSelectedIndex(0)
     }
 
     window.addEventListener(SLASH_MENU_EVENT, handleOpen)
     window.addEventListener(SLASH_MENU_CLOSE_EVENT, handleClose)
     window.addEventListener(SLASH_MENU_QUERY_EVENT, handleQuery)
+
     return () => {
       window.removeEventListener(SLASH_MENU_EVENT, handleOpen)
       window.removeEventListener(SLASH_MENU_CLOSE_EVENT, handleClose)
@@ -303,256 +333,217 @@ export function SlashCommandMenu({ editor }: SlashCommandMenuProps) {
     }
   }, [isOpen, isMobile])
 
-  // Scroll selected item into view
-  useEffect(() => {
-    if (!isOpen) return
-    const el = menuRef.current?.querySelector(`[data-index="${selectedIndex}"]`)
-    el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-  }, [selectedIndex, isOpen])
-
-
-
+  // Keyboard navigation (Desktop)
   useEffect(() => {
     if (!isOpen || isMobile) return
-    const handleClick = (e: MouseEvent) => {
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setSelectedIndex(prev => (prev + 1) % flatFiltered.length)
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setSelectedIndex(prev => (prev - 1 + flatFiltered.length) % flatFiltered.length)
+      } else if (e.key === 'Enter') {
+        e.preventDefault()
+        const selectedItem = flatFiltered[selectedIndex]
+        if (selectedItem) executeCommand(selectedItem)
+      } else if (e.key === 'Escape') {
+        e.preventDefault()
+        closeMenu()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, isMobile, flatFiltered, selectedIndex, executeCommand, closeMenu])
+
+  // Close on outside click (Desktop)
+  useEffect(() => {
+    if (!isOpen || isMobile) return
+
+    const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         closeMenu()
       }
     }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
+
+    window.addEventListener('mousedown', handleClickOutside)
+    return () => window.removeEventListener('mousedown', handleClickOutside)
   }, [isOpen, isMobile, closeMenu])
 
-  const executeCommand = useCallback((item: CommandItem) => {
-    if (!editor) return
-
-    // Compute the actual range to delete: from the slash position to current cursor
-    // The slash is at range.from, then the user may have typed query chars after it
-    let deleteRange = range
-    if (range && query.length > 0) {
-      // The '/' + query.length chars were typed
-      deleteRange = { from: range.from, to: range.from + 1 + query.length }
-    }
-
-    if (deleteRange) {
-      // Clamp to document bounds
-      const docSize = editor.state.doc.content.size
-      const safeFrom = Math.max(0, Math.min(deleteRange.from, docSize))
-      const safeTo = Math.max(safeFrom, Math.min(deleteRange.to, docSize))
-      if (safeTo > safeFrom) {
-        editor.chain().focus().deleteRange({ from: safeFrom, to: safeTo }).run()
-      }
-    } else {
-      editor.commands.focus()
-    }
-
-    item.command(editor, deleteRange ?? undefined)
-    closeMenu(false)
-  }, [editor, range, query, closeMenu])
-
-  // Keyboard navigation
-  useEffect(() => {
-    if (!isOpen) return
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { closeMenu(); return }
-      if (e.key === 'ArrowDown') {
-        e.preventDefault()
-        setSelectedIndex(i => (i + 1) % flatFiltered.length)
-      }
-      if (e.key === 'ArrowUp') {
-        e.preventDefault()
-        setSelectedIndex(i => (i - 1 + flatFiltered.length) % flatFiltered.length)
-      }
-      if (e.key === 'Enter') {
-        e.preventDefault()
-        if (flatFiltered[selectedIndex]) executeCommand(flatFiltered[selectedIndex])
-      }
-    }
-    window.addEventListener('keydown', handleKey)
-    return () => window.removeEventListener('keydown', handleKey)
-  }, [isOpen, flatFiltered, selectedIndex, closeMenu, executeCommand])
+  // ─── Render ─────────────────────────────────────────
 
   if (!isOpen) return null
 
   // ─── Mobile bottom sheet ────────────────────────────
   if (isMobile) {
     return (
-      <div className="slash-menu-mobile-overlay" onClick={() => closeMenu()}>
-        <div
-          className={`slash-menu-mobile-sheet ${isClosing ? 'slash-menu-sheet-closing' : 'slash-menu-sheet-opening'}`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Handle */}
-          <div className="slash-menu-handle-bar">
-            <div className="slash-menu-handle" />
-          </div>
+      <Drawer 
+        open={isOpen} 
+        onOpenChange={(open) => {
+          if (!open) closeMenu()
+        }}
+      >
+        <DrawerContent className="pb-8 max-h-[92vh]">
+          {/* Handle is built-in to DrawerContent usually, but we keep header clear */}
+          <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
 
           {/* Header */}
-          <div className="slash-menu-mobile-header">
-            <div className="slash-menu-mobile-title">
-              <span className="slash-menu-mobile-title-icon">/</span>
-              <span>Comandos</span>
+          <div className="px-6 pt-6 pb-2">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 text-primary font-bold">
+                /
+              </div>
+              <h2 className="text-xl font-bold">Comandos</h2>
             </div>
-            <button className="slash-menu-close-btn" onClick={() => closeMenu()} aria-label="Fechar">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </button>
+
+            {/* Search */}
+            <div className="relative mb-4 group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <input
+                ref={searchRef}
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Pesquisar comandos..."
+                className="w-full h-11 bg-muted/50 border border-transparent focus:border-primary/20 focus:bg-background rounded-xl pl-10 pr-4 text-base outline-none transition-all"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+              />
+              {query && (
+                <button 
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground" 
+                  onClick={() => setQuery('')}
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Search */}
-          <div className="slash-menu-search-wrapper">
-            <svg className="slash-menu-search-icon" width="15" height="15" viewBox="0 0 15 15" fill="none">
-              <path d="M10 6.5C10 8.43 8.43 10 6.5 10C4.57 10 3 8.43 3 6.5C3 4.57 4.57 3 6.5 3C8.43 3 10 4.57 10 6.5ZM9.5 10.5L12.5 13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-            <input
-              ref={searchRef}
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Pesquisar comandos..."
-              className="slash-menu-search-input"
-              autoComplete="off"
-              autoCorrect="off"
-              spellCheck={false}
-            />
-            {query && (
-              <button className="slash-menu-search-clear" onClick={() => setQuery('')}>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path d="M1 1L11 11M11 1L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-              </button>
-            )}
-          </div>
+          <DrawerDescription className="sr-only">
+            Selecione um bloco ou comando para inserir no editor
+          </DrawerDescription>
 
-          {/* Items */}
-          <div ref={menuRef} className="slash-menu-mobile-items">
+          {/* Items Container */}
+          <div ref={menuRef} className="px-3 pb-4 overflow-y-auto">
             {filteredGroups.length === 0 ? (
-              <div className="slash-menu-empty">
-                <span>Nenhum resultado para &ldquo;{query}&rdquo;</span>
+              <div className="py-12 text-center text-muted-foreground animate-in fade-in zoom-in-95">
+                <Search className="mx-auto h-8 w-8 mb-3 opacity-20" />
+                <p className="text-sm">Nenhum resultado para &ldquo;{query}&rdquo;</p>
               </div>
             ) : (
-              filteredGroups.map((group) => {
-                const groupStartIndex = flatFiltered.findIndex(i => i.id === group.items[0]?.id)
-                return (
-                  <div key={group.id} className="slash-menu-group">
-                    <div className="slash-menu-group-label">{group.title}</div>
-                    <div className="slash-menu-mobile-grid">
-                      {group.items.map((item, idx) => {
-                        const globalIdx = groupStartIndex + idx
-                        return (
-                          <button
-                            key={item.id}
-                            data-index={globalIdx}
-                            className={`slash-menu-mobile-tile ${globalIdx === selectedIndex ? 'slash-menu-tile-selected' : ''}`}
-                            onClick={() => executeCommand(item)}
-                            onMouseEnter={() => setSelectedIndex(globalIdx)}
-                          >
-                            <div className="slash-menu-tile-icon">
-                              <item.icon size={20} />
-                            </div>
-                            <span className="slash-menu-tile-label">{item.label}</span>
-                          </button>
-                        )
-                      })}
+              <div className="space-y-6">
+                {filteredGroups.map((group) => {
+                  const groupStartIndex = flatFiltered.findIndex(i => i.id === group.items[0]?.id)
+                  return (
+                    <div key={group.id} className="space-y-2">
+                      <div className="px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                        {group.title}
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {group.items.map((item, idx) => {
+                          const globalIdx = groupStartIndex + idx
+                          const isSelected = globalIdx === selectedIndex
+                          return (
+                            <button
+                              key={item.id}
+                              data-index={globalIdx}
+                              className={cn(
+                                "flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-200",
+                                isSelected 
+                                  ? "bg-primary/10 border-primary/20 shadow-sm" 
+                                  : "bg-secondary/20 border-transparent active:scale-95 active:bg-secondary/40"
+                              )}
+                              onClick={() => executeCommand(item)}
+                              onMouseEnter={() => !isMobile && setSelectedIndex(globalIdx)}
+                            >
+                              <div className={cn(
+                                "w-10 h-10 rounded-xl flex items-center justify-center mb-2 transition-colors",
+                                isSelected ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground"
+                              )}>
+                                <item.icon size={20} />
+                              </div>
+                              <span className="text-[13px] font-semibold text-foreground">{item.label}</span>
+                            </button>
+                          )
+                        })}
+                      </div>
                     </div>
-                  </div>
-                )
-              })
+                  )
+                })}
+              </div>
             )}
           </div>
-        </div>
-      </div>
+        </DrawerContent>
+      </Drawer>
     )
   }
 
-  // ─── Desktop floating popover ────────────────────────
-  const viewportH = typeof window !== 'undefined' ? window.innerHeight : 800
-  const viewportW = typeof window !== 'undefined' ? window.innerWidth : 1200
-  const menuH = 400
-  const menuW = 300
-  const adjustedTop = position.top + menuH > viewportH - 16
-    ? position.top - menuH - 8
-    : position.top + 4
-  const adjustedLeft = position.left + menuW > viewportW - 16
-    ? viewportW - menuW - 16
-    : position.left
-
+  // ─── Desktop floating menu ──────────────────────────
   return (
     <div
       ref={menuRef}
-      className={`slash-menu-desktop ${isClosing ? 'slash-menu-desktop-closing' : 'slash-menu-desktop-opening'}`}
-      style={{ top: adjustedTop, left: adjustedLeft }}
+      className="fixed z-50 w-72 bg-background border border-border/50 shadow-2xl rounded-xl overflow-hidden animate-in fade-in zoom-in-95 duration-100 backdrop-blur-xl"
+      style={{
+        top: position.top,
+        left: position.left,
+      }}
     >
-      {/* Search */}
-      <div className="slash-menu-desktop-search">
-        <svg className="slash-menu-search-icon" width="14" height="14" viewBox="0 0 15 15" fill="none">
-          <path d="M10 6.5C10 8.43 8.43 10 6.5 10C4.57 10 3 8.43 3 6.5C3 4.57 4.57 3 6.5 3C8.43 3 10 4.57 10 6.5ZM9.5 10.5L12.5 13.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-        </svg>
-        <input
-          ref={searchRef}
-          type="text"
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value)
-            setSelectedIndex(0)
-          }}
-          placeholder="Pesquisar comandos..."
-          className="slash-menu-desktop-search-input"
-          autoComplete="off"
-          autoCorrect="off"
-          spellCheck={false}
-        />
-        <kbd className="slash-menu-kbd">esc</kbd>
-      </div>
-
-      {/* Groups */}
-      <div className="slash-menu-desktop-items">
+      {/* Scrollable area */}
+      <div className="max-h-[min(400px,80vh)] overflow-y-auto p-1.5 custom-scrollbar">
         {filteredGroups.length === 0 ? (
-          <div className="slash-menu-empty">
-            <span>Sem resultados para &ldquo;{query}&rdquo;</span>
+          <div className="px-3 py-6 text-center text-muted-foreground text-sm">
+            Nenhum resultado
           </div>
         ) : (
           filteredGroups.map((group) => {
             const groupStartIndex = flatFiltered.findIndex(i => i.id === group.items[0]?.id)
             return (
-              <div key={group.id} className="slash-menu-group">
-                <div className="slash-menu-group-label">{group.title}</div>
-                {group.items.map((item, idx) => {
-                  const globalIdx = groupStartIndex + idx
-                  const isSelected = globalIdx === selectedIndex
-                  return (
-                    <button
-                      key={item.id}
-                      data-index={globalIdx}
-                      className={`slash-menu-desktop-item ${isSelected ? 'slash-menu-item-selected' : ''}`}
-                      onClick={() => executeCommand(item)}
-                      onMouseEnter={() => setSelectedIndex(globalIdx)}
-                    >
-                      <div className={`slash-menu-desktop-item-icon ${isSelected ? 'slash-menu-item-icon-selected' : ''}`}>
-                        <item.icon size={15} />
-                      </div>
-                      <div className="slash-menu-desktop-item-content">
-                        <span className="slash-menu-desktop-item-label">{item.label}</span>
-                        <span className="slash-menu-desktop-item-desc">{item.description}</span>
-                      </div>
-                      {isSelected && (
-                        <kbd className="slash-menu-enter-kbd">↵</kbd>
-                      )}
-                    </button>
-                  )
-                })}
+              <div key={group.id} className="mb-2 last:mb-0">
+                <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
+                  {group.title}
+                </div>
+                <div className="space-y-0.5">
+                  {group.items.map((item, idx) => {
+                    const globalIdx = groupStartIndex + idx
+                    const isSelected = globalIdx === selectedIndex
+                    return (
+                      <button
+                        key={item.id}
+                        className={cn(
+                          "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-all duration-75",
+                          isSelected ? "bg-primary text-primary-foreground shadow-sm" : "hover:bg-muted text-foreground"
+                        )}
+                        onClick={() => executeCommand(item)}
+                        onMouseEnter={() => setSelectedIndex(globalIdx)}
+                      >
+                        <div className={cn(
+                          "flex items-center justify-center w-7 h-7 rounded-md shrink-0",
+                          isSelected ? "bg-background/20" : "bg-muted"
+                        )}>
+                          <item.icon size={16} />
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-sm font-medium truncate leading-tight">
+                            {item.label}
+                          </span>
+                          {!isSelected && (
+                            <span className="text-[10px] text-muted-foreground truncate leading-tight">
+                              {item.description}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
             )
           })
         )}
-      </div>
-
-      {/* Footer hint */}
-      <div className="slash-menu-footer">
-        <span><kbd className="slash-menu-kbd-sm">↑↓</kbd> navegar</span>
-        <span><kbd className="slash-menu-kbd-sm">↵</kbd> inserir</span>
-        <span><kbd className="slash-menu-kbd-sm">esc</kbd> fechar</span>
       </div>
     </div>
   )
