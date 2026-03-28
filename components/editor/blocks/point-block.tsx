@@ -5,7 +5,7 @@ import { PointBlockView } from './point-block-view'
 export const PointBlock = Node.create({
   name: 'pointBlock',
   group: 'block',
-  content: 'inline*',
+  content: 'block+',
   parseHTML() {
     return [{ tag: 'div[data-type="point"]' }]
   },

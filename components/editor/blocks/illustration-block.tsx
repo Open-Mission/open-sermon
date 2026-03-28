@@ -5,7 +5,7 @@ import { IllustrationBlockView } from './illustration-block-view'
 export const IllustrationBlock = Node.create({
   name: 'illustrationBlock',
   group: 'block',
-  content: 'inline*',
+  content: 'block+',
   parseHTML() {
     return [{ tag: 'div[data-type="illustration"]' }]
   },

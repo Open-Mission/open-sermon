@@ -5,7 +5,7 @@ import { ApplicationBlockView } from './application-block-view'
 export const ApplicationBlock = Node.create({
   name: 'applicationBlock',
   group: 'block',
-  content: 'inline*',
+  content: 'block+',
   parseHTML() {
     return [{ tag: 'div[data-type="application"]' }]
   },

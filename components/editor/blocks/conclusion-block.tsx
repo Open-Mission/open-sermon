@@ -5,7 +5,7 @@ import { ConclusionBlockView } from './conclusion-block-view'
 export const ConclusionBlock = Node.create({
   name: 'conclusionBlock',
   group: 'block',
-  content: 'inline*',
+  content: 'block+',
   parseHTML() {
     return [{ tag: 'div[data-type="conclusion"]' }]
   },

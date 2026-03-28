@@ -5,7 +5,7 @@ import { IntroBlockView } from './intro-block-view'
 export const IntroBlock = Node.create({
   name: 'introBlock',
   group: 'block',
-  content: 'inline*',
+  content: 'block+',
   parseHTML() {
     return [{ tag: 'div[data-type="intro"]' }]
   },
