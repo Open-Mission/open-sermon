@@ -23,9 +23,12 @@ import { BlockMenu } from "./block-menu";
 
 
 import { createClient } from "@/lib/supabase/client";
+import { syncService } from "@/lib/sync-service";
+import { offlineDb } from "@/lib/offline-db";
 import { useSidebar } from "@/components/ui/sidebar";
 import { Trash2, Bold, Italic, Underline as UnderlineIcon, Copy, X, Highlighter } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { Sermon } from "@/types/sermon";
 import { BlockSelectionProvider, useBlockSelection } from "./block-selection-context";
 import { SelectableTextBlockView } from "./blocks/selectable-text-block-view";
 import Paragraph from "@tiptap/extension-paragraph";
@@ -163,6 +166,21 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
 
       setIsSaving(true);
       try {
+        const localSermon = await offlineDb.getSermon(sermonId);
+        await offlineDb.saveSermon({
+          ...localSermon,
+          id: sermonId,
+          blocks: content,
+          updated_at: new Date().toISOString(),
+        } as Sermon);
+
+        if (!navigator.onLine || offlineDb.isLocalId(sermonId)) {
+          await syncService.updateSermonOffline(sermonId, {
+            blocks: content,
+          });
+          return;
+        }
+
         await supabase
           .from("sermons")
           .update({ blocks: content })

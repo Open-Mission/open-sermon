@@ -4,28 +4,19 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-keys";
 import { localdb, markAsSynced } from "@/lib/localdb";
 import type { Sermon } from "@/types/sermon";
+import { offlineDb } from "@/lib/offline-db";
+import { syncService } from "@/lib/sync-service";
+import { useState, useEffect } from "react";
 
 async function fetchSermons(limit?: number): Promise<Sermon[]> {
-  const params = new URLSearchParams();
-  if (limit) params.set("limit", String(limit));
-
-  const url = `/api/sermons${params.toString() ? `?${params}` : ""}`;
-  const res = await fetch(url);
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch sermons");
-  }
-
+  const res = await fetch(`/api/sermons${limit ? `?limit=${limit}` : ""}`);
+  if (!res.ok) throw new Error("Failed to fetch sermons");
   return res.json();
 }
 
 async function fetchSermon(id: string): Promise<Sermon> {
   const res = await fetch(`/api/sermons/${id}`);
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch sermon");
-  }
-
+  if (!res.ok) throw new Error("Failed to fetch sermon");
   return res.json();
 }
 
@@ -61,20 +52,119 @@ async function fetchSermonsWithLocalSync(limit?: number): Promise<Sermon[]> {
 }
 
 export function useSermons(limit?: number) {
-  return useQuery({
+  const [offlineSermons, setOfflineSermons] = useState<Sermon[]>([]);
+  const [isOffline, setIsOffline] = useState(false);
+
+  useEffect(() => {
+    const loadOfflineData = async () => {
+      if (!navigator.onLine) {
+        const userId = localStorage.getItem("userId");
+        if (userId) {
+          const sermons = await offlineDb.getAllSermons(userId);
+          setOfflineSermons(sermons);
+          setIsOffline(true);
+        }
+      }
+    };
+    loadOfflineData();
+
+    const handleOffline = () => {
+      setIsOffline(true);
+      loadOfflineData();
+    };
+    const handleOnline = () => setIsOffline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  const query = useQuery({
     queryKey: queryKeys.sermons.list(limit),
     queryFn: () => fetchSermonsWithLocalSync(limit),
     staleTime: 30 * 1000,
+    enabled: !isOffline,
   });
+
+  useEffect(() => {
+    if (query.data && !isOffline) {
+      const userId = query.data[0]?.user_id;
+      if (userId) {
+        offlineDb.saveSermons(query.data);
+        localStorage.setItem("userId", userId);
+      }
+    }
+  }, [query.data, isOffline]);
+
+  if (isOffline) {
+    return {
+      ...query,
+      data: offlineSermons,
+      isLoading: false,
+      isFetching: false,
+    };
+  }
+
+  return query;
 }
 
 export function useSermon(id: string) {
-  return useQuery({
+  const [offlineSermon, setOfflineSermon] = useState<Sermon | null>(null);
+  const [isOffline, setIsOffline] = useState(false);
+
+  useEffect(() => {
+    const loadOfflineData = async () => {
+      if (!navigator.onLine && id) {
+        const sermon = await offlineDb.getSermon(id);
+        setOfflineSermon(sermon ?? null);
+        setIsOffline(true);
+      }
+    };
+    loadOfflineData();
+
+    const handleOffline = () => {
+      setIsOffline(true);
+      loadOfflineData();
+    };
+    const handleOnline = () => setIsOffline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [id]);
+
+  const query = useQuery({
     queryKey: queryKeys.sermons.detail(id),
     queryFn: () => fetchSermonWithLocalSync(id),
     staleTime: 60 * 1000,
-    enabled: !!id,
+    enabled: !!id && !isOffline,
   });
+
+  useEffect(() => {
+    if (query.data && !isOffline) {
+      offlineDb.saveSermon(query.data);
+      localStorage.setItem("userId", query.data.user_id);
+    }
+  }, [query.data, isOffline]);
+
+  if (isOffline) {
+    return {
+      ...query,
+      data: offlineSermon,
+      isLoading: false,
+      isFetching: false,
+    };
+  }
+
+  return query;
 }
 
 export function useSermonOfflineStatus(id: string) {
@@ -97,11 +187,18 @@ export function useCreateSermon() {
 
   return useMutation({
     mutationFn: async (title: string) => {
+      if (!navigator.onLine) {
+        const sermon = await syncService.createSermonOffline(title);
+        return { success: true, sermonId: sermon.id };
+      }
+
       const { createSermonWithTitle } = await import("@/lib/sermon-actions");
       return createSermonWithTitle(title);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.sermons.all });
+    onSuccess: (result) => {
+      if (result.success && !offlineDb.isLocalId(result.sermonId!)) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.sermons.all });
+      }
     },
   });
 }
@@ -111,6 +208,11 @@ export function useDeleteSermon() {
 
   return useMutation({
     mutationFn: async (sermonId: string) => {
+      if (!navigator.onLine || offlineDb.isLocalId(sermonId)) {
+        await syncService.deleteSermonOffline(sermonId);
+        return { success: true };
+      }
+
       const { softDeleteSermon } = await import("@/lib/sermon-actions");
       await localdb.deleteSermon(sermonId);
       return softDeleteSermon(sermonId);
@@ -154,6 +256,11 @@ export function useRenameSermon() {
       sermonId: string;
       newTitle: string;
     }) => {
+      if (!navigator.onLine || offlineDb.isLocalId(sermonId)) {
+        await syncService.updateSermonOffline(sermonId, { title: newTitle });
+        return { success: true };
+      }
+
       const { renameSermon } = await import("@/lib/sermon-actions");
       return renameSermon(sermonId, newTitle);
     },

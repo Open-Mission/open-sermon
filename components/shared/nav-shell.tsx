@@ -7,9 +7,11 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 export function NavShell({
   children,
   sidebar,
+  syncIndicator,
 }: {
   children: React.ReactNode;
   sidebar: React.ReactNode;
+  syncIndicator?: React.ReactNode;
 }) {
   const pathname = usePathname();
   const showSidebar = pathname.startsWith("/sermons");

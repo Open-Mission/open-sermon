@@ -33,12 +33,14 @@ import {
   Delete01Icon,
   FavouriteIcon,
 } from "@hugeicons/core-free-icons";
+import { CloudOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { softDeleteSermon, renameSermon, toggleFavorite } from "@/lib/sermon-actions";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { offlineDb } from "@/lib/offline-db";
 
 interface SermonItemProps {
   sermon: Sermon;
@@ -56,6 +58,7 @@ export function SermonItem({ sermon }: SermonItemProps) {
   const [isRenaming, setIsRenaming] = React.useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = React.useState(false);
   const [isFavorite, setIsFavorite] = React.useState(sermon.is_favorite ?? false);
+  const isLocal = offlineDb.isLocalId(sermon.id);
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -160,6 +163,9 @@ export function SermonItem({ sermon }: SermonItemProps) {
             <a href={`/sermons/${sermon.id}`}>
               <HugeiconsIcon icon={File01Icon} size={18} />
               <span className="truncate">{sermon.title}</span>
+              {isLocal && (
+                <CloudOff className="h-3 w-3 text-amber-500 ml-auto shrink-0" />
+              )}
             </a>
           </SidebarMenuButton>
           {isMobile ? (

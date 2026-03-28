@@ -6,6 +6,7 @@ import { SaveIndicator } from "@/components/editor/save-indicator";
 import { FavoriteButton } from "@/components/shared/favorite-button";
 import { ShareButton } from "@/components/shared/share-button";
 import { SermonActionsDropdown } from "@/components/shared/sermon-actions-dropdown";
+import { SyncStatusIndicator } from "@/components/shared/sync-status-indicator";
 
 export default async function SermonPage({
   params,
@@ -40,6 +41,7 @@ export default async function SermonPage({
         </div>
         
         <div className="flex items-center gap-1">
+          <SyncStatusIndicator />
           <SaveIndicator />
           <div className="flex items-center gap-1 opacity-100 group-hover:opacity-100 transition-opacity">
             <FavoriteButton

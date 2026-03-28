@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppSidebar } from "@/components/shared/app-sidebar";
 import { NavShell } from "@/components/shared/nav-shell";
+import { SyncWrapper } from "@/components/shared/sync-wrapper";
 
 export default async function AppLayout({
   children,
@@ -20,10 +21,12 @@ export default async function AppLayout({
   }
 
   return (
-    <TooltipProvider delayDuration={0}>
-      <NavShell sidebar={<AppSidebar />}>
-        {children}
-      </NavShell>
-    </TooltipProvider>
+    <SyncWrapper userId={user.id}>
+      <TooltipProvider delayDuration={0}>
+        <NavShell sidebar={<AppSidebar />}>
+          {children}
+        </NavShell>
+      </TooltipProvider>
+    </SyncWrapper>
   );
 }
