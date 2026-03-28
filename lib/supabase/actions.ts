@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { defaultLocale } from "@/i18n/routing";
 
 export type AuthResult = {
   error?: string;
@@ -15,7 +16,7 @@ export async function signIn(
 
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  const locale = (formData.get("locale") as string) || "pt-BR";
+  const locale = (formData.get("locale") as string) || defaultLocale;
 
   const { error } = await supabase.auth.signInWithPassword({
     email,
@@ -26,7 +27,7 @@ export async function signIn(
     return { error: error.message };
   }
 
-  redirect(`/${locale}`);
+  redirect(locale === defaultLocale ? "/" : `/${locale}`);
 }
 
 export async function signUp(
@@ -58,12 +59,13 @@ export async function signInWithMagicLink(
 
   const email = formData.get("email") as string;
   const origin = formData.get("origin") as string;
-  const locale = (formData.get("locale") as string) || "pt-BR";
+  const locale = (formData.get("locale") as string) || defaultLocale;
+  const localePath = locale === defaultLocale ? "" : `/${locale}`;
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: `${origin}/${locale}/auth/callback`,
+      emailRedirectTo: `${origin}${localePath}/auth/callback`,
     },
   });
 
@@ -74,15 +76,16 @@ export async function signInWithMagicLink(
   return { error: undefined };
 }
 
-export async function signInWithGoogle(locale: string = "pt-BR") {
+export async function signInWithGoogle(locale: string = defaultLocale) {
   const supabase = await createClient();
 
   const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const localePath = locale === defaultLocale ? "" : `/${locale}`;
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${siteUrl}/${locale}/auth/callback`,
+      redirectTo: `${siteUrl}${localePath}/auth/callback`,
     },
   });
 

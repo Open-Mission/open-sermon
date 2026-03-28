@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { useActionState } from "react";
-import { useTranslations } from "next-intl";
-import { useParams, useRouter } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,8 +23,7 @@ const initialState: AuthResult = {};
 export function RegisterForm() {
   const t = useTranslations("auth");
   const router = useRouter();
-  const params = useParams();
-  const locale = params.locale as string;
+  const locale = useLocale();
   const [state, action, pending] = useActionState(signUp, initialState);
   const [hasSubmitted, setHasSubmitted] = React.useState(false);
   const success = hasSubmitted && !pending && state.error === undefined;

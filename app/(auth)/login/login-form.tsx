@@ -1,9 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { useActionState, useState } from "react";
-import { useTranslations, useMessages } from "next-intl";
-import { useParams } from "next/navigation";
+import { useActionState } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,15 +21,9 @@ const initialState: AuthResult = {};
 
 export function LoginForm() {
   const t = useTranslations("auth");
-  const params = useParams();
-  const locale = params.locale as string;
-  const [mounted, setMounted] = useState(false);
+  const locale = useLocale();
 
   const [state, action, pending] = useActionState(signIn, initialState);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
 
   return (
     <Card className="w-full border-border/40 bg-card/60 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden relative group">
