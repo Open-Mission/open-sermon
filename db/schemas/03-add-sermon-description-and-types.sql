@@ -8,7 +8,10 @@ ALTER TABLE public.sermons
 ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAULT '';
 
 -- 2. Update sermon_type enum to include new types
--- First, rename the existing type
+-- First, remove default value to avoid cast issues
+ALTER TABLE public.sermons ALTER COLUMN type DROP DEFAULT;
+
+-- Rename the existing type
 ALTER TYPE sermon_type RENAME TO sermon_type_old;
 
 -- Create new enum with additional types
@@ -20,7 +23,7 @@ CREATE TYPE sermon_type AS ENUM (
   'cell'
 );
 
--- Add column with new type
+-- Add column with new type using explicit cast
 ALTER TABLE public.sermons 
 ALTER COLUMN type TYPE sermon_type USING (
   CASE 
@@ -34,5 +37,5 @@ ALTER COLUMN type TYPE sermon_type USING (
 -- Drop old enum
 DROP TYPE sermon_type_old;
 
--- 3. Add unique index for slug generation (if not exists)
--- This helps with SEO-friendly URLs when publishing
+-- Restore default
+ALTER TABLE public.sermons ALTER COLUMN type SET DEFAULT 'preaching'::sermon_type;
