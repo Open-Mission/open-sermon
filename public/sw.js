@@ -1,4 +1,4 @@
-const CACHE_NAME = "open-sermon-v6";
+const CACHE_NAME = "open-sermon-v7";
 const OFFLINE_URL = "/offline";
 const HOME_URL = "/";
 
@@ -120,6 +120,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Cache First for Images, Network First for Code/Styles/Fonts
   if (
     request.destination === "image" ||
     request.destination === "style" ||
@@ -129,11 +130,25 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       (async () => {
         const cache = await caches.open(CACHE_NAME);
-        const cachedResponse = await cache.match(request);
         
-        if (cachedResponse) {
-          return cachedResponse;
+        // Try network first for everything except images, which can be cache-first
+        if (request.destination !== "image") {
+          try {
+            const networkResponse = await fetch(request);
+            if (networkResponse.ok) {
+              cache.put(request, networkResponse.clone());
+            }
+            return networkResponse;
+          } catch (error) {
+            const cachedResponse = await cache.match(request);
+            if (cachedResponse) return cachedResponse;
+            return new Response("", { status: 408 });
+          }
         }
+
+        // Cache first for images
+        const cachedResponse = await cache.match(request);
+        if (cachedResponse) return cachedResponse;
 
         try {
           const networkResponse = await fetch(request);
