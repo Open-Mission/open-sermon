@@ -196,5 +196,39 @@
     "ctaTitle": "Pronto para transformar sua preparação?",
     "ctaSubtitle": "Junte-se a centenas de pastores que já estão economizando horas na preparação semanal.",
     "footerText": "© 2026 Open Sermon. Código aberto para a expansão do Reino."
+  },
+  "profile": {
+    "title": "Perfil & Configurações",
+    "subtitle": "Gerencie suas informações",
+    "personalInfo": "Informações Pessoais",
+    "firstName": "Nome",
+    "lastName": "Sobrenome",
+    "email": "E-mail",
+    "phone": "Telefone",
+    "bio": "Bio",
+    "bioPlaceholder": "Conte um pouco sobre você...",
+    "churchInfo": "Informações da Igreja",
+    "churchName": "Nome da Igreja",
+    "churchRole": "Cargo / Ministério",
+    "preferences": "Preferências",
+    "language": "Idioma",
+    "timezone": "Fuso Horário",
+    "appearance": "Aparência",
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema",
+    "save": "Salvar Alterações",
+    "saving": "Salvando...",
+    "saved": "Perfil atualizado com sucesso!",
+    "saveError": "Falha ao atualizar perfil. Tente novamente.",
+    "avatar": "Foto de Perfil",
+    "changeAvatar": "Trocar foto",
+    "stats": {
+      "title": "Suas Estatísticas",
+      "totalSermons": "Total de Sermões",
+      "preached": "Pregados",
+      "inProgress": "Em Progresso",
+      "public": "Compartilhados"
+    }
   }
 }

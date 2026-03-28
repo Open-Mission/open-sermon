@@ -196,5 +196,39 @@
     "ctaTitle": "Ready to transform your preparation?",
     "ctaSubtitle": "Join hundreds of pastors who are already saving hours on weekly preparation.",
     "footerText": "© 2026 Open Sermon. Open source for the expansion of the Kingdom."
+  },
+  "profile": {
+    "title": "Profile & Settings",
+    "subtitle": "Manage your account information",
+    "personalInfo": "Personal Information",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "phone": "Phone",
+    "bio": "Bio",
+    "bioPlaceholder": "Tell us a bit about yourself...",
+    "churchInfo": "Church Information",
+    "churchName": "Church Name",
+    "churchRole": "Role / Ministry",
+    "preferences": "Preferences",
+    "language": "Language",
+    "timezone": "Timezone",
+    "appearance": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "save": "Save Changes",
+    "saving": "Saving...",
+    "saved": "Profile updated successfully!",
+    "saveError": "Failed to update profile. Please try again.",
+    "avatar": "Profile Photo",
+    "changeAvatar": "Change photo",
+    "stats": {
+      "title": "Your Stats",
+      "totalSermons": "Total Sermons",
+      "preached": "Preached",
+      "inProgress": "In Progress",
+      "public": "Shared"
+    }
   }
 }
