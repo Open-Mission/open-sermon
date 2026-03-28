@@ -65,7 +65,7 @@ export function BlockMenu({ editor }: BlockMenuProps) {
   const [selectedIndex, setSelectedIndex] = useState(0)
 
   useEffect(() => {
-    if (isVisible && itemRefs.current[selectedIndex]) {
+    if (isVisible && !isMobile && itemRefs.current[selectedIndex]) {
       setTimeout(() => {
         itemRefs.current[selectedIndex]?.scrollIntoView({
           behavior: 'smooth',
@@ -73,7 +73,7 @@ export function BlockMenu({ editor }: BlockMenuProps) {
         })
       }, 50)
     }
-  }, [selectedIndex, isVisible])
+  }, [selectedIndex, isVisible, isMobile])
 
   useEffect(() => {
     itemRefs.current = []
@@ -307,12 +307,15 @@ export function BlockMenu({ editor }: BlockMenuProps) {
                     key={globalIndex}
                     ref={(el) => { itemRefs.current[globalIndex] = el }}
                     className={`w-full text-left flex items-center space-x-2 px-3 py-2.5 text-sm rounded transition-colors ${
-                      globalIndex === selectedIndex ? 'bg-primary text-primary-foreground' : 'hover:bg-muted/80'
+                      !isMobile && globalIndex === selectedIndex ? 'bg-primary text-primary-foreground' : 'hover:bg-muted/80'
                     }`}
-                    onClick={() => handleItemSelect(item)}
+                    onClick={() => {
+                      setSelectedIndex(globalIndex)
+                      handleItemSelect(item)
+                    }}
                     onMouseEnter={() => !isMobile && setSelectedIndex(globalIndex)}
                   >
-                    <item.icon className={`h-4 w-4 ${globalIndex === selectedIndex ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
+                    <item.icon className={`h-4 w-4 ${!isMobile && globalIndex === selectedIndex ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
                     <span>{item.label}</span>
                   </button>
                 )
