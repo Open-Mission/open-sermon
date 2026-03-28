@@ -230,5 +230,9 @@
       "inProgress": "In Progress",
       "public": "Shared"
     }
+  },
+  "publicSermon": {
+    "createAccount": "Create your free account",
+    "preparedWith": "Prepared with"
   }
 }

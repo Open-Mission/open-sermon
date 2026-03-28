@@ -65,7 +65,14 @@ export function BlockSelectionProvider({
 export function useBlockSelection() {
   const context = useContext(BlockSelectionContext);
   if (context === undefined) {
-    throw new Error("useBlockSelection must be used within a BlockSelectionProvider");
+    return {
+      selectedBlocks: [],
+      toggleBlock: () => {},
+      clearSelection: () => {},
+      isBlockSelected: () => false,
+      bulkDelete: () => {},
+      bulkCopy: () => {},
+    };
   }
   return context;
 }

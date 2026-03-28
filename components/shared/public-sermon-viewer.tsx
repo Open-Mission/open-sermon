@@ -4,6 +4,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import { Highlight } from "@tiptap/extension-highlight";
+import { useTranslations } from "next-intl";
 import { IllustrationBlock } from "@/components/editor/blocks/illustration-block";
 import { ApplicationBlock } from "@/components/editor/blocks/application-block";
 import { PointBlock } from "@/components/editor/blocks/point-block";
@@ -12,6 +13,8 @@ import { ConclusionBlock } from "@/components/editor/blocks/conclusion-block";
 import { VerseBlock } from "@/components/editor/blocks/verse-block";
 import { CalloutBlock } from "@/components/editor/blocks/callout-block";
 import { InlineVerse } from "@/components/editor/blocks/inline-verse";
+import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 
 type JSONContent = {
   type: string;
@@ -35,6 +38,8 @@ export function PublicSermonViewer({
   type,
   preachedAt,
 }: PublicSermonViewerProps) {
+  const t = useTranslations("publicSermon");
+  const common = useTranslations("common");
   const editor = useEditor({
     immediatelyRender: false,
     editable: false,
@@ -64,9 +69,17 @@ export function PublicSermonViewer({
   });
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="mx-auto max-w-3xl px-6 py-16 md:py-24">
-        <header className="mb-12">
+    <div className="min-h-screen bg-background flex flex-col">
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+        <div className="mx-auto px-6 h-14 flex items-center justify-end">
+          <Button asChild size="sm">
+            <Link href="/register">{t("createAccount")}</Link>
+          </Button>
+        </div>
+      </header>
+
+      <main className="flex-1 mx-auto max-w-3xl px-6 py-16 md:py-24 w-full">
+        <div className="mb-12">
           {type && (
             <span className="inline-block text-xs font-medium uppercase tracking-widest text-muted-foreground mb-4">
               {type}
@@ -86,10 +99,21 @@ export function PublicSermonViewer({
             </p>
           )}
           <div className="mt-6 h-px bg-border" />
-        </header>
+        </div>
 
         <EditorContent editor={editor} />
-      </div>
+      </main>
+
+      <footer className="pt-4 pb-8">
+        <div className="mx-auto max-w-3xl px-6 flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
+          <p>
+            {t("preparedWith")}{" "}
+            <Link href="/" className="font-medium text-foreground hover:underline">
+              {common("appName")}
+            </Link>
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
