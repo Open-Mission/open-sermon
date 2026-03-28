@@ -8,6 +8,7 @@ const VERSION_IDS: Record<string, string> = {
   ARA: "your-ara-id",
   ACF: "your-acf-id",
   NTLH: "your-ntlh-id",
+  NVT: "your-nvt-id",
   KJV: "de4e12af7f28f599-02",
   NIV: "your-niv-id",
 };
@@ -20,6 +21,7 @@ async function generateVerseText(reference: string, version: string): Promise<st
     ARA: "Almeida Revista e Atualizada (ARA) em português",
     ACF: "Almeida Corrigida e Fiel (ACF) em português",
     NTLH: "Nova Tradução na Linguagem de Hoje (NTLH) em português",
+    NVT: "Nova Versão Transformadora (NVT) em português",
     KJV: "King James Version (KJV) in English",
     NIV: "New International Version (NIV) in English",
   };

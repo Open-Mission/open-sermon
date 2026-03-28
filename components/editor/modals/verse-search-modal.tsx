@@ -24,10 +24,11 @@ export function VerseSearchModal({ onClose, onInsert }: VerseSearchModalProps) {
 
   const versions = [
     { label: 'NVI', value: 'NVI' },
+    { label: 'NVT', value: 'NVT' },
     { label: 'ARA', value: 'ARA' },
-    { label: 'ARC', value: 'ARC' },
+    { label: 'ACF', value: 'ACF' },
+    { label: 'NTLH', value: 'NTLH' },
     { label: 'KJV', value: 'KJV' },
-    { label: 'NIV', value: 'NIV' },
   ]
 
   const handleSearch = async () => {

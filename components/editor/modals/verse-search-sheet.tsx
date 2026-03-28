@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +28,7 @@ import { BookOpen, Loader2, Search, Pencil } from "lucide-react";
 
 const VERSIONS = [
   { value: "NVI", label: "NVI" },
+  { value: "NVT", label: "NVT" },
   { value: "ARA", label: "ARA" },
   { value: "ACF", label: "ACF" },
   { value: "NTLH", label: "NTLH" },
