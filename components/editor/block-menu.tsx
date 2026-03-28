@@ -281,7 +281,7 @@ export function BlockMenu({ editor }: BlockMenuProps) {
   }
 
   const GroupedMenuList = () => (
-    <div ref={groupedListRef} className="max-h-[60vh] overflow-y-auto">
+    <div ref={groupedListRef} className={isMobile ? '' : 'max-h-[60vh] overflow-y-auto'}>
       {BLOCK_GROUPS.map((group, groupIndex) => {
         const groupFilteredItems = group.items.filter(item => 
           item.label.toLowerCase().includes(query.toLowerCase())
@@ -324,6 +324,9 @@ export function BlockMenu({ editor }: BlockMenuProps) {
     return (
       <Drawer 
         open={isVisible} 
+        modal={true}
+        dismissible={false}
+        shouldScaleBackground={false}
         onOpenChange={(open) => {
           if (!open) {
             setIsVisible(false)
@@ -334,11 +337,19 @@ export function BlockMenu({ editor }: BlockMenuProps) {
         }}
       >
         <DrawerContent className="pb-8">
-          <DrawerHeader>
-            <DrawerTitle>{t('search', { default: 'Comandos' })}</DrawerTitle>
-            <DrawerDescription>
-              Selecione um bloco para inserir no seu sermão
-            </DrawerDescription>
+          <DrawerHeader className="flex flex-row items-center justify-between">
+            <div>
+              <DrawerTitle>{t('search', { default: 'Comandos' })}</DrawerTitle>
+              <DrawerDescription>
+                Selecione um bloco para inserir no seu sermão
+              </DrawerDescription>
+            </div>
+            <button
+              onClick={() => setIsVisible(false)}
+              className="p-2 text-muted-foreground hover:text-foreground"
+            >
+              ✕
+            </button>
           </DrawerHeader>
           <div className="px-4 pb-2">
             <input
@@ -346,14 +357,13 @@ export function BlockMenu({ editor }: BlockMenuProps) {
               value={query}
               onChange={(e) => {
                 setQuery(e.target.value)
-                setSelectedIndex(0)
               }}
               placeholder="Pesquisar..."
               className="w-full bg-muted/50 border border-input rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               enterKeyHint="search"
             />
           </div>
-          <div className="px-3 pb-4">
+          <div className="px-3 pb-4 overflow-y-auto max-h-[50vh]">
             <GroupedMenuList />
           </div>
         </DrawerContent>
