@@ -106,11 +106,11 @@ export function BlockMenu({ editor }: BlockMenuProps) {
         { label: t('blocks.verse', { default: 'Versículo Bíblico' }), icon: BookOpen, command: () => {}, requiresInput: true },
         { label: t('blocks.inlineVerse', { default: 'Versículo Inline' }), icon: Type, command: () => {}, isInlineVerse: true },
         { label: t('blocks.callout', { default: 'Callout' }), icon: MessageSquare, command: (e) => e.chain().focus().insertContent({ type: 'calloutBlock', content: [{ type: 'paragraph' }] }).run() },
-        { label: t('blocks.illustration', { default: 'Ilustração' }), icon: Lightbulb, command: (e) => e.chain().focus().insertContent({ type: 'illustrationBlock' }).run() },
-        { label: t('blocks.application', { default: 'Aplicação' }), icon: Target, command: (e) => e.chain().focus().insertContent({ type: 'applicationBlock' }).run() },
-        { label: t('blocks.point', { default: 'Ponto Principal' }), icon: Pin, command: (e) => e.chain().focus().insertContent({ type: 'pointBlock' }).run() },
-        { label: t('blocks.intro', { default: 'Introdução' }), icon: PlayCircle, command: (e) => e.chain().focus().insertContent({ type: 'introBlock' }).run() },
-        { label: t('blocks.conclusion', { default: 'Conclusão' }), icon: CheckCircle, command: (e) => e.chain().focus().insertContent({ type: 'conclusionBlock' }).run() },
+        { label: t('blocks.illustration', { default: 'Ilustração' }), icon: Lightbulb, command: (e) => e.chain().focus().insertContent({ type: 'illustrationBlock', content: [{ type: 'paragraph' }] }).run() },
+        { label: t('blocks.application', { default: 'Aplicação' }), icon: Target, command: (e) => e.chain().focus().insertContent({ type: 'applicationBlock', content: [{ type: 'paragraph' }] }).run() },
+        { label: t('blocks.point', { default: 'Ponto Principal' }), icon: Pin, command: (e) => e.chain().focus().insertContent({ type: 'pointBlock', content: [{ type: 'paragraph' }] }).run() },
+        { label: t('blocks.intro', { default: 'Introdução' }), icon: PlayCircle, command: (e) => e.chain().focus().insertContent({ type: 'introBlock', content: [{ type: 'paragraph' }] }).run() },
+        { label: t('blocks.conclusion', { default: 'Conclusão' }), icon: CheckCircle, command: (e) => e.chain().focus().insertContent({ type: 'conclusionBlock', content: [{ type: 'paragraph' }] }).run() },
       ]
     }
   ], [t])

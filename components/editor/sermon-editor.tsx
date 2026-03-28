@@ -1,8 +1,8 @@
 "use client";
 
-import { useEditor, EditorContent, Editor } from "@tiptap/react";
+import { useEditor, EditorContent } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { StarterKit } from "@tiptap/starter-kit";
 import { NodeSelection } from "@tiptap/pm/state";
 import Underline from "@tiptap/extension-underline";
@@ -19,9 +19,9 @@ import { CalloutBlock } from "./blocks/callout-block";
 import { InlineVerse } from "./blocks/inline-verse";
 import { VerseSearchModal } from "./modals/verse-search-modal";
 import { HighlightColorPicker } from "./highlight-color-picker";
-import { BlockMenu } from "./block-menu";
-import { FloatingAddButton } from "./floating-add-button";
-
+import { SlashCommandMenu, openSlashMenu, closeSlashMenu, updateSlashMenuQuery } from "./slash-command-menu";
+import { BlockMenu, OPEN_BLOCK_MENU_EVENT } from "./block-menu";
+import "./editor.css";
 
 import { createClient } from "@/lib/supabase/client";
 import { syncService } from "@/lib/sync-service";
@@ -35,7 +35,7 @@ import { SelectableTextBlockView } from "./blocks/selectable-text-block-view";
 import Paragraph from "@tiptap/extension-paragraph";
 import Heading from "@tiptap/extension-heading";
 import { ReactNodeViewRenderer } from "@tiptap/react";
-import { OPEN_BLOCK_MENU_EVENT } from "./block-menu";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const SelectableParagraph = Paragraph.extend({
   addNodeView() {
@@ -66,6 +66,10 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
   const [showModal, setShowModal] = useState(false);
   const [selectedBlock, setSelectedBlock] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const isMobile = useIsMobile();
+  const slashMenuOpenRef = useRef(false);
+  const slashQueryRef = useRef('');
+  const slashRangeRef = useRef<{ from: number; to: number } | null>(null);
 
   const supabase = createClient();
   const { toggleSidebar } = useSidebar();
@@ -75,10 +79,7 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
     editable: true,
     onUpdate: ({ editor }) => {
       const content = editor.getJSON();
-      // Debounce saving to avoid too many requests
       if (editor.isDestroyed) return;
-
-      // Save to Supabase
       saveToSupabase(content);
     },
     extensions: [
@@ -123,10 +124,45 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       attributes: {
         class: "ProseMirror focus:outline-none max-w-none prose dark:prose-invert min-h-[500px] cursor-text",
       },
-      handleTextInput: (view, from, to, text) => {
+      handleTextInput: (view, from, _to, text) => {
+        // Slash command trigger
         if (text === '/') {
-          window.dispatchEvent(new CustomEvent(OPEN_BLOCK_MENU_EVENT))
-          return true
+          const coords = view.coordsAtPos(from)
+          const scrollY = window.scrollY
+          const scrollX = window.scrollX
+
+          // Range will cover the '/' character once inserted
+          const range = { from, to: from + 1 }
+          slashRangeRef.current = range
+          slashQueryRef.current = ''
+          slashMenuOpenRef.current = true
+
+          // On mobile, open the drawer-style menu
+          if (isMobile) {
+            window.dispatchEvent(new CustomEvent(OPEN_BLOCK_MENU_EVENT))
+            return false // let the '/' actually be typed
+          }
+
+          // Desktop: open floating popover at cursor position
+          setTimeout(() => {
+            openSlashMenu(
+              { top: coords.bottom + scrollY, left: coords.left + scrollX },
+              { from, to: from + 1 }
+            )
+          }, 0)
+          return false // let '/' be typed so user sees it
+        }
+
+        // When slash menu is open, update the query
+        if (slashMenuOpenRef.current && !isMobile) {
+          const newQuery = slashQueryRef.current + text
+          slashQueryRef.current = newQuery
+          // Update range to cover '/' + query
+          if (slashRangeRef.current) {
+            const newTo = slashRangeRef.current.from + 1 + newQuery.length
+            slashRangeRef.current = { from: slashRangeRef.current.from, to: newTo }
+            updateSlashMenuQuery(newQuery)
+          }
         }
         return false
       },
@@ -135,10 +171,38 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
           toggleSidebar();
           return true;
         }
+        // Handle backspace to close slash menu when user deletes the '/'
+        if (event.key === 'Backspace' && slashMenuOpenRef.current && !isMobile) {
+          if (slashQueryRef.current.length === 0) {
+            // Deleting the '/' itself — close menu
+            closeSlashMenu()
+            slashMenuOpenRef.current = false
+            slashQueryRef.current = ''
+            slashRangeRef.current = null
+          } else {
+            // Update query
+            slashQueryRef.current = slashQueryRef.current.slice(0, -1)
+            if (slashRangeRef.current) {
+              slashRangeRef.current = { from: slashRangeRef.current.from, to: slashRangeRef.current.to - 1 }
+            }
+            updateSlashMenuQuery(slashQueryRef.current)
+          }
+        }
         return false;
       },
     },
   });
+
+  // Track slash menu close to reset refs
+  useEffect(() => {
+    const handleClose = () => {
+      slashMenuOpenRef.current = false
+      slashQueryRef.current = ''
+      slashRangeRef.current = null
+    }
+    window.addEventListener('slash-menu:close', handleClose)
+    return () => window.removeEventListener('slash-menu:close', handleClose)
+  }, [isMobile]);
 
   // Focus editor on mount for new sermons
   useEffect(() => {
@@ -373,8 +437,10 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
           }
         }}
       />
+      {/* Slash command menu (desktop floating + mobile fallback) */}
+      <SlashCommandMenu editor={editor} />
+      {/* Legacy block menu for mobile FAB */}
       <BlockMenu editor={editor} />
-      {/* <TableOfContents editor={editor} /> */}
       {showModal && selectedBlock === "verse" && (
         <VerseSearchModal
           onClose={() => {
