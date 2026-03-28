@@ -17,6 +17,7 @@ import {
   CheckmarkCircle02Icon,
   Note01Icon,
   Tick01Icon,
+  ArrowLeft01Icon,
 } from "@hugeicons/core-free-icons";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ import { Label } from "@/components/ui/label";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Link } from "@/i18n/navigation";
 
 interface Profile {
   id: string;
@@ -102,12 +104,18 @@ export function ProfileClient({ user, profile, stats }: ProfileClientProps) {
 
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 md:px-8 py-8 space-y-8">
-      <div className="flex items-start justify-between">
+      <div className="flex items-center gap-3">
+        <Link
+          href="/"
+          className="h-9 w-9 rounded-lg bg-muted/50 hover:bg-muted flex items-center justify-center transition-colors"
+        >
+          <HugeiconsIcon icon={ArrowLeft01Icon} size={18} className="text-muted-foreground" />
+        </Link>
         <div>
           <h1 className="text-xl font-semibold tracking-tight text-foreground/90">
             {t("title")}
           </h1>
-          <p className="text-sm text-muted-foreground/60 mt-1">
+          <p className="text-sm text-muted-foreground/60">
             {t("subtitle")}
           </p>
         </div>

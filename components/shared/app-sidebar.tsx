@@ -15,6 +15,7 @@ import {
   Book01Icon,
   Home01Icon,
   UserCircleIcon,
+  Bookmark01Icon,
 } from "@hugeicons/core-free-icons";
 import { getSermons, getFavoriteSermons } from "@/lib/sermon-data";
 import { getTranslations } from "next-intl/server";
@@ -31,6 +32,7 @@ export async function AppSidebar() {
   const favoriteSermons = await getFavoriteSermons();
   const t = await getTranslations("dashboard");
   const commonT = await getTranslations("common");
+  const profileT = await getTranslations("profile");
   const supabase = await createClient();
   const {
     data: { user },
@@ -65,6 +67,14 @@ export async function AppSidebar() {
                 <Link href="/">
                   <HugeiconsIcon icon={Home01Icon} size={18} />
                   <span>{t("title")}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link href="/profile">
+                  <HugeiconsIcon icon={UserCircleIcon} size={18} />
+                  <span>{profileT("title")}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -129,7 +139,7 @@ export async function AppSidebar() {
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip={t("library")}>
                 <Link href="/library">
-                  <HugeiconsIcon icon={UserCircleIcon} size={18} />
+                  <HugeiconsIcon icon={Bookmark01Icon} size={18} />
                   <span>{t("library")}</span>
                 </Link>
               </SidebarMenuButton>
