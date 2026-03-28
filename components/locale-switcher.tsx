@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { useLocale, useTranslations } from 'next-intl'
-import { usePathname, useRouter } from '@/i18n/navigation'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -25,11 +25,15 @@ export function LocaleSwitcher() {
   const t = useTranslations('common')
   const locale = useLocale()
   const router = useRouter()
-  const pathname = usePathname()
   const isMobile = useIsMobile()
 
-  const handleLocaleChange = (newLocale: string) => {
-    router.replace(pathname, { locale: newLocale as "en" | "pt" })
+  const handleLocaleChange = async (newLocale: string) => {
+    await fetch('/api/locale', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ locale: newLocale }),
+    })
+    router.refresh()
   }
 
   const locales = [
@@ -50,7 +54,7 @@ export function LocaleSwitcher() {
         </DrawerTrigger>
         <DrawerContent>
           <DrawerHeader>
-            <DrawerTitle>{t('language', { default: 'Idioma' })}</DrawerTitle>
+            <DrawerTitle>{t('language', { defaultValue: 'Idioma' })}</DrawerTitle>
           </DrawerHeader>
           <div className="p-4 space-y-2">
             {locales.map((l) => (

@@ -36,7 +36,7 @@ export default async function SermonPage({
         <div className="flex items-center gap-2">
           <SidebarTrigger className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors" />
           <nav className="flex items-center text-sm font-medium text-muted-foreground overflow-hidden">
-            <span className="truncate max-w-[200px]">{sermon.title}</span>
+            {/* <span className="truncate max-w-[200px]">{sermon.title}</span> */}
           </nav>
         </div>
         

@@ -65,6 +65,28 @@ export function VerseSearchSheet({
   const [isParsing, setIsParsing] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [activeTab, setActiveTab] = React.useState("search");
+  const [isOnline, setIsOnline] = React.useState(
+    typeof navigator !== "undefined" ? navigator.onLine : true
+  );
+
+  React.useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (!isOnline && activeTab === "search") {
+      setActiveTab("manual");
+    }
+  }, [isOnline, activeTab]);
 
   const handleSearch = async () => {
     if (!input.trim()) {
@@ -290,7 +312,7 @@ export function VerseSearchSheet({
   const tabs = (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
       <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="search" className="flex items-center gap-2">
+        <TabsTrigger value="search" className="flex items-center gap-2" disabled={!isOnline}>
           <Search className="h-4 w-4" />
           {t("verse.searchModal.tabSearch")}
         </TabsTrigger>

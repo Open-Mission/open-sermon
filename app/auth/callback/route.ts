@@ -1,17 +1,13 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ locale: string }> }
-) {
-  const { locale } = await params;
+export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? `/${locale}`;
+  const next = searchParams.get("next") ?? "/";
 
   if (!code) {
-    return NextResponse.redirect(new URL(`/${locale}/login?error=auth`, request.url));
+    return NextResponse.redirect(new URL("/login?error=auth", request.url));
   }
 
   let response = NextResponse.redirect(new URL(next, request.url));
@@ -37,7 +33,7 @@ export async function GET(
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
-    return NextResponse.redirect(new URL(`/${locale}/login?error=auth`, request.url));
+    return NextResponse.redirect(new URL("/login?error=auth", request.url));
   }
 
   return response;

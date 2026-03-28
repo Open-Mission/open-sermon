@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Montserrat } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
-import { notFound } from "next/navigation";
-import { routing } from "@/i18n/routing";
+import { getMessages, getLocale } from "next-intl/server";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/components/query-provider";
 import { ServiceWorkerRegistration } from "@/components/service-worker-registration";
@@ -73,22 +71,12 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-type Props = {
+export default async function RootLayout({
+  children,
+}: {
   children: React.ReactNode;
-  params: Promise<{ locale: string }>;
-};
-
-export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale }));
-}
-
-export default async function LocaleLayout({ children, params }: Props) {
-  const { locale } = await params;
-
-  if (!routing.locales.includes(locale as (typeof routing.locales)[number])) {
-    notFound();
-  }
-
+}) {
+  const locale = await getLocale();
   const messages = await getMessages();
 
   return (
