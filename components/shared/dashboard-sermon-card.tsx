@@ -36,11 +36,18 @@ interface DashboardSermonCardProps {
   isPendingSync?: boolean;
 }
 
-const statusConfig: Record<SermonStatus, { label: string; className: string }> = {
-  draft: { label: "Rascunho", className: "bg-slate-500/10 text-slate-600 dark:text-slate-400" },
-  in_progress: { label: "Em progresso", className: "bg-amber-500/10 text-amber-600 dark:text-amber-400" },
-  finished: { label: "Finalizado", className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" },
-  preached: { label: "Pregado", className: "bg-violet-500/10 text-violet-600 dark:text-violet-400" },
+const statusConfig: Record<SermonStatus, { label: string; dot: string; color: string }> = {
+  draft: { label: "Rascunho", dot: "bg-slate-400", color: "text-slate-500" },
+  in_progress: { label: "Em progresso", dot: "bg-amber-400", color: "text-amber-600" },
+  finished: { label: "Finalizado", dot: "bg-emerald-400", color: "text-emerald-600" },
+  preached: { label: "Pregado", dot: "bg-violet-400", color: "text-violet-600" },
+};
+
+const statusGradients: Record<SermonStatus, string> = {
+  draft: "from-slate-100 to-slate-50 dark:from-slate-900/40 dark:to-slate-900/20",
+  in_progress: "from-amber-50 to-amber-25 dark:from-amber-900/20 dark:to-amber-900/10",
+  finished: "from-emerald-50 to-emerald-25 dark:from-emerald-900/20 dark:to-emerald-900/10",
+  preached: "from-violet-50 to-violet-25 dark:from-violet-900/20 dark:to-violet-900/10",
 };
 
 export function DashboardSermonCard({ sermon, isFullWidth = false, showOfflineIndicator = false, isPendingSync = false }: DashboardSermonCardProps) {
@@ -50,8 +57,10 @@ export function DashboardSermonCard({ sermon, isFullWidth = false, showOfflineIn
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
+  const [isHovered, setIsHovered] = React.useState(false);
 
   const status = statusConfig[sermon.status] || statusConfig.draft;
+  const gradient = statusGradients[sermon.status] || statusGradients.draft;
   const isLocal = offlineDb.isLocalId(sermon.id);
 
   const handleDelete = async () => {
@@ -80,30 +89,40 @@ export function DashboardSermonCard({ sermon, isFullWidth = false, showOfflineIn
     }
   };
 
-  const cardWidth = isFullWidth ? "w-full" : "w-[85%] sm:w-64";
+  const cardWidth = isFullWidth ? "w-full" : "w-[85%] sm:w-72";
 
   return (
     <>
       <Link
         key={sermon.id}
         href={`/sermons/${sermon.id}`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         className={cn(
-          "group flex-none h-36 bg-card border border-border/50 rounded-xl shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 flex flex-col p-4 relative overflow-hidden",
+          "group flex-none h-40 bg-gradient-to-br border border-transparent rounded-2xl transition-all duration-300 ease-out flex flex-col p-5 relative overflow-hidden cursor-pointer",
           cardWidth,
-          isFullWidth ? "snap-start" : "snap-start"
+          "snap-start",
+          gradient,
+          isHovered && "shadow-lg shadow-black/5 dark:shadow-black/20 border-border/50"
         )}
       >
-        <div className="flex items-start justify-between mb-1">
-          <div className="h-10 w-10 bg-primary/10 text-primary rounded-lg flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors shrink-0">
-            <HugeiconsIcon icon={Note01Icon} size={20} />
+        <div className="flex items-start justify-between mb-3">
+          <div className={cn(
+            "h-11 w-11 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300",
+            "bg-white/60 dark:bg-white/10 backdrop-blur-sm",
+            isHovered && "shadow-md"
+          )}>
+            <HugeiconsIcon 
+              icon={Note01Icon} 
+              size={22} 
+              className={cn("transition-colors duration-300", status.color)}
+              strokeWidth={1.5}
+            />
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-muted-foreground shrink-0">
-              {format(new Date(sermon.created_at), "dd MMM", { locale: ptBR })}
-            </span>
             {isMobile || isFullWidth ? (
               <button
-                className="p-1.5 hover:bg-muted rounded-md text-muted-foreground"
+                className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-lg text-muted-foreground/60 hover:text-foreground transition-colors"
                 onClick={(e) => {
                   e.preventDefault();
                   setIsSheetOpen(true);
@@ -115,7 +134,10 @@ export function DashboardSermonCard({ sermon, isFullWidth = false, showOfflineIn
               <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
                 <DropdownMenuTrigger asChild>
                   <button
-                    className="p-1.5 hover:bg-muted rounded-md text-muted-foreground opacity-0 group-hover:opacity-100 transition-all"
+                    className={cn(
+                      "p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-lg text-muted-foreground/60 hover:text-foreground transition-all duration-200",
+                      isHovered ? "opacity-100" : "opacity-0"
+                    )}
                     onClick={(e) => e.preventDefault()}
                   >
                     <MoreHorizontal className="h-4 w-4" />
@@ -150,32 +172,38 @@ export function DashboardSermonCard({ sermon, isFullWidth = false, showOfflineIn
           </div>
         </div>
         
-        <h3 className="font-semibold text-base leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+        <h3 className="font-semibold text-[15px] leading-snug line-clamp-2 tracking-tight text-foreground/90">
           {sermon.title || "Sem título"}
         </h3>
         
-        <div className="flex items-center gap-2 mt-auto">
-          <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium", status.className)}>
-            {status.label}
+        <div className="flex items-center justify-between gap-2 mt-auto pt-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={cn("inline-flex items-center gap-1.5 text-[11px] font-medium", status.color)}>
+              <span className={cn("h-1.5 w-1.5 rounded-full", status.dot)} />
+              {status.label}
+            </span>
+            {sermon.is_public && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-blue-500 dark:text-blue-400">
+                <HugeiconsIcon icon={Link01Icon} size={11} />
+                Público
+              </span>
+            )}
+            {(isLocal || isPendingSync) && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                <CloudOff className="h-3 w-3" />
+                Pendente
+              </span>
+            )}
+            {showOfflineIndicator && !isLocal && !isPendingSync && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400" title="Disponível offline">
+                <Download className="h-3 w-3" />
+                Offline
+              </span>
+            )}
+          </div>
+          <span className="text-[11px] text-muted-foreground/50 shrink-0 font-medium tracking-wide">
+            {format(new Date(sermon.created_at), "dd MMM", { locale: ptBR })}
           </span>
-          {sermon.is_public && (
-            <span className="inline-flex items-center rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-medium text-blue-600 dark:text-blue-400">
-              <HugeiconsIcon icon={Link01Icon} size={10} className="mr-1" />
-              Público
-            </span>
-          )}
-          {(isLocal || isPendingSync) && (
-            <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
-              <CloudOff className="h-2.5 w-2.5 mr-1" />
-              Pendente
-            </span>
-          )}
-          {showOfflineIndicator && !isLocal && !isPendingSync && (
-            <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400" title="Disponível offline">
-              <Download className="h-2.5 w-2.5 mr-1" />
-              Offline
-            </span>
-          )}
         </div>
       </Link>
 
@@ -257,28 +285,36 @@ export function CollapsibleSection({ title, icon, count, children, defaultOpen =
   const [isOpen, setIsOpen] = React.useState(defaultOpen);
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-3">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors w-full"
+        className="group flex items-center gap-2 text-muted-foreground/60 hover:text-foreground transition-colors w-full py-1"
       >
-        {isOpen ? (
+        <span className={cn(
+          "transition-transform duration-200",
+          isOpen ? "rotate-0" : "-rotate-90"
+        )}>
           <ChevronDown className="h-4 w-4" />
-        ) : (
-          <ChevronRight className="h-4 w-4" />
-        )}
-        {icon}
-        <h2 className="text-sm font-medium">{title}</h2>
+        </span>
+        <span className="text-muted-foreground/40">
+          {icon}
+        </span>
+        <h2 className="text-sm font-medium tracking-tight">{title}</h2>
         {count !== undefined && (
-          <span className="ml-2 text-xs bg-muted px-2 py-0.5 rounded-full">{count}</span>
+          <span className="text-[11px] text-muted-foreground/50 font-medium">{count}</span>
         )}
       </button>
       
-      {isOpen && (
-        <div className="flex gap-4 overflow-x-auto pb-4 pt-1 px-1 -mx-1 snap-x scroll-smooth no-scrollbar">
-          {children}
+      <div className={cn(
+        "grid transition-all duration-300 ease-out",
+        isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+      )}>
+        <div className="overflow-hidden">
+          <div className="flex gap-3 overflow-x-auto pb-4 pt-1 px-1 -mx-1 snap-x scroll-smooth no-scrollbar">
+            {children}
+          </div>
         </div>
-      )}
+      </div>
     </section>
   );
 }
@@ -290,31 +326,43 @@ interface StatusFilterProps {
 }
 
 export function StatusFilter({ selectedStatus, onStatusChange, counts }: StatusFilterProps) {
-  const statuses: Array<{ value: SermonStatus | "all"; label: string; className: string }> = [
-    { value: "all", label: "Todos", className: "" },
-    { value: "draft", label: "Rascunho", className: "bg-slate-500/10 text-slate-600" },
-    { value: "in_progress", label: "Em progresso", className: "bg-amber-500/10 text-amber-600" },
-    { value: "finished", label: "Finalizado", className: "bg-emerald-500/10 text-emerald-600" },
-    { value: "preached", label: "Pregado", className: "bg-violet-500/10 text-violet-600" },
+  const statuses: Array<{ value: SermonStatus | "all"; label: string; dot: string; color: string }> = [
+    { value: "all", label: "Todos", dot: "bg-foreground/50", color: "text-foreground/70" },
+    { value: "draft", label: "Rascunho", dot: "bg-slate-400", color: "text-slate-500" },
+    { value: "in_progress", label: "Em progresso", dot: "bg-amber-400", color: "text-amber-600" },
+    { value: "finished", label: "Finalizado", dot: "bg-emerald-400", color: "text-emerald-600" },
+    { value: "preached", label: "Pregado", dot: "bg-violet-400", color: "text-violet-600" },
   ];
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {statuses.map((status) => (
-        <button
-          key={status.value}
-          onClick={() => onStatusChange(status.value)}
-          className={cn(
-            "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all",
-            selectedStatus === status.value
-              ? "bg-primary text-primary-foreground"
-              : status.className
-          )}
-        >
-          {status.label}
-          <span className="text-[10px] opacity-70">({counts[status.value]})</span>
-        </button>
-      ))}
+    <div className="flex flex-wrap gap-1.5">
+      {statuses.map((status) => {
+        const isSelected = selectedStatus === status.value;
+        return (
+          <button
+            key={status.value}
+            onClick={() => onStatusChange(status.value)}
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200",
+              isSelected
+                ? "bg-foreground text-background"
+                : cn("hover:bg-muted/50", status.color)
+            )}
+          >
+            <span className={cn(
+              "h-1.5 w-1.5 rounded-full transition-colors",
+              isSelected ? "bg-background" : status.dot
+            )} />
+            {status.label}
+            <span className={cn(
+              "text-[10px] transition-opacity",
+              isSelected ? "opacity-60" : "opacity-50"
+            )}>
+              {counts[status.value]}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -328,6 +376,7 @@ interface SermonTableRowProps {
 export function SermonTableRow({ sermon, showOfflineIndicator = false, isPendingSync = false }: SermonTableRowProps) {
   const [isShareDialogOpen, setIsShareDialogOpen] = React.useState(false);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isHovered, setIsHovered] = React.useState(false);
   
   const status = statusConfig[sermon.status] || statusConfig.draft;
   const isLocal = offlineDb.isLocalId(sermon.id);
@@ -337,45 +386,57 @@ export function SermonTableRow({ sermon, showOfflineIndicator = false, isPending
       <Link 
         key={sermon.id} 
         href={`/sermons/${sermon.id}`}
-        className="group sm:grid sm:grid-cols-12 flex flex-col gap-2 sm:gap-4 py-3 px-2 hover:bg-muted/40 transition-colors items-start sm:items-center rounded-md"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className="group sm:grid sm:grid-cols-12 flex flex-col gap-2 sm:gap-4 py-3.5 px-3 hover:bg-muted/30 transition-all duration-200 items-start sm:items-center rounded-lg"
       >
         <div className="col-span-5 flex items-center gap-3">
-          <HugeiconsIcon icon={Note01Icon} size={16} className="text-muted-foreground" />
-          <span className="font-medium text-sm">
+          <div className={cn(
+            "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200",
+            "bg-muted/50",
+            isHovered && "bg-muted"
+          )}>
+            <HugeiconsIcon icon={Note01Icon} size={16} className={status.color} strokeWidth={1.5} />
+          </div>
+          <span className="font-medium text-sm text-foreground/90">
             {sermon.title || "Sem título"}
           </span>
         </div>
         <div className="col-span-4 flex items-center gap-2 flex-wrap">
-          <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-medium", status.className)}>
+          <span className={cn("inline-flex items-center gap-1.5 text-[11px] font-medium", status.color)}>
+            <span className={cn("h-1.5 w-1.5 rounded-full", status.dot)} />
             {status.label}
           </span>
           {sermon.is_public && (
-            <span className="inline-flex items-center rounded-full bg-blue-500/10 px-2.5 py-0.5 text-[10px] font-medium text-blue-600 dark:text-blue-400">
-              <HugeiconsIcon icon={Link01Icon} size={10} className="mr-1" />
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-blue-500 dark:text-blue-400">
+              <HugeiconsIcon icon={Link01Icon} size={11} />
               Público
             </span>
           )}
           {(isLocal || isPendingSync) && (
-            <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
-              <CloudOff className="h-2.5 w-2.5 mr-1" />
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+              <CloudOff className="h-3 w-3" />
               Pendente
             </span>
           )}
           {showOfflineIndicator && !isLocal && !isPendingSync && (
-            <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400" title="Disponível offline">
-              <Download className="h-2.5 w-2.5 mr-1" />
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400" title="Disponível offline">
+              <Download className="h-3 w-3" />
               Offline
             </span>
           )}
         </div>
         <div className="col-span-3 flex items-center justify-between sm:justify-end gap-2">
-          <span className="text-xs text-muted-foreground">
+          <span className="text-xs text-muted-foreground/70 font-medium">
             {format(new Date(sermon.created_at), "MMM d", { locale: ptBR })}
           </span>
           <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
             <DropdownMenuTrigger asChild>
               <button
-                className="p-1 hover:bg-muted rounded-md text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                className={cn(
+                  "p-1.5 hover:bg-muted rounded-lg text-muted-foreground/50 hover:text-foreground transition-all duration-200",
+                  isHovered ? "opacity-100" : "opacity-0"
+                )}
                 onClick={(e) => e.preventDefault()}
               >
                 <MoreHorizontal className="h-4 w-4" />
