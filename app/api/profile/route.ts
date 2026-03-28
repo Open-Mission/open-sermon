@@ -11,7 +11,7 @@ export async function PATCH(request: Request) {
   }
 
   const body = await request.json();
-  const { first_name, last_name, phone, church_name, church_role, bio, timezone } = body;
+  const { first_name, last_name, phone, church_name, church_role, bio, timezone, avatar_url } = body;
 
   const full_name = [first_name, last_name].filter(Boolean).join(" ");
 
@@ -27,6 +27,7 @@ export async function PATCH(request: Request) {
       church_role,
       bio,
       timezone,
+      avatar_url,
       updated_at: new Date().toISOString(),
     });
 

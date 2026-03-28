@@ -38,6 +38,12 @@ export async function AppSidebar() {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("avatar_url")
+    .eq("id", user?.id || "")
+    .single();
+
   return (
     <Sidebar variant="sidebar" collapsible="offcanvas">
       <SidebarHeader className="h-14 flex flex-row items-center justify-between px-4">
@@ -149,7 +155,7 @@ export async function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-2 border-t mt-auto">
-        <UserMenu user={user} />
+        <UserMenu user={user} avatarUrl={profile?.avatar_url} />
       </SidebarFooter>
     </Sidebar>
   );

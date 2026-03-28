@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { useTheme } from "next-themes";
 import { signOut } from "@/lib/supabase/actions";
@@ -28,9 +28,10 @@ import { cn } from "@/lib/utils";
 interface UserMenuProps {
   user: any;
   showDetails?: boolean;
+  avatarUrl?: string | null;
 }
 
-export function UserMenu({ user, showDetails = true }: UserMenuProps) {
+export function UserMenu({ user, showDetails = true, avatarUrl }: UserMenuProps) {
   const t = useTranslations("common");
   const { setTheme, theme } = useTheme();
   
@@ -48,8 +49,9 @@ export function UserMenu({ user, showDetails = true }: UserMenuProps) {
             !showDetails && "h-10 w-10 p-0 justify-center rounded-full"
           )}
         >
-          <Avatar size={showDetails ? "default" : "lg"}>
-            <AvatarFallback className="text-primary font-bold text-xs">
+          <Avatar className={cn(showDetails ? "h-9 w-9" : "h-9 w-9")}>
+            {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
+            <AvatarFallback className="text-primary font-bold text-xs bg-gradient-to-br from-primary/20 to-primary/10">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -70,11 +72,19 @@ export function UserMenu({ user, showDetails = true }: UserMenuProps) {
         className="w-64 p-2 rounded-2xl shadow-xl border-muted bg-popover"
       >
         <DropdownMenuLabel className="font-normal p-2">
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-semibold leading-none">{displayName}</p>
-            <p className="text-xs leading-none text-muted-foreground truncate mt-1">
-              {user?.email}
-            </p>
+          <div className="flex items-center gap-3">
+            <Avatar className="h-10 w-10">
+              {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
+              <AvatarFallback className="text-primary font-bold text-xs bg-gradient-to-br from-primary/20 to-primary/10">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col space-y-1">
+              <p className="text-sm font-semibold leading-none">{displayName}</p>
+              <p className="text-xs leading-none text-muted-foreground truncate mt-1">
+                {user?.email}
+              </p>
+            </div>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

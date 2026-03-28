@@ -34,6 +34,7 @@ interface DashboardSermonCardProps {
   isFullWidth?: boolean;
   showOfflineIndicator?: boolean;
   isPendingSync?: boolean;
+  isUnavailableOffline?: boolean;
 }
 
 const statusConfig: Record<SermonStatus, { label: string; dot: string; color: string }> = {
@@ -50,7 +51,7 @@ const statusGradients: Record<SermonStatus, string> = {
   preached: "from-violet-50 to-violet-25 dark:from-violet-900/20 dark:to-violet-900/10",
 };
 
-export function DashboardSermonCard({ sermon, isFullWidth = false, showOfflineIndicator = false, isPendingSync = false }: DashboardSermonCardProps) {
+export function DashboardSermonCard({ sermon, isFullWidth = false, showOfflineIndicator = false, isPendingSync = false, isUnavailableOffline = false }: DashboardSermonCardProps) {
   const isMobile = useIsMobile();
   const router = useRouter();
   const [isShareDialogOpen, setIsShareDialogOpen] = React.useState(false);
@@ -103,7 +104,8 @@ export function DashboardSermonCard({ sermon, isFullWidth = false, showOfflineIn
           cardWidth,
           "snap-start",
           gradient,
-          isHovered && "shadow-lg shadow-black/5 dark:shadow-black/20 border-border/50"
+          isHovered && "shadow-lg shadow-black/5 dark:shadow-black/20 border-border/50",
+          isUnavailableOffline && "opacity-50 pointer-events-none"
         )}
       >
         <div className="flex items-start justify-between mb-3">
@@ -371,9 +373,10 @@ interface SermonTableRowProps {
   sermon: Sermon;
   showOfflineIndicator?: boolean;
   isPendingSync?: boolean;
+  isUnavailableOffline?: boolean;
 }
 
-export function SermonTableRow({ sermon, showOfflineIndicator = false, isPendingSync = false }: SermonTableRowProps) {
+export function SermonTableRow({ sermon, showOfflineIndicator = false, isPendingSync = false, isUnavailableOffline = false }: SermonTableRowProps) {
   const [isShareDialogOpen, setIsShareDialogOpen] = React.useState(false);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [isHovered, setIsHovered] = React.useState(false);
@@ -388,7 +391,10 @@ export function SermonTableRow({ sermon, showOfflineIndicator = false, isPending
         href={`/sermons/${sermon.id}`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className="group sm:grid sm:grid-cols-12 flex flex-col gap-2 sm:gap-4 py-3.5 px-3 hover:bg-muted/30 transition-all duration-200 items-start sm:items-center rounded-lg"
+        className={cn(
+          "group sm:grid sm:grid-cols-12 flex flex-col gap-2 sm:gap-4 py-3.5 px-3 hover:bg-muted/30 transition-all duration-200 items-start sm:items-center rounded-lg",
+          isUnavailableOffline && "opacity-50 pointer-events-none"
+        )}
       >
         <div className="col-span-5 flex items-center gap-3">
           <div className={cn(

@@ -18,8 +18,9 @@ import {
   Note01Icon,
   Tick01Icon,
   ArrowLeft01Icon,
+  Camera01Icon,
 } from "@hugeicons/core-free-icons";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,6 +29,7 @@ import { LocaleSwitcher } from "@/components/locale-switcher";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Link } from "@/i18n/navigation";
+import { createBrowserClient } from "@supabase/ssr";
 
 interface Profile {
   id: string;
@@ -68,6 +70,13 @@ export function ProfileClient({ user, profile, stats }: ProfileClientProps) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [isSaving, setIsSaving] = React.useState(false);
+  const [avatarPreview, setAvatarPreview] = React.useState<string | null>(profile?.avatar_url || null);
+  const [avatarFile, setAvatarFile] = React.useState<File | null>(null);
+
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   const [formData, setFormData] = React.useState({
     first_name: profile?.first_name || "",
@@ -79,16 +88,57 @@ export function ProfileClient({ user, profile, stats }: ProfileClientProps) {
     timezone: profile?.timezone || "America/Sao_Paulo",
   });
 
-  const initials = user?.email?.substring(0, 2).toUpperCase() || "US";
   const displayName = formData.first_name || user?.email?.split("@")[0] || "User";
+  const initials = displayName?.substring(0, 2).toUpperCase() || "US";
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Imagem muito grande. Máximo 5MB.");
+        return;
+      }
+      setAvatarFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadAvatar = async (): Promise<string | null> => {
+    if (!avatarFile) return null;
+
+    const fileExt = avatarFile.name.split(".").pop();
+    const fileName = `${user.id}/avatar.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(fileName, avatarFile, { upsert: true });
+
+    if (uploadError) {
+      console.error("Upload error:", uploadError);
+      return null;
+    }
+
+    const { data } = supabase.storage.from("avatars").getPublicUrl(fileName);
+    return data.publicUrl;
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      const uploadedUrl = avatarFile ? await uploadAvatar() : null;
+      const finalAvatarUrl = uploadedUrl || avatarPreview;
+
       const response = await fetch("/api/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          avatar_url: finalAvatarUrl,
+        }),
       });
 
       if (!response.ok) throw new Error();
@@ -156,14 +206,27 @@ export function ProfileClient({ user, profile, stats }: ProfileClientProps) {
         
         <div className="bg-muted/20 rounded-2xl border border-border/30 p-6 space-y-5">
           <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-primary/20 to-primary/10 text-primary">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
+            <label className="relative cursor-pointer group">
+              <Avatar className="h-16 w-16 border-2 border-border/50 group-hover:border-primary/50 transition-colors">
+                {avatarPreview && <AvatarImage src={avatarPreview} alt={displayName} />}
+                <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-primary/20 to-primary/10 text-primary">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <HugeiconsIcon icon={Camera01Icon} size={20} className="text-white" />
+              </div>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onChange={handleAvatarChange}
+                className="hidden"
+              />
+            </label>
             <div>
               <p className="font-medium text-foreground/90">{displayName}</p>
               <p className="text-sm text-muted-foreground/60">{user.email}</p>
+              <p className="text-xs text-muted-foreground/40 mt-1">Clique na foto para alterar</p>
             </div>
           </div>
 
