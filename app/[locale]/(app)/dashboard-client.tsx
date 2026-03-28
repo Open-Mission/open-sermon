@@ -1,16 +1,18 @@
 "use client";
 
 import { User } from "@supabase/supabase-js";
-import { FileText, Globe, Clock, Plus } from "lucide-react";
+import { FileText, Globe, Clock, Plus, CloudOff, Download } from "lucide-react";
 import Link from "next/link";
 import { NewSermonButtonInline } from "@/components/shared/new-sermon-button-inline";
 import { NewSermonFab } from "@/components/shared/new-sermon-fab";
 import { UserMenu } from "@/components/shared/user-menu";
 import { DashboardSermonCard, CollapsibleSection, StatusFilter, SermonTableRow } from "@/components/shared/dashboard-sermon-card";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sermon, SermonStatus } from "@/types/sermon";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Add02Icon } from "@hugeicons/core-free-icons";
+import { offlineDb } from "@/lib/offline-db";
+import { cn } from "@/lib/utils";
 
 interface DashboardClientProps {
   user: User | null;
@@ -22,6 +24,39 @@ interface DashboardClientProps {
 
 export function DashboardClient({ user, userName, recentSermons, publishedSermons, allSermons }: DashboardClientProps) {
   const [selectedStatus, setSelectedStatus] = useState<SermonStatus | "all">("all");
+  const [offlineSermons, setOfflineSermons] = useState<Sermon[]>([]);
+  const [isOffline, setIsOffline] = useState(false);
+
+  useEffect(() => {
+    const loadOfflineSermons = async () => {
+      if (user?.id) {
+        const sermons = await offlineDb.getAllSermons(user.id);
+        setOfflineSermons(sermons);
+      }
+    };
+    loadOfflineSermons();
+
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+
+    setIsOffline(!navigator.onLine);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (allSermons.length > 0 && user?.id) {
+      offlineDb.saveSermons(allSermons);
+    }
+  }, [allSermons, user?.id]);
+
+  const syncedSermonIds = new Set(offlineSermons.map(s => s.id).filter(id => !offlineDb.isLocalId(id)));
+  const localOnlySermonIds = new Set(offlineSermons.filter(s => offlineDb.isLocalId(s.id)).map(s => s.id));
 
   const filteredSermons = selectedStatus === "all" 
     ? allSermons 
@@ -50,9 +85,18 @@ export function DashboardClient({ user, userName, recentSermons, publishedSermon
           icon={<Clock className="h-4 w-4" />}
           count={recentSermons.length}
         >
-          {recentSermons.map((sermon) => (
-            <DashboardSermonCard key={sermon.id} sermon={sermon} />
-          ))}
+          {recentSermons.map((sermon) => {
+            const isPending = localOnlySermonIds.has(sermon.id);
+            const isAvailableOffline = syncedSermonIds.has(sermon.id);
+            return (
+              <DashboardSermonCard 
+                key={sermon.id} 
+                sermon={sermon}
+                showOfflineIndicator={isAvailableOffline}
+                isPendingSync={isPending}
+              />
+            );
+          })}
         </CollapsibleSection>
       )}
 
@@ -62,9 +106,49 @@ export function DashboardClient({ user, userName, recentSermons, publishedSermon
           icon={<Globe className="h-4 w-4" />}
           count={publishedSermons.length}
         >
-          {publishedSermons.map((sermon) => (
-            <DashboardSermonCard key={sermon.id} sermon={sermon} />
-          ))}
+          {publishedSermons.map((sermon) => {
+            const isPending = localOnlySermonIds.has(sermon.id);
+            const isAvailableOffline = syncedSermonIds.has(sermon.id);
+            return (
+              <DashboardSermonCard 
+                key={sermon.id} 
+                sermon={sermon}
+                showOfflineIndicator={isAvailableOffline}
+                isPendingSync={isPending}
+              />
+            );
+          })}
+        </CollapsibleSection>
+      )}
+
+      {(syncedSermonIds.size > 0 || localOnlySermonIds.size > 0) && (
+        <CollapsibleSection
+          title="Disponíveis offline"
+          icon={<Download className="h-4 w-4" />}
+          count={syncedSermonIds.size + localOnlySermonIds.size}
+          defaultOpen={isOffline}
+        >
+          {localOnlySermonIds.size > 0 && (
+            <div className="mb-4">
+              <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-500 mb-2 px-1">
+                <CloudOff className="h-3.5 w-3.5" />
+                <span>Aguardando sincronização ({localOnlySermonIds.size})</span>
+              </div>
+              {offlineSermons.filter(s => localOnlySermonIds.has(s.id)).map((sermon) => (
+                <DashboardSermonCard key={sermon.id} sermon={sermon} isPendingSync />
+              ))}
+            </div>
+          )}
+          {syncedSermonIds.size > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {allSermons
+                .filter(s => syncedSermonIds.has(s.id))
+                .slice(0, 6)
+                .map((sermon) => (
+                  <DashboardSermonCard key={sermon.id} sermon={sermon} showOfflineIndicator />
+                ))}
+            </div>
+          )}
         </CollapsibleSection>
       )}
 
@@ -96,16 +180,35 @@ export function DashboardClient({ user, userName, recentSermons, publishedSermon
                   <div className="col-span-3 text-right">Data</div>
                 </div>
 
-                {filteredSermons.map((sermon) => (
-                  <SermonTableRow key={sermon.id} sermon={sermon} />
-                ))}
+                {filteredSermons.map((sermon) => {
+                  const isPending = localOnlySermonIds.has(sermon.id);
+                  const isAvailableOffline = syncedSermonIds.has(sermon.id);
+                  return (
+                    <SermonTableRow 
+                      key={sermon.id} 
+                      sermon={sermon} 
+                      showOfflineIndicator={isAvailableOffline}
+                      isPendingSync={isPending}
+                    />
+                  );
+                })}
               </div>
             </div>
 
             <div className="sm:hidden grid grid-cols-1 gap-3">
-              {filteredSermons.map((sermon) => (
-                <DashboardSermonCard key={sermon.id} sermon={sermon} isFullWidth />
-              ))}
+              {filteredSermons.map((sermon) => {
+                const isPending = localOnlySermonIds.has(sermon.id);
+                const isAvailableOffline = syncedSermonIds.has(sermon.id);
+                return (
+                  <DashboardSermonCard 
+                    key={sermon.id} 
+                    sermon={sermon} 
+                    isFullWidth 
+                    showOfflineIndicator={isAvailableOffline}
+                    isPendingSync={isPending}
+                  />
+                );
+              })}
               <Link
                 href="/sermons/new"
                 className="flex-none w-full h-36 bg-transparent border-2 border-dashed border-border/50 rounded-xl flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary/50 hover:text-primary transition-colors"

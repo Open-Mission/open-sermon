@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { MoreHorizontal, ChevronDown, ChevronRight } from "lucide-react";
+import { MoreHorizontal, ChevronDown, ChevronRight, CloudOff, Download } from "lucide-react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Note01Icon, Link01Icon, Edit02Icon, Delete01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
 import { cn } from "@/lib/utils";
@@ -27,10 +27,13 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "sonner";
 import { softDeleteSermon, unpublishSermon } from "@/lib/sermon-actions";
+import { offlineDb } from "@/lib/offline-db";
 
 interface DashboardSermonCardProps {
   sermon: Sermon;
   isFullWidth?: boolean;
+  showOfflineIndicator?: boolean;
+  isPendingSync?: boolean;
 }
 
 const statusConfig: Record<SermonStatus, { label: string; className: string }> = {
@@ -40,7 +43,7 @@ const statusConfig: Record<SermonStatus, { label: string; className: string }> =
   preached: { label: "Pregado", className: "bg-violet-500/10 text-violet-600 dark:text-violet-400" },
 };
 
-export function DashboardSermonCard({ sermon, isFullWidth = false }: DashboardSermonCardProps) {
+export function DashboardSermonCard({ sermon, isFullWidth = false, showOfflineIndicator = false, isPendingSync = false }: DashboardSermonCardProps) {
   const isMobile = useIsMobile();
   const router = useRouter();
   const [isShareDialogOpen, setIsShareDialogOpen] = React.useState(false);
@@ -49,6 +52,7 @@ export function DashboardSermonCard({ sermon, isFullWidth = false }: DashboardSe
   const [isDeleting, setIsDeleting] = React.useState(false);
 
   const status = statusConfig[sermon.status] || statusConfig.draft;
+  const isLocal = offlineDb.isLocalId(sermon.id);
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -158,6 +162,18 @@ export function DashboardSermonCard({ sermon, isFullWidth = false }: DashboardSe
             <span className="inline-flex items-center rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-medium text-blue-600 dark:text-blue-400">
               <HugeiconsIcon icon={Link01Icon} size={10} className="mr-1" />
               Público
+            </span>
+          )}
+          {(isLocal || isPendingSync) && (
+            <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
+              <CloudOff className="h-2.5 w-2.5 mr-1" />
+              Pendente
+            </span>
+          )}
+          {showOfflineIndicator && !isLocal && !isPendingSync && (
+            <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400" title="Disponível offline">
+              <Download className="h-2.5 w-2.5 mr-1" />
+              Offline
             </span>
           )}
         </div>
@@ -305,13 +321,16 @@ export function StatusFilter({ selectedStatus, onStatusChange, counts }: StatusF
 
 interface SermonTableRowProps {
   sermon: Sermon;
+  showOfflineIndicator?: boolean;
+  isPendingSync?: boolean;
 }
 
-export function SermonTableRow({ sermon }: SermonTableRowProps) {
+export function SermonTableRow({ sermon, showOfflineIndicator = false, isPendingSync = false }: SermonTableRowProps) {
   const [isShareDialogOpen, setIsShareDialogOpen] = React.useState(false);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   
   const status = statusConfig[sermon.status] || statusConfig.draft;
+  const isLocal = offlineDb.isLocalId(sermon.id);
 
   return (
     <>
@@ -326,7 +345,7 @@ export function SermonTableRow({ sermon }: SermonTableRowProps) {
             {sermon.title || "Sem título"}
           </span>
         </div>
-        <div className="col-span-4 flex items-center gap-2">
+        <div className="col-span-4 flex items-center gap-2 flex-wrap">
           <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-medium", status.className)}>
             {status.label}
           </span>
@@ -334,6 +353,18 @@ export function SermonTableRow({ sermon }: SermonTableRowProps) {
             <span className="inline-flex items-center rounded-full bg-blue-500/10 px-2.5 py-0.5 text-[10px] font-medium text-blue-600 dark:text-blue-400">
               <HugeiconsIcon icon={Link01Icon} size={10} className="mr-1" />
               Público
+            </span>
+          )}
+          {(isLocal || isPendingSync) && (
+            <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
+              <CloudOff className="h-2.5 w-2.5 mr-1" />
+              Pendente
+            </span>
+          )}
+          {showOfflineIndicator && !isLocal && !isPendingSync && (
+            <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400" title="Disponível offline">
+              <Download className="h-2.5 w-2.5 mr-1" />
+              Offline
             </span>
           )}
         </div>
