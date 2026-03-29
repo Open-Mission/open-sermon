@@ -67,17 +67,24 @@ export function CursorSlashButton({ editor }: CursorSlashButtonProps) {
       const scrollY = window.scrollY
       const scrollX = window.scrollX
 
-      setPosition({
-        top: coords.top + scrollY - 10,
-        left: coords.left + scrollX - 44,
-      })
+      if (isMobile) {
+        setPosition({
+          top: coords.bottom + scrollY + 4,
+          left: coords.left + scrollX,
+        })
+      } else {
+        setPosition({
+          top: coords.top + scrollY - 10,
+          left: coords.left + scrollX - 44,
+        })
+      }
       setShouldShow(true)
       setIsVisible(true)
     } catch {
       setShouldShow(false)
       setIsVisible(false)
     }
-  }, [editor])
+  }, [editor, isMobile])
 
   useEffect(() => {
     if (!editor || editor.isDestroyed) return
@@ -165,25 +172,26 @@ export function CursorSlashButton({ editor }: CursorSlashButtonProps) {
       className={cn(
         'fixed z-40',
         'flex items-center justify-center',
-        'w-7 h-7 rounded-md',
+        isMobile ? 'w-8 h-8 rounded-full' : 'w-7 h-7 rounded-md',
         'bg-muted/80 backdrop-blur-sm border border-border/50',
         'text-muted-foreground',
         'transition-all duration-150',
-        'hover:bg-primary hover:text-primary-foreground hover:border-primary hover:scale-110 hover:shadow-md',
+        'hover:bg-primary hover:text-primary-foreground hover:border-primary',
+        !isMobile && 'hover:scale-110 hover:shadow-md',
         'active:scale-95',
         'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1',
         isVisible 
-          ? 'opacity-100 translate-x-0' 
-          : 'opacity-0 -translate-x-1 pointer-events-none'
+          ? 'opacity-100 scale-100' 
+          : 'opacity-0 scale-75 pointer-events-none'
       )}
       style={{
         top: position.top,
-        left: position.left,
+        left: isMobile ? position.left - 16 : position.left,
       }}
       aria-label="Adicionar bloco"
       title="Clique para adicionar um bloco"
     >
-      <Plus className="h-4 w-4" strokeWidth={2.5} />
+      <Plus className={isMobile ? "h-5 w-5" : "h-4 w-4"} strokeWidth={2.5} />
     </button>
   )
 }
