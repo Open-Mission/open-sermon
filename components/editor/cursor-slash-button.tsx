@@ -64,18 +64,15 @@ export function CursorSlashButton({ editor }: CursorSlashButtonProps) {
         return
       }
 
-      const scrollY = window.scrollY
-      const scrollX = window.scrollX
-
       if (isMobile) {
         setPosition({
-          top: coords.bottom + scrollY + 4,
-          left: coords.left + scrollX,
+          top: coords.bottom + 4,
+          left: coords.left,
         })
       } else {
         setPosition({
-          top: coords.top + scrollY - 10,
-          left: coords.left + scrollX - 44,
+          top: coords.top - 10,
+          left: coords.left - 44,
         })
       }
       setShouldShow(true)
@@ -144,14 +141,12 @@ export function CursorSlashButton({ editor }: CursorSlashButtonProps) {
 
     const { from } = editor.state.selection
     const coords = editor.view.coordsAtPos(from)
-    const scrollY = window.scrollY
-    const scrollX = window.scrollX
 
     if (isMobile) {
       window.dispatchEvent(new CustomEvent(OPEN_BLOCK_MENU_EVENT))
     } else {
       openSlashMenu(
-        { top: coords.top + scrollY + 24, left: coords.left + scrollX },
+        { top: coords.top + 24, left: coords.left },
         { from, to: from }
       )
     }
