@@ -119,6 +119,8 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       StarterKit.configure({
         paragraph: false,
         heading: false,
+        link: false,
+        underline: false,
       }),
       SelectableParagraph,
       SelectableHeading,

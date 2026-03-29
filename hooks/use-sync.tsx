@@ -28,11 +28,11 @@ export function SyncProvider({
 }) {
   const [status, setStatus] = useState<SyncStatus>("idle");
   const [pendingCount, setPendingCount] = useState(0);
-  const [isOnline, setIsOnline] = useState(
-    typeof navigator !== "undefined" ? navigator.onLine : true
-  );
+  const [isOnline, setIsOnline] = useState(true);
 
   useEffect(() => {
+    setIsOnline(navigator.onLine);
+
     syncService.initialize(userId);
 
     const unsubscribe = syncService.subscribe((newStatus, count) => {

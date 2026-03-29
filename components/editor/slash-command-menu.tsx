@@ -381,7 +381,6 @@ export function SlashCommandMenu({ editor }: { editor: Editor | null }) {
     setIsOpen(false)
     setQuery('')
     setSelectedIndex(0)
-    window.dispatchEvent(new CustomEvent(SLASH_MENU_CLOSE_EVENT))
   }, [])
 
   const executeCommand = useCallback((item: CommandItem) => {

@@ -3,9 +3,24 @@
 import { useSync } from "@/hooks/use-sync";
 import { Cloud, CloudOff, CloudUpload, RefreshCw, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
 export function SyncStatusIndicator() {
   const { status, pendingCount, syncNow, isOnline } = useSync();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+        <div className="h-3.5 w-3.5" />
+        <span className="hidden sm:inline">Salvo</span>
+      </div>
+    );
+  }
 
   if (status === "idle" && pendingCount === 0 && isOnline) {
     return (
