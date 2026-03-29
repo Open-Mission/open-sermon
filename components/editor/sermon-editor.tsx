@@ -22,6 +22,7 @@ import { VerseSearchModal } from "./modals/verse-search-modal";
 import { HighlightColorPicker } from "./highlight-color-picker";
 import { SlashCommandMenu, openSlashMenu, closeSlashMenu, updateSlashMenuQuery } from "./slash-command-menu";
 import { BlockMenu, OPEN_BLOCK_MENU_EVENT } from "./block-menu";
+import { CursorSlashButton } from "./cursor-slash-button";
 import "./editor.css";
 
 import { createClient } from "@/lib/supabase/client";
@@ -599,6 +600,8 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       />
       {/* Slash command menu (desktop floating + mobile fallback) */}
       <SlashCommandMenu editor={editor} />
+      {/* Cursor-following slash button */}
+      <CursorSlashButton editor={editor} />
       {/* Legacy block menu for mobile FAB */}
       <BlockMenu editor={editor} />
       {showModal && selectedBlock === "verse" && (
