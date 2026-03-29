@@ -300,8 +300,8 @@ export function BlockMenu({ editor }: BlockMenuProps) {
         
         setIsVisible(true)
         setPosition({ 
-          top: window.scrollY + 20, 
-          left: coords.left + window.scrollX 
+          top: 20, 
+          left: coords.left 
         })
       }
     }
