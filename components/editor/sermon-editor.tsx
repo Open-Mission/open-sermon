@@ -10,6 +10,8 @@ import { Highlight } from "@tiptap/extension-highlight";
 import UniqueId from "@tiptap/extension-unique-id";
 import { Placeholder } from "@tiptap/extension-placeholder";
 import Link from "@tiptap/extension-link";
+import { TableKit } from "@tiptap/extension-table";
+import { CustomTableCell, CustomTableHeader, CustomTableRow } from "./extensions/custom-table";
 import { IllustrationBlock } from "./blocks/illustration-block";
 import { ApplicationBlock } from "./blocks/application-block";
 import { PointBlock } from "./blocks/point-block";
@@ -23,6 +25,8 @@ import { HighlightColorPicker } from "./highlight-color-picker";
 import { SlashCommandMenu, openSlashMenu, closeSlashMenu, updateSlashMenuQuery } from "./slash-command-menu";
 import { BlockMenu, OPEN_BLOCK_MENU_EVENT } from "./block-menu";
 import { CursorSlashButton } from "./cursor-slash-button";
+import { TableInsertDialog, openTableInsertDialog, TABLE_INSERT_DIALOG_EVENT } from "./table-insert-dialog";
+import { TableBubbleMenu } from "./table-bubble-menu";
 import "./editor.css";
 
 import { createClient } from "@/lib/supabase/client";
@@ -100,6 +104,7 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
   const [showModal, setShowModal] = useState(false);
   const [selectedBlock, setSelectedBlock] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [showTableDialog, setShowTableDialog] = useState(false);
   const isMobile = useIsMobile();
   const slashMenuOpenRef = useRef(false);
   const slashQueryRef = useRef('');
@@ -157,6 +162,17 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
         },
       }),
       Highlight.configure({ multicolor: true }),
+      TableKit.configure({
+        table: {
+          resizable: true,
+        },
+        tableCell: false,
+        tableHeader: false,
+        tableRow: false,
+      }),
+      CustomTableCell,
+      CustomTableHeader,
+      CustomTableRow,
       UniqueId.configure({
         types: ['paragraph', 'heading', 'verseBlock', 'calloutBlock', 'illustrationBlock', 'applicationBlock', 'pointBlock', 'introBlock', 'conclusionBlock'],
         generateID: () => crypto.randomUUID(),
@@ -239,6 +255,13 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
     window.addEventListener('slash-menu:close', handleClose)
     return () => window.removeEventListener('slash-menu:close', handleClose)
   }, [isMobile]);
+
+  // Listen for table insert dialog open
+  useEffect(() => {
+    const handleOpenTableDialog = () => setShowTableDialog(true);
+    window.addEventListener(TABLE_INSERT_DIALOG_EVENT, handleOpenTableDialog);
+    return () => window.removeEventListener(TABLE_INSERT_DIALOG_EVENT, handleOpenTableDialog);
+  }, []);
 
   // Focus editor on mount for new sermons
   useEffect(() => {
@@ -600,6 +623,10 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       <CursorSlashButton editor={editor} />
       {/* Legacy block menu for mobile FAB */}
       <BlockMenu editor={editor} />
+      {/* Table bubble menu for managing rows/columns */}
+      <TableBubbleMenu editor={editor} />
+      {/* Table insert dialog */}
+      <TableInsertDialog open={showTableDialog} onOpenChange={setShowTableDialog} editor={editor} />
       {showModal && selectedBlock === "verse" && (
         <VerseSearchModal
           onClose={() => {

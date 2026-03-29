@@ -569,3 +569,84 @@
   color: var(--primary);
   font-weight: 500;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* Table Styles                                                                   */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+.tiptap table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  table-layout: fixed;
+  overflow: hidden;
+}
+
+.tiptap table td,
+.tiptap table th {
+  border: 1px solid var(--border);
+  padding: 0.5em 0.75em;
+  position: relative;
+  vertical-align: top;
+  box-sizing: border-box;
+  min-width: 50px;
+}
+
+.tiptap table th {
+  background: var(--muted);
+  font-weight: 600;
+  text-align: left;
+}
+
+.tiptap table .selectedCell {
+  background: color-mix(in oklch, var(--primary) 10%, transparent);
+}
+
+.tiptap table .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--primary);
+  opacity: 0;
+  transition: opacity 0.2s;
+  cursor: col-resize;
+}
+
+.tiptap table:hover .column-resize-handle {
+  opacity: 0.3;
+}
+
+.tiptap table .column-resize-handle:hover {
+  opacity: 1;
+}
+
+.tiptap table th[style*="text-align: center"] {
+  text-align: center;
+}
+
+.tiptap table th[style*="text-align: right"] {
+  text-align: right;
+}
+
+.tiptap table p {
+  margin: 0;
+}
+
+.tiptap table .tableWrapper {
+  padding: 1rem 0;
+  overflow-x: auto;
+}
+
+/* Table resize cursor */
+.tiptap .resize-cursor {
+  cursor: col-resize;
+}
+
+/* Table focus styles */
+.tiptap table:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+  border-radius: 4px;
+}
