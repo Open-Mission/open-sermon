@@ -11,7 +11,7 @@ import UniqueId from "@tiptap/extension-unique-id";
 import { Placeholder } from "@tiptap/extension-placeholder";
 import Link from "@tiptap/extension-link";
 import { TableKit } from "@tiptap/extension-table";
-import { CustomTableCell, CustomTableHeader, CustomTableRow } from "./extensions/custom-table";
+import { CustomTable, CustomTableCell, CustomTableHeader, CustomTableRow } from "./extensions/custom-table";
 import { IllustrationBlock } from "./blocks/illustration-block";
 import { ApplicationBlock } from "./blocks/application-block";
 import { PointBlock } from "./blocks/point-block";
@@ -163,12 +163,13 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       }),
       Highlight.configure({ multicolor: true }),
       TableKit.configure({
-        table: {
-          resizable: true,
-        },
+        table: false,
         tableCell: false,
         tableHeader: false,
         tableRow: false,
+      }),
+      CustomTable.configure({
+        resizable: true,
       }),
       CustomTableCell,
       CustomTableHeader,

@@ -1,6 +1,14 @@
 "use client";
 
-import { TableCell, TableRow as TableRowExtension, TableHeader } from "@tiptap/extension-table";
+import { Table, TableCell, TableRow as TableRowExtension, TableHeader } from "@tiptap/extension-table";
+import { ReactNodeViewRenderer } from "@tiptap/react";
+import { TableView } from "./table-view";
+
+export const CustomTable = Table.extend({
+  addNodeView() {
+    return ReactNodeViewRenderer(TableView);
+  },
+});
 
 export const CustomTableCell = TableCell.extend({
   addAttributes() {
