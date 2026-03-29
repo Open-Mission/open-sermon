@@ -161,11 +161,12 @@
     "search": "Search blocks...",
     "noResults": "No results found",
     "toc": {
-      "title": "Contents",
-      "open": "Contents",
-      "description": "Navigate between sermon blocks",
+      "title": "Outline",
+      "open": "Outline",
+      "description": "Navigate and reorder sermon blocks",
       "previous": "Previous",
-      "next": "Next"
+      "next": "Next",
+      "dragHint": "Drag to reorder blocks"
     }
   },
   "series": {

@@ -161,11 +161,12 @@
     "search": "Buscar blocos...",
     "noResults": "Nenhum resultado encontrado",
     "toc": {
-      "title": "Sumário",
-      "open": "Sumário",
-      "description": "Navegue entre os blocos do sermão",
+      "title": "Estrutura",
+      "open": "Estrutura",
+      "description": "Navegue e reorganize os blocos do sermão",
       "previous": "Anterior",
-      "next": "Próximo"
+      "next": "Próximo",
+      "dragHint": "Arraste para reordenar os blocos"
     }
   },
   "series": {
