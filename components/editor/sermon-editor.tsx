@@ -53,6 +53,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { Sermon } from "@/types/sermon";
 import { BlockSelectionProvider, useBlockSelection } from "./block-selection-context";
+import { useEditorContext } from "./editor-context";
 import { SelectableTextBlockView } from "./blocks/selectable-text-block-view";
 import { Paragraph } from "@tiptap/extension-paragraph";
 import { Heading } from "@tiptap/extension-heading";
@@ -112,6 +113,7 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
 
   const supabase = createClient();
   const { toggleSidebar } = useSidebar();
+  const { setEditor } = useEditorContext();
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -262,6 +264,16 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
     window.addEventListener(TABLE_INSERT_DIALOG_EVENT, handleOpenTableDialog);
     return () => window.removeEventListener(TABLE_INSERT_DIALOG_EVENT, handleOpenTableDialog);
   }, []);
+
+  // Update editor context when editor is created/destroyed
+  useEffect(() => {
+    if (editor) {
+      setEditor(editor);
+    }
+    return () => {
+      setEditor(null);
+    };
+  }, [editor, setEditor]);
 
   // Focus editor on mount for new sermons
   useEffect(() => {
