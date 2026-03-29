@@ -21,6 +21,7 @@ import {
   Hash,
   Search,
   X,
+  Table,
   type LucideIcon,
 } from 'lucide-react'
 import {
@@ -29,6 +30,7 @@ import {
   DrawerDescription,
 } from '@/components/ui/drawer'
 import { dispatchVerseSearchEvent } from './block-menu'
+import { openTableInsertDialog } from './table-insert-dialog'
 import { cn } from '@/lib/utils'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -238,6 +240,15 @@ export function SlashCommandMenu({ editor }: { editor: Editor | null }) {
           keywords: ['h3', 'titulo', 'pequeno'],
           group: 'basic',
           command: (e) => e.chain().focus().toggleHeading({ level: 3 }).run(),
+        },
+        {
+          id: 'table',
+          label: 'Tabela',
+          description: 'Insira uma tabela configurável.',
+          icon: Table,
+          keywords: ['tabela', 'table', 'dados'],
+          group: 'basic',
+          command: () => openTableInsertDialog(),
         },
       ],
     },
