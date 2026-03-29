@@ -25,6 +25,9 @@ import { Button } from "@/components/ui/button";
 
 const cellColors = [
   { color: "transparent", label: "Nenhuma" },
+  { color: "#f3f4f6", label: "Cinza claro" },
+  { color: "#e5e7eb", label: "Cinza" },
+  { color: "#d1d5db", label: "Cinza médio" },
   { color: "#fecaca", label: "Vermelho claro" },
   { color: "#fed7aa", label: "Laranja claro" },
   { color: "#fef08a", label: "Amarelo claro" },
@@ -32,7 +35,6 @@ const cellColors = [
   { color: "#a5f3fc", label: "Ciano claro" },
   { color: "#bfdbfe", label: "Azul claro" },
   { color: "#e9d5ff", label: "Roxo claro" },
-  { color: "#f3f4f6", label: "Cinza claro" },
 ];
 
 type TableBubbleMenuProps = {

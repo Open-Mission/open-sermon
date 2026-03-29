@@ -574,6 +574,38 @@
 /* Table Styles                                                                   */
 /* ─────────────────────────────────────────────────────────────────────────── */
 
+/* Table wrapper for horizontal scroll on mobile */
+.tiptap .tableWrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1em 0;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.tiptap .tableWrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.tiptap .tableWrapper::-webkit-scrollbar-track {
+  background: var(--muted);
+  border-radius: 3px;
+}
+
+.tiptap .tableWrapper::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.tiptap .tableWrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+.tiptap .tableWrapper table {
+  margin: 0;
+}
+
 .tiptap table {
   border-collapse: collapse;
   width: 100%;
@@ -590,6 +622,18 @@
   vertical-align: top;
   box-sizing: border-box;
   min-width: 50px;
+  color: var(--foreground);
+}
+
+/* Ensure text stays readable on colored backgrounds */
+.tiptap table td[style*="background"],
+.tiptap table th[style*="background"] {
+  color: var(--foreground) !important;
+}
+
+.tiptap table td p,
+.tiptap table th p {
+  color: inherit;
 }
 
 .tiptap table th {
@@ -599,7 +643,7 @@
 }
 
 .tiptap table .selectedCell {
-  background: color-mix(in oklch, var(--primary) 10%, transparent);
+  background: color-mix(in oklch, var(--primary) 10%, transparent) !important;
 }
 
 .tiptap table .column-resize-handle {
@@ -634,11 +678,6 @@
   margin: 0;
 }
 
-.tiptap table .tableWrapper {
-  padding: 1rem 0;
-  overflow-x: auto;
-}
-
 /* Table resize cursor */
 .tiptap .resize-cursor {
   cursor: col-resize;
@@ -649,4 +688,23 @@
   outline: 2px solid var(--primary);
   outline-offset: -2px;
   border-radius: 4px;
+}
+
+/* Mobile table scroll indicator */
+@media (max-width: 640px) {
+  .tiptap .tableWrapper::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    background: linear-gradient(to right, transparent, var(--background));
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  
+  .tiptap .tableWrapper {
+    position: relative;
+  }
 }
