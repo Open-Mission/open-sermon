@@ -22,6 +22,7 @@ import { VerseSearchModal } from "./modals/verse-search-modal";
 import { HighlightColorPicker } from "./highlight-color-picker";
 import { SlashCommandMenu, openSlashMenu, closeSlashMenu, updateSlashMenuQuery } from "./slash-command-menu";
 import { BlockMenu, OPEN_BLOCK_MENU_EVENT } from "./block-menu";
+import { CursorSlashButton } from "./cursor-slash-button";
 import "./editor.css";
 
 import { createClient } from "@/lib/supabase/client";
@@ -166,32 +167,26 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
         class: "ProseMirror focus:outline-none max-w-none prose dark:prose-invert min-h-[500px] cursor-text",
       },
       handleTextInput: (view, from, _to, text) => {
-        // Slash command trigger
         if (text === '/') {
           const coords = view.coordsAtPos(from)
-          const scrollY = window.scrollY
-          const scrollX = window.scrollX
 
-          // Range will cover the '/' character once inserted
           const range = { from, to: from + 1 }
           slashRangeRef.current = range
           slashQueryRef.current = ''
           slashMenuOpenRef.current = true
 
-          // On mobile, open the drawer-style menu
           if (isMobile) {
             window.dispatchEvent(new CustomEvent(OPEN_BLOCK_MENU_EVENT))
-            return false // let the '/' actually be typed
+            return false
           }
 
-          // Desktop: open floating popover at cursor position
           setTimeout(() => {
             openSlashMenu(
-              { top: coords.bottom + scrollY, left: coords.left + scrollX },
+              { top: coords.bottom, left: coords.left },
               { from, to: from + 1 }
             )
           }, 0)
-          return false // let '/' be typed so user sees it
+          return false
         }
 
         // When slash menu is open, update the query
@@ -601,6 +596,8 @@ export function SermonEditor({ initialContent, sermonId }: SermonEditorProps) {
       />
       {/* Slash command menu (desktop floating + mobile fallback) */}
       <SlashCommandMenu editor={editor} />
+      {/* Cursor-following slash button */}
+      <CursorSlashButton editor={editor} />
       {/* Legacy block menu for mobile FAB */}
       <BlockMenu editor={editor} />
       {showModal && selectedBlock === "verse" && (
