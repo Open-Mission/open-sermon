@@ -30,7 +30,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { updateSermon, type SermonType } from "@/lib/sermon-actions";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -38,7 +42,13 @@ import { CalendarIcon, ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
-const SERMON_TYPES: SermonType[] = ["preaching", "ebd_class", "devotional", "video_script", "cell"];
+const SERMON_TYPES: SermonType[] = [
+  "preaching",
+  "ebd_class",
+  "devotional",
+  "video_script",
+  "cell",
+];
 
 interface EditSermonSheetProps {
   open: boolean;
@@ -66,7 +76,7 @@ export function EditSermonSheet({
   const [description, setDescription] = React.useState(initialData.description);
   const [type, setType] = React.useState<SermonType>(initialData.type);
   const [preachedAt, setPreachedAt] = React.useState<Date | undefined>(
-    initialData.preachedAt ? new Date(initialData.preachedAt) : undefined
+    initialData.preachedAt ? new Date(initialData.preachedAt) : undefined,
   );
   const [tagsInput, setTagsInput] = React.useState(initialData.tags.join(", "));
   const [isSaving, setIsSaving] = React.useState(false);
@@ -76,7 +86,9 @@ export function EditSermonSheet({
       setTitle(initialData.title);
       setDescription(initialData.description);
       setType(initialData.type);
-      setPreachedAt(initialData.preachedAt ? new Date(initialData.preachedAt) : undefined);
+      setPreachedAt(
+        initialData.preachedAt ? new Date(initialData.preachedAt) : undefined,
+      );
       setTagsInput(initialData.tags.join(", "));
     }
   }, [open, initialData]);
@@ -157,11 +169,13 @@ export function EditSermonSheet({
               variant="outline"
               className={cn(
                 "w-full justify-start text-left font-normal",
-                !preachedAt && "text-muted-foreground"
+                !preachedAt && "text-muted-foreground",
               )}
             >
               <HugeiconsIcon icon={CalendarIcon} size={16} className="mr-2" />
-              {preachedAt ? format(preachedAt, "PPP") : t("sermon.preachedAtHint")}
+              {preachedAt
+                ? format(preachedAt, "PPP")
+                : t("sermon.preachedAtHint")}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -226,7 +240,7 @@ export function EditSermonSheet({
         <SheetHeader>
           <SheetTitle>{t("sermon.editTitle")}</SheetTitle>
         </SheetHeader>
-        <div className="py-4">{renderForm()}</div>
+        <div className="py-4 px-4">{renderForm()}</div>
         <SheetFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {t("common.cancel")}
